@@ -29,7 +29,7 @@ import {
   Palette
 } from 'lucide-react';
 import Layout from '../../components/Layout';
-import './settings.css';
+import './Settings.css';
 
 const SettingsPage = ({ onNavigate }) => {
   const [activeTab, setActiveTab] = useState('general');
@@ -118,8 +118,8 @@ const SettingsPage = ({ onNavigate }) => {
               <p className="settings-subtitle">Manage your blood bank system configuration</p>
             </div>
           </div>
-          <button 
-            onClick={handleSave} 
+          <button
+            onClick={handleSave}
             disabled={loading}
             className="settings-save-btn"
           >
@@ -182,10 +182,10 @@ const SettingsPage = ({ onNavigate }) => {
                       <Globe className="label-icon" />
                       Language
                     </label>
-                    <select 
+                    <select
                       className="settings-select"
                       value={generalSettings.language}
-                      onChange={(e) => setGeneralSettings({...generalSettings, language: e.target.value})}
+                      onChange={(e) => setGeneralSettings({ ...generalSettings, language: e.target.value })}
                     >
                       <option value="en">English</option>
                       <option value="ms">Bahasa Malaysia</option>
@@ -199,10 +199,10 @@ const SettingsPage = ({ onNavigate }) => {
                       <Clock className="label-icon" />
                       Timezone
                     </label>
-                    <select 
+                    <select
                       className="settings-select"
                       value={generalSettings.timezone}
-                      onChange={(e) => setGeneralSettings({...generalSettings, timezone: e.target.value})}
+                      onChange={(e) => setGeneralSettings({ ...generalSettings, timezone: e.target.value })}
                     >
                       <option value="Asia/Kuala_Lumpur">Asia/Kuala Lumpur (GMT+8)</option>
                       <option value="Asia/Singapore">Asia/Singapore (GMT+8)</option>
@@ -215,10 +215,10 @@ const SettingsPage = ({ onNavigate }) => {
                       <Calendar className="label-icon" />
                       Date Format
                     </label>
-                    <select 
+                    <select
                       className="settings-select"
                       value={generalSettings.dateFormat}
-                      onChange={(e) => setGeneralSettings({...generalSettings, dateFormat: e.target.value})}
+                      onChange={(e) => setGeneralSettings({ ...generalSettings, dateFormat: e.target.value })}
                     >
                       <option value="DD/MM/YYYY">DD/MM/YYYY</option>
                       <option value="MM/DD/YYYY">MM/DD/YYYY</option>
@@ -247,7 +247,7 @@ const SettingsPage = ({ onNavigate }) => {
                       type="text"
                       className="settings-input"
                       value={generalSettings.organizationName}
-                      onChange={(e) => setGeneralSettings({...generalSettings, organizationName: e.target.value})}
+                      onChange={(e) => setGeneralSettings({ ...generalSettings, organizationName: e.target.value })}
                     />
                   </div>
 
@@ -260,7 +260,7 @@ const SettingsPage = ({ onNavigate }) => {
                       type="email"
                       className="settings-input"
                       value={generalSettings.email}
-                      onChange={(e) => setGeneralSettings({...generalSettings, email: e.target.value})}
+                      onChange={(e) => setGeneralSettings({ ...generalSettings, email: e.target.value })}
                     />
                   </div>
 
@@ -273,7 +273,7 @@ const SettingsPage = ({ onNavigate }) => {
                       type="tel"
                       className="settings-input"
                       value={generalSettings.phone}
-                      onChange={(e) => setGeneralSettings({...generalSettings, phone: e.target.value})}
+                      onChange={(e) => setGeneralSettings({ ...generalSettings, phone: e.target.value })}
                     />
                   </div>
 
@@ -286,7 +286,7 @@ const SettingsPage = ({ onNavigate }) => {
                       className="settings-textarea"
                       rows="3"
                       value={generalSettings.address}
-                      onChange={(e) => setGeneralSettings({...generalSettings, address: e.target.value})}
+                      onChange={(e) => setGeneralSettings({ ...generalSettings, address: e.target.value })}
                     />
                   </div>
                 </div>
@@ -317,7 +317,7 @@ const SettingsPage = ({ onNavigate }) => {
                           <input
                             type="checkbox"
                             checked={notificationSettings.emailNotifications}
-                            onChange={(e) => setNotificationSettings({...notificationSettings, emailNotifications: e.target.checked})}
+                            onChange={(e) => setNotificationSettings({ ...notificationSettings, emailNotifications: e.target.checked })}
                           />
                           <span className="toggle-slider"></span>
                         </label>
@@ -335,7 +335,7 @@ const SettingsPage = ({ onNavigate }) => {
                           <input
                             type="checkbox"
                             checked={notificationSettings.pushNotifications}
-                            onChange={(e) => setNotificationSettings({...notificationSettings, pushNotifications: e.target.checked})}
+                            onChange={(e) => setNotificationSettings({ ...notificationSettings, pushNotifications: e.target.checked })}
                           />
                           <span className="toggle-slider"></span>
                         </label>
@@ -353,7 +353,7 @@ const SettingsPage = ({ onNavigate }) => {
                           <input
                             type="checkbox"
                             checked={notificationSettings.smsNotifications}
-                            onChange={(e) => setNotificationSettings({...notificationSettings, smsNotifications: e.target.checked})}
+                            onChange={(e) => setNotificationSettings({ ...notificationSettings, smsNotifications: e.target.checked })}
                           />
                           <span className="toggle-slider"></span>
                         </label>
@@ -376,7 +376,7 @@ const SettingsPage = ({ onNavigate }) => {
                           <input
                             type="checkbox"
                             checked={notificationSettings.urgentRequests}
-                            onChange={(e) => setNotificationSettings({...notificationSettings, urgentRequests: e.target.checked})}
+                            onChange={(e) => setNotificationSettings({ ...notificationSettings, urgentRequests: e.target.checked })}
                           />
                           <span className="toggle-slider"></span>
                         </label>
@@ -394,7 +394,7 @@ const SettingsPage = ({ onNavigate }) => {
                           <input
                             type="checkbox"
                             checked={notificationSettings.newDonations}
-                            onChange={(e) => setNotificationSettings({...notificationSettings, newDonations: e.target.checked})}
+                            onChange={(e) => setNotificationSettings({ ...notificationSettings, newDonations: e.target.checked })}
                           />
                           <span className="toggle-slider"></span>
                         </label>
@@ -412,7 +412,7 @@ const SettingsPage = ({ onNavigate }) => {
                           <input
                             type="checkbox"
                             checked={notificationSettings.upcomingEvents}
-                            onChange={(e) => setNotificationSettings({...notificationSettings, upcomingEvents: e.target.checked})}
+                            onChange={(e) => setNotificationSettings({ ...notificationSettings, upcomingEvents: e.target.checked })}
                           />
                           <span className="toggle-slider"></span>
                         </label>
@@ -430,7 +430,7 @@ const SettingsPage = ({ onNavigate }) => {
                           <input
                             type="checkbox"
                             checked={notificationSettings.weeklyReports}
-                            onChange={(e) => setNotificationSettings({...notificationSettings, weeklyReports: e.target.checked})}
+                            onChange={(e) => setNotificationSettings({ ...notificationSettings, weeklyReports: e.target.checked })}
                           />
                           <span className="toggle-slider"></span>
                         </label>
@@ -461,7 +461,7 @@ const SettingsPage = ({ onNavigate }) => {
                         <input
                           type="checkbox"
                           checked={securitySettings.twoFactorAuth}
-                          onChange={(e) => setSecuritySettings({...securitySettings, twoFactorAuth: e.target.checked})}
+                          onChange={(e) => setSecuritySettings({ ...securitySettings, twoFactorAuth: e.target.checked })}
                         />
                         <span className="toggle-slider"></span>
                       </label>
@@ -478,7 +478,7 @@ const SettingsPage = ({ onNavigate }) => {
                         type="number"
                         className="settings-input"
                         value={securitySettings.sessionTimeout}
-                        onChange={(e) => setSecuritySettings({...securitySettings, sessionTimeout: e.target.value})}
+                        onChange={(e) => setSecuritySettings({ ...securitySettings, sessionTimeout: e.target.value })}
                       />
                       <p className="form-hint">Auto logout after inactivity</p>
                     </div>
@@ -492,7 +492,7 @@ const SettingsPage = ({ onNavigate }) => {
                         type="number"
                         className="settings-input"
                         value={securitySettings.passwordExpiry}
-                        onChange={(e) => setSecuritySettings({...securitySettings, passwordExpiry: e.target.value})}
+                        onChange={(e) => setSecuritySettings({ ...securitySettings, passwordExpiry: e.target.value })}
                       />
                       <p className="form-hint">Force password change after specified days</p>
                     </div>
@@ -506,7 +506,7 @@ const SettingsPage = ({ onNavigate }) => {
                         type="number"
                         className="settings-input"
                         value={securitySettings.loginAttempts}
-                        onChange={(e) => setSecuritySettings({...securitySettings, loginAttempts: e.target.value})}
+                        onChange={(e) => setSecuritySettings({ ...securitySettings, loginAttempts: e.target.value })}
                       />
                       <p className="form-hint">Lock account after failed attempts</p>
                     </div>
@@ -544,7 +544,7 @@ const SettingsPage = ({ onNavigate }) => {
                       type="number"
                       className="settings-input"
                       value={bloodBankSettings.criticalStockLevel}
-                      onChange={(e) => setBloodBankSettings({...bloodBankSettings, criticalStockLevel: e.target.value})}
+                      onChange={(e) => setBloodBankSettings({ ...bloodBankSettings, criticalStockLevel: e.target.value })}
                     />
                     <p className="form-hint">Alert when stock falls below this level</p>
                   </div>
@@ -558,7 +558,7 @@ const SettingsPage = ({ onNavigate }) => {
                       type="number"
                       className="settings-input"
                       value={bloodBankSettings.urgentStockLevel}
-                      onChange={(e) => setBloodBankSettings({...bloodBankSettings, urgentStockLevel: e.target.value})}
+                      onChange={(e) => setBloodBankSettings({ ...bloodBankSettings, urgentStockLevel: e.target.value })}
                     />
                     <p className="form-hint">Trigger urgent notifications at this level</p>
                   </div>
@@ -572,7 +572,7 @@ const SettingsPage = ({ onNavigate }) => {
                       type="number"
                       className="settings-input"
                       value={bloodBankSettings.expiryAlertDays}
-                      onChange={(e) => setBloodBankSettings({...bloodBankSettings, expiryAlertDays: e.target.value})}
+                      onChange={(e) => setBloodBankSettings({ ...bloodBankSettings, expiryAlertDays: e.target.value })}
                     />
                     <p className="form-hint">Alert before blood units expire</p>
                   </div>
@@ -586,7 +586,7 @@ const SettingsPage = ({ onNavigate }) => {
                       type="number"
                       className="settings-input"
                       value={bloodBankSettings.donationInterval}
-                      onChange={(e) => setBloodBankSettings({...bloodBankSettings, donationInterval: e.target.value})}
+                      onChange={(e) => setBloodBankSettings({ ...bloodBankSettings, donationInterval: e.target.value })}
                     />
                     <p className="form-hint">Minimum days between donations</p>
                   </div>
@@ -600,7 +600,7 @@ const SettingsPage = ({ onNavigate }) => {
                       type="number"
                       className="settings-input"
                       value={bloodBankSettings.minDonorAge}
-                      onChange={(e) => setBloodBankSettings({...bloodBankSettings, minDonorAge: e.target.value})}
+                      onChange={(e) => setBloodBankSettings({ ...bloodBankSettings, minDonorAge: e.target.value })}
                     />
                     <p className="form-hint">Minimum age to donate blood</p>
                   </div>
@@ -614,7 +614,7 @@ const SettingsPage = ({ onNavigate }) => {
                       type="number"
                       className="settings-input"
                       value={bloodBankSettings.maxDonorAge}
-                      onChange={(e) => setBloodBankSettings({...bloodBankSettings, maxDonorAge: e.target.value})}
+                      onChange={(e) => setBloodBankSettings({ ...bloodBankSettings, maxDonorAge: e.target.value })}
                     />
                     <p className="form-hint">Maximum age to donate blood</p>
                   </div>
@@ -642,17 +642,17 @@ const SettingsPage = ({ onNavigate }) => {
                         <input
                           type="checkbox"
                           checked={systemSettings.autoBackup}
-                          onChange={(e) => setSystemSettings({...systemSettings, autoBackup: e.target.checked})}
+                          onChange={(e) => setSystemSettings({ ...systemSettings, autoBackup: e.target.checked })}
                         />
                         <span className="toggle-slider"></span>
                       </label>
                     </div>
                     {systemSettings.autoBackup && (
                       <div className="system-details">
-                        <select 
+                        <select
                           className="settings-select"
                           value={systemSettings.backupFrequency}
-                          onChange={(e) => setSystemSettings({...systemSettings, backupFrequency: e.target.value})}
+                          onChange={(e) => setSystemSettings({ ...systemSettings, backupFrequency: e.target.value })}
                         >
                           <option value="hourly">Hourly</option>
                           <option value="daily">Daily</option>
@@ -673,7 +673,7 @@ const SettingsPage = ({ onNavigate }) => {
                         type="number"
                         className="settings-input"
                         value={systemSettings.dataRetention}
-                        onChange={(e) => setSystemSettings({...systemSettings, dataRetention: e.target.value})}
+                        onChange={(e) => setSystemSettings({ ...systemSettings, dataRetention: e.target.value })}
                       />
                       <p className="form-hint">Keep archived data for specified days</p>
                     </div>
@@ -731,12 +731,12 @@ const SettingsPage = ({ onNavigate }) => {
                   <div className="appearance-card">
                     <h3 className="appearance-title">Primary Color</h3>
                     <div className="color-options">
-                      <button className="color-option active" style={{background: '#EF4444'}}></button>
-                      <button className="color-option" style={{background: '#3B82F6'}}></button>
-                      <button className="color-option" style={{background: '#10B981'}}></button>
-                      <button className="color-option" style={{background: '#8B5CF6'}}></button>
-                      <button className="color-option" style={{background: '#F59E0B'}}></button>
-                      <button className="color-option" style={{background: '#EC4899'}}></button>
+                      <button className="color-option active" style={{ background: '#EF4444' }}></button>
+                      <button className="color-option" style={{ background: '#3B82F6' }}></button>
+                      <button className="color-option" style={{ background: '#10B981' }}></button>
+                      <button className="color-option" style={{ background: '#8B5CF6' }}></button>
+                      <button className="color-option" style={{ background: '#F59E0B' }}></button>
+                      <button className="color-option" style={{ background: '#EC4899' }}></button>
                     </div>
                   </div>
 

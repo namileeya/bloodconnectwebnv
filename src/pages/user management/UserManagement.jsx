@@ -13,14 +13,14 @@ import './UserManagement.css';
 
 // Firebase imports - adjust path as needed
 import { getAuth, createUserWithEmailAndPassword, deleteUser } from 'firebase/auth';
-import { 
-  getFirestore, 
-  collection, 
-  doc, 
-  getDocs, 
-  getDoc, 
-  addDoc, 
-  updateDoc, 
+import {
+  getFirestore,
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  addDoc,
+  updateDoc,
   deleteDoc,
   query,
   where,
@@ -89,11 +89,11 @@ const formatDateToDDMMYYYY = (dateString) => {
   if (!dateString) return '';
   // Handle both Date objects and "DD/MM/YYYY" strings
   if (dateString.includes('/')) return dateString;
-  
+
   try {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return dateString; // Invalid date
-    
+
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
@@ -364,15 +364,15 @@ const UserManagement = ({ onNavigate }) => {
       // 1. Fetch all users from users collection
       const usersSnapshot = await getDocs(collection(db, 'users'));
       const usersData = [];
-      
+
       console.log('Total users in collection:', usersSnapshot.size);
-      
+
       for (const userDoc of usersSnapshot.docs) {
         const userId = userDoc.id;
         const userData = userDoc.data();
-        
+
         console.log(`Processing user: ${userId}, email: ${userData.email}`);
-        
+
         // 2. Fetch donor profile
         let donorProfile = {};
         try {
@@ -386,14 +386,14 @@ const UserManagement = ({ onNavigate }) => {
         } catch (error) {
           console.error(`Error fetching donor profile for ${userId}:`, error);
         }
-        
+
         // 3. Query donations for this user - FIXED FIELD NAME
         let donationCount = 0;
         let totalBloodDonatedML = 0;
         try {
           // Debug: Check what field name is used in donations collection
           console.log(`Querying donations for user: ${userId}`);
-          
+
           // Try both possible field names
           let donationsSnapshot;
           try {
@@ -402,7 +402,7 @@ const UserManagement = ({ onNavigate }) => {
               query(collection(db, 'donations'), where('donor_id', '==', userId))
             );
             console.log(`Found ${donationsSnapshot.size} donations using 'donor_id' field`);
-            
+
             if (donationsSnapshot.size === 0) {
               // Try 'userId' or other possible field names
               const allDonations = await getDocs(collection(db, 'donations'));
@@ -414,26 +414,26 @@ const UserManagement = ({ onNavigate }) => {
           } catch (queryError) {
             console.log('Query error, checking donations collection structure');
           }
-          
+
           if (donationsSnapshot) {
             donationCount = donationsSnapshot.size;
-            
+
             donationsSnapshot.forEach(doc => {
               const donationData = doc.data();
               console.log('Donation data:', donationData);
               totalBloodDonatedML += donationData.amount_ml || 0;
             });
           }
-          
+
           console.log(`Calculated for ${userId}: ${donationCount} donations, ${totalBloodDonatedML}ml`);
-          
+
         } catch (error) {
           console.error(`Error fetching donations for ${userId}:`, error);
         }
-        
+
         // 4. Calculate donor status
         const donorStatus = donationCount >= 3 ? 'Regular Donor' : 'New Donor';
-        
+
         // 5. Combine all data
         usersData.push({
           id: userId,
@@ -465,14 +465,14 @@ const UserManagement = ({ onNavigate }) => {
           donorStatus,
         });
       }
-      
+
       console.log('Final users data:', usersData);
       setUsers(usersData);
       setFilteredUsers(usersData);
-      
+
       // 6. Check and create sample donation if needed
       await checkAndCreateSampleDonation();
-      
+
     } catch (error) {
       console.error('Error loading users:', error);
     } finally {
@@ -484,17 +484,17 @@ const UserManagement = ({ onNavigate }) => {
     try {
       const sampleUserId = "9MW4SELaQibhaXDatRgRkegBzHG3";
       console.log('Checking donations for sample user:', sampleUserId);
-      
+
       // First check if user exists
       const userDoc = await getDoc(doc(db, 'users', sampleUserId));
       if (!userDoc.exists()) {
         console.log('Sample user does not exist in users collection');
         return;
       }
-      
+
       const userData = userDoc.data();
       console.log('Sample user found:', userData.email);
-      
+
       // Get donor profile for name
       let donorName = "batrissya aleeya";
       try {
@@ -505,16 +505,16 @@ const UserManagement = ({ onNavigate }) => {
       } catch (error) {
         console.error('Error getting donor profile:', error);
       }
-      
+
       // Check if donations exist for this user
       const donationsQuery = query(
         collection(db, 'donations'),
         where('donor_id', '==', sampleUserId)
       );
       const donationsSnapshot = await getDocs(donationsQuery);
-      
+
       console.log(`Found ${donationsSnapshot.size} donations for sample user`);
-      
+
       if (donationsSnapshot.empty) {
         console.log('Creating sample donation...');
         // Create a sample donation
@@ -530,10 +530,10 @@ const UserManagement = ({ onNavigate }) => {
           created_by: "Admin",
           created_at: serverTimestamp(),
         };
-        
+
         await addDoc(collection(db, 'donations'), donationData);
         console.log('Sample donation created successfully');
-        
+
         // Reload users to show updated donation count
         await loadUsers();
       } else {
@@ -585,7 +585,7 @@ const UserManagement = ({ onNavigate }) => {
 
   /* ----- Handlers ----- */
   const handleEdit = (user) => {
-    setSelectedUser({...user});
+    setSelectedUser({ ...user });
     setShowEditModal(true);
   };
 
@@ -604,20 +604,20 @@ const UserManagement = ({ onNavigate }) => {
         console.log('Would delete auth user:', userToDelete.email);
         // await deleteUser(auth.currentUser); // Requires user to be signed in
       }
-      
+
       // 2. Delete from users collection
       await deleteDoc(doc(db, 'users', deletingUserId));
-      
+
       // 3. Delete from donor_profiles collection
       await deleteDoc(doc(db, 'donor_profiles', deletingUserId));
-      
+
       // 4. Update local state
       setUsers(prev => prev.filter((u) => u.id !== deletingUserId));
-      
+
       // 5. Close modal
       setShowDeleteConfirm(false);
       setDeletingUserId(null);
-      
+
     } catch (error) {
       console.error('Error deleting user:', error);
       alert('Error deleting user. Check console for details.');
@@ -651,20 +651,20 @@ const UserManagement = ({ onNavigate }) => {
     try {
       const password = generateRandomPassword();
       console.log('Creating user with email:', newUser.email);
-      
+
       // 1. Create Firebase Auth user
       const userCredential = await createUserWithEmailAndPassword(
-        auth, 
-        newUser.email, 
+        auth,
+        newUser.email,
         password
       );
       const userId = userCredential.user.uid;
       console.log('Auth user created with ID:', userId);
-      
+
       // Generate display ID and QR code
       const displayId = `DON-${userId.substring(0, 7)}`;
       const qrCodeData = `BLOODCONNECT:USER:${userId}`;
-      
+
       // 2. Create users document
       await setDoc(doc(db, 'users', userId), {
         email: newUser.email,
@@ -678,7 +678,7 @@ const UserManagement = ({ onNavigate }) => {
         created_at: serverTimestamp(),
       });
       console.log('users document created');
-      
+
       // 3. Create donor_profiles document
       await setDoc(doc(db, 'donor_profiles', userId), {
         user_id: userId,
@@ -699,11 +699,11 @@ const UserManagement = ({ onNavigate }) => {
         updated_at: serverTimestamp(),
       });
       console.log('donor_profiles document created');
-      
+
       // 4. Show temp password to admin
       setTempPassword(password);
       setShowPasswordModal(true);
-      
+
       // 5. Reload users and close modal
       await loadUsers();
       setShowAddModal(false);
@@ -726,10 +726,10 @@ const UserManagement = ({ onNavigate }) => {
         allergies: 'None',
         bloodBankId: '',
       });
-      
+
     } catch (error) {
       console.error('Error adding new user:', error);
-      
+
       // Check if auth user was created but Firestore failed
       if (error.code === 'auth/email-already-in-use') {
         alert('Error: Email already in use. The auth user was created but Firestore documents may have failed. Check Firebase console.');
@@ -741,10 +741,10 @@ const UserManagement = ({ onNavigate }) => {
 
   const handleSaveEditUser = async () => {
     if (!selectedUser) return;
-    
+
     try {
       const userId = selectedUser.id;
-      
+
       // 1. Update users document (except email)
       await updateDoc(doc(db, 'users', userId), {
         phone_number: selectedUser.phoneNumber,
@@ -752,7 +752,7 @@ const UserManagement = ({ onNavigate }) => {
         state: selectedUser.state,
         postcode: selectedUser.postcode,
       });
-      
+
       // 2. Update donor_profiles document
       await updateDoc(doc(db, 'donor_profiles', userId), {
         full_name: selectedUser.fullName,
@@ -769,13 +769,13 @@ const UserManagement = ({ onNavigate }) => {
         blood_bank_id: selectedUser.bloodBankId,
         updated_at: serverTimestamp(),
       });
-      
+
       // 3. Update local state and close modal
-      setUsers(prev => prev.map((u) => 
-        u.id === selectedUser.id ? {...selectedUser} : u
+      setUsers(prev => prev.map((u) =>
+        u.id === selectedUser.id ? { ...selectedUser } : u
       ));
       handleCloseEditModal();
-      
+
     } catch (error) {
       console.error('Error updating user:', error);
       alert(`Error updating user: ${error.message}`);
@@ -784,7 +784,7 @@ const UserManagement = ({ onNavigate }) => {
 
   const handleViewDetails = (user) => setSelectedUser(user);
   const handleCloseDetails = () => setSelectedUser(null);
-  
+
   const handleCloseEditModal = () => {
     setShowEditModal(false);
     setSelectedUser(null);
@@ -1196,7 +1196,7 @@ const UserManagement = ({ onNavigate }) => {
                   {/* Personal Information */}
                   <div className="edit-form-section">
                     <h3 className="edit-modal-section-title">Personal Information</h3>
-                    
+
                     <div className="edit-form-field">
                       <label className="edit-form-label">Email *</label>
                       <input
