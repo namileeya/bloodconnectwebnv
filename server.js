@@ -1,24 +1,22 @@
-// server.js  (MAIN SERVER FILE - create this in project root)
-const express = require('express');
+// server.js
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 
-// Import your Firebase config
-const firebase = require('./firebase'); // or your firebase config file
+// Serve static files from dist folder
+app.use(express.static(path.join(__dirname, 'dist')));
 
-// Your routes and middleware here
-app.get('/', (req, res) => {
-    res.send('Server is running with Firebase!');
+// All routes to index.html
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
-// API endpoints
-app.get('/api/data', (req, res) => {
-    // Use Firebase here
-    res.json({ message: 'Firebase data' });
-});
-
-// ⭐⭐⭐ PORT BINDING GOES HERE ⭐⭐⭐
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`✅ Server running on http://localhost:${PORT}`);
-    console.log(`✅ Firebase is connected and ready`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`✅ Serving Vite app on http://0.0.0.0:${PORT}`);
 });
