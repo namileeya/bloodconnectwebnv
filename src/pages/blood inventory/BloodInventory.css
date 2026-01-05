@@ -1,0 +1,561 @@
+/* BloodInventory.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Loading Spinner */
+.loading-container {
+  @apply flex items-center justify-center min-h-96;
+}
+
+.loading-content {
+  @apply text-center;
+}
+
+.loading-spinner {
+  @apply animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4;
+}
+
+.loading-text {
+  @apply text-gray-600;
+}
+
+/* Header */
+.inventory-header-container {
+  @apply flex justify-between items-center;
+}
+
+.inventory-header-title {
+  @apply text-3xl font-bold text-gray-800;
+}
+
+/* Search and Filters */
+.inventory-filters-container {
+  @apply bg-white p-6 rounded-xl shadow-sm;
+}
+
+.inventory-filters-grid {
+  @apply flex flex-wrap gap-4 items-end;
+}
+
+.inventory-search-container {
+  @apply flex-1 min-w-80;
+}
+
+.inventory-filter-label {
+  @apply block text-sm font-semibold text-gray-700 mb-2;
+}
+
+.inventory-search-input-container {
+  @apply relative;
+}
+
+.inventory-search-icon {
+  @apply absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400;
+}
+
+.inventory-search-input {
+  @apply w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm;
+}
+
+.inventory-filter-select-container {
+  @apply min-w-32;
+}
+
+.inventory-filter-select {
+  @apply w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm;
+}
+
+/* Error Message */
+.error-container {
+  @apply bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3;
+}
+
+.error-icon {
+  @apply w-5 h-5 text-red-600 flex-shrink-0;
+}
+
+.error-text {
+  @apply text-red-800 flex-1;
+}
+
+.error-close {
+  @apply ml-auto text-red-600 hover:text-red-800;
+}
+
+.error-close-icon {
+  @apply w-4 h-4;
+}
+
+/* Available Blood Card */
+.available-blood-card {
+  @apply bg-white rounded-xl shadow-sm p-6 border-l-4 border-yellow-400;
+}
+
+.available-blood-content {
+  @apply flex items-center justify-between;
+}
+
+.available-blood-info {
+  @apply flex-1;
+}
+
+.available-blood-label {
+  @apply text-gray-600 text-sm font-medium mb-2;
+}
+
+.available-blood-number {
+  @apply text-5xl font-bold text-gray-800 mb-3;
+}
+
+.available-blood-trend {
+  @apply flex items-center gap-2;
+}
+
+.trend-icon {
+  @apply w-5 h-5 text-teal-600;
+}
+
+.trend-text {
+  @apply text-teal-600 text-sm font-semibold;
+}
+
+.available-blood-icon {
+  @apply bg-yellow-100 p-4 rounded-full;
+}
+
+.package-icon {
+  @apply w-8 h-8 text-yellow-600;
+}
+
+/* Add/Update Stock Buttons */
+.add-stock-container,
+.update-stock-container {
+  @apply flex justify-start;
+}
+
+.add-stock-button,
+.update-stock-button {
+  @apply px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-semibold;
+}
+
+/* Table */
+.inventory-table-container {
+  @apply bg-white rounded-xl shadow-sm overflow-hidden;
+}
+
+.inventory-table-wrapper {
+  @apply overflow-x-auto;
+}
+
+.inventory-table {
+  @apply w-full;
+}
+
+.inventory-table-header {
+  @apply bg-gray-50 border-b border-gray-200;
+}
+
+.inventory-table-header-cell {
+  @apply px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider;
+}
+
+.inventory-table-body {
+  @apply bg-white divide-y divide-gray-100;
+}
+
+.inventory-table-row {
+  @apply hover:bg-gray-50 transition-colors;
+}
+
+.inventory-table-cell {
+  @apply px-6 py-4 text-sm;
+}
+
+.inventory-id-cell {
+  @apply text-gray-900 font-medium;
+}
+
+.inventory-type-cell {
+  @apply text-gray-900 font-semibold;
+}
+
+.inventory-rhesus-cell {
+  @apply text-gray-600;
+}
+
+.inventory-location-cell {
+  @apply text-gray-600;
+}
+
+.inventory-date-cell {
+  @apply text-gray-600;
+}
+
+/* Empty State */
+.inventory-empty-state {
+  @apply text-center py-12;
+}
+
+.inventory-empty-state-icon {
+  @apply text-gray-400 mb-4;
+}
+
+.inventory-empty-state-icon svg {
+  @apply w-12 h-12 mx-auto;
+}
+
+.inventory-empty-state-title {
+  @apply text-lg font-semibold text-gray-600 mb-2;
+}
+
+.inventory-empty-state-description {
+  @apply text-gray-500 text-sm;
+}
+
+/* Modal */
+.inventory-modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4;
+}
+
+.inventory-modal-container {
+  @apply bg-white rounded-2xl max-w-2xl w-full shadow-2xl;
+}
+
+.inventory-modal-header {
+  @apply flex justify-between items-center border-b border-gray-200 px-6 py-4;
+}
+
+.inventory-modal-title {
+  @apply text-xl font-bold text-gray-800;
+}
+
+.inventory-modal-close {
+  @apply p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all;
+}
+
+.inventory-modal-close-icon {
+  @apply w-5 h-5;
+}
+
+.inventory-modal-body {
+  @apply p-6;
+}
+
+.inventory-modal-form {
+  @apply space-y-4 mb-6;
+}
+
+.inventory-form-group {
+  @apply space-y-2;
+}
+
+.inventory-form-label {
+  @apply block text-sm font-semibold text-gray-700;
+}
+
+.inventory-form-input {
+  @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm;
+}
+
+.inventory-form-input:disabled {
+  @apply bg-gray-100 cursor-not-allowed;
+}
+
+.inventory-form-select {
+  @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm bg-white;
+}
+
+.inventory-modal-actions {
+  @apply flex justify-end gap-3 pt-4 border-t border-gray-200;
+}
+
+.inventory-modal-button {
+  @apply px-6 py-2.5 rounded-lg font-semibold text-sm transition-all;
+}
+
+.inventory-cancel-button {
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+}
+
+.inventory-save-button {
+  @apply bg-red-600 text-white hover:bg-red-700;
+}
+
+.inventory-save-button:disabled {
+  @apply bg-gray-300 cursor-not-allowed hover:bg-gray-300;
+}
+
+/* Pagination */
+.inventory-pagination {
+  @apply flex justify-between items-center bg-white rounded-lg border border-gray-200 px-6 py-4;
+}
+
+.inventory-pagination-info {
+  @apply flex items-center gap-4 text-sm text-gray-600;
+}
+
+.inventory-items-per-page-select {
+  @apply border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent;
+}
+
+.inventory-pagination-range {
+  @apply font-medium;
+}
+
+.inventory-pagination-controls {
+  @apply flex items-center gap-2;
+}
+
+.inventory-pagination-btn {
+  @apply w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent;
+}
+
+.inventory-pagination-btn:hover:not(:disabled) {
+  @apply text-gray-800 border-gray-400;
+}
+
+/* Responsive adjustments for pagination */
+@media (max-width: 640px) {
+  .inventory-pagination {
+    @apply flex-col gap-4 items-stretch;
+  }
+
+  .inventory-pagination-info {
+    @apply justify-center;
+  }
+
+  .inventory-pagination-controls {
+    @apply justify-center;
+  }
+}
+
+/* Stats Cards Grid */
+.stats-cards-grid {
+  @apply grid grid-cols-1 md:grid-cols-3 gap-6;
+}
+
+.stat-card {
+  @apply bg-white rounded-xl shadow-sm p-6;
+}
+
+.stat-card-blue {
+  @apply border-l-4 border-blue-400;
+}
+
+.stat-card-red {
+  @apply border-l-4 border-red-400;
+}
+
+.stat-card-orange {
+  @apply border-l-4 border-orange-400;
+}
+
+.stat-card-content {
+  @apply flex items-center justify-between;
+}
+
+.stat-card-info {
+  @apply flex-1;
+}
+
+.stat-card-label {
+  @apply text-gray-600 text-sm font-medium mb-2;
+}
+
+.stat-card-number {
+  @apply text-5xl font-bold text-gray-800 mb-3;
+}
+
+.stat-card-number-red {
+  @apply text-red-600;
+}
+
+.stat-card-number-orange {
+  @apply text-orange-600;
+}
+
+.stat-card-trend {
+  @apply flex items-center gap-2;
+}
+
+.trend-icon-red {
+  @apply w-5 h-5 text-red-600;
+}
+
+.trend-icon-orange {
+  @apply w-5 h-5 text-orange-600;
+}
+
+.trend-text-red {
+  @apply text-red-600 text-sm font-semibold;
+}
+
+.trend-text-orange {
+  @apply text-orange-600 text-sm font-semibold;
+}
+
+.stat-card-icon {
+  @apply p-4 rounded-full;
+}
+
+.stat-card-icon-blue {
+  @apply bg-blue-100;
+}
+
+.stat-card-icon-red {
+  @apply bg-red-100;
+}
+
+.stat-card-icon-orange {
+  @apply bg-orange-100;
+}
+
+/* Location Stock Section */
+.location-stock-section {
+  @apply space-y-4;
+}
+
+.location-selector-header {
+  @apply flex justify-between items-center mb-4;
+}
+
+.location-stock-title {
+  @apply text-2xl font-bold text-gray-800;
+}
+
+.location-selector-dropdown {
+  @apply px-4 py-2.5 border-2 border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm font-semibold text-gray-700 bg-white hover:border-red-400 cursor-pointer;
+}
+
+.location-card {
+  @apply bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100;
+}
+
+.location-header {
+  @apply bg-gradient-to-r from-red-50 to-white p-6 border-b border-gray-200 flex justify-between items-center;
+}
+
+.location-title-section {
+  @apply flex items-center gap-3;
+}
+
+.location-icon {
+  @apply w-6 h-6 text-red-600;
+}
+
+.location-name {
+  @apply text-xl font-bold text-gray-800;
+}
+
+.location-stats {
+  @apply flex items-center gap-6;
+}
+
+.location-stat-item {
+  @apply flex flex-col items-center;
+}
+
+.location-stat-value {
+  @apply text-3xl font-bold text-gray-800;
+}
+
+.location-stat-label {
+  @apply text-xs text-gray-600 font-medium uppercase mt-1;
+}
+
+.location-blood-types {
+  @apply grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-4 p-6;
+}
+
+.location-blood-type-card {
+  @apply p-4 rounded-lg border-2 transition-all hover:shadow-md text-center;
+}
+
+.location-blood-type-card.stock-level-low {
+  @apply bg-red-50 border-red-300;
+}
+
+.location-blood-type-card.stock-level-medium {
+  @apply bg-orange-50 border-orange-300;
+}
+
+.location-blood-type-card.stock-level-high {
+  @apply bg-green-50 border-green-300;
+}
+
+.blood-type-header-compact {
+  @apply flex flex-col items-center gap-1 mb-2;
+}
+
+.blood-type-count-large {
+  @apply text-4xl font-bold text-gray-800 my-2;
+}
+
+.stock-level-text {
+  @apply text-xs font-bold uppercase;
+}
+
+.stock-level-text.stock-level-low {
+  @apply text-red-700;
+}
+
+.stock-level-text.stock-level-medium {
+  @apply text-orange-700;
+}
+
+.stock-level-text.stock-level-high {
+  @apply text-green-700;
+}
+
+.universal-badge-small {
+  @apply text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-semibold;
+}
+
+/* Table Blood Type Badges */
+.blood-type-badge {
+  @apply font-bold;
+}
+
+.blood-type-badge-negative {
+  @apply text-purple-700;
+}
+
+.blood-type-badge-positive {
+  @apply text-blue-700;
+}
+
+.universal-badge {
+  @apply ml-2 text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-semibold;
+}
+
+/* Days Left Styling */
+.days-left {
+  @apply font-semibold;
+}
+
+.days-left-critical {
+  @apply text-red-600;
+}
+
+.days-left-urgent {
+  @apply text-orange-600;
+}
+
+.days-left-warning {
+  @apply text-yellow-600;
+}
+
+.days-left-good {
+  @apply text-green-600;
+}
+
+/* Status Badge */
+.status-badge {
+  @apply px-3 py-1 rounded-full text-xs font-semibold border;
+}
+
+.days-left-expired {
+  color: #991b1b;
+  font-weight: 600;
+}

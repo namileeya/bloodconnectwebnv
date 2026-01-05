@@ -1,0 +1,484 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Main Content */
+.user-management-content {
+  @apply p-6 bg-gray-50 min-h-screen;
+}
+
+/* Header */
+.user-header-container {
+  @apply flex justify-between items-center flex-wrap gap-4;
+}
+
+.user-header-title {
+  @apply text-3xl font-bold text-gray-800;
+}
+
+/* Filters */
+.user-filters-container {
+  @apply bg-white p-6 rounded-xl shadow-sm;
+}
+
+.user-filters-row {
+  @apply flex flex-wrap gap-4 items-center;
+}
+
+.user-search-input-container {
+  @apply relative flex-1 min-w-80;
+}
+
+.user-search-icon {
+  @apply absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400;
+}
+
+.user-search-input {
+  @apply w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm;
+}
+
+.user-status-filter,
+.user-blood-type-filter {
+  @apply px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm bg-white min-w-40;
+}
+
+.add-member-btn,
+.add-record-button {
+  @apply px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-semibold;
+}
+
+/* Users Grid */
+.users-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8;
+}
+
+/* Empty State */
+.user-empty-state {
+  @apply col-span-full text-center py-12;
+}
+
+.user-empty-state-icon {
+  @apply text-gray-400 mb-4;
+}
+
+.user-empty-state-icon svg {
+  @apply w-12 h-12 mx-auto;
+}
+
+.user-empty-state-title {
+  @apply text-lg font-semibold text-gray-600 mb-2;
+}
+
+.user-empty-state-description {
+  @apply text-gray-500 text-sm;
+}
+
+/* User Card */
+.user-card-wrapper {
+  @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6 relative hover:shadow-md transition-shadow duration-200;
+}
+
+.user-card-actions {
+  @apply absolute top-4 right-4 flex gap-2 opacity-100 transition-opacity duration-200;
+}
+
+.user-action-button {
+  @apply p-2 rounded-lg transition-all;
+}
+
+.user-edit-button {
+  @apply text-gray-600 hover:text-gray-800 hover:bg-gray-100;
+}
+
+.user-delete-button {
+  @apply text-red-600 hover:text-red-800 hover:bg-red-50;
+}
+
+.user-action-icon {
+  @apply w-4 h-4;
+}
+
+.user-card-content {
+  @apply flex flex-col items-center;
+}
+
+.avatar-container {
+  @apply mb-4;
+}
+
+.avatar {
+  @apply rounded-full flex items-center justify-center text-white font-semibold text-lg;
+}
+
+.user-info {
+  @apply text-center w-full;
+}
+
+.user-name {
+  @apply text-lg font-semibold text-gray-800 mb-1;
+}
+
+.user-status {
+  @apply flex items-center justify-center gap-2 mb-2;
+}
+
+.blood-type {
+  @apply text-sm font-medium text-red-600;
+}
+
+.separator {
+  @apply text-gray-400;
+}
+
+.donor-status {
+  @apply text-sm text-gray-500;
+}
+
+.user-email {
+  @apply text-sm text-gray-600 mb-4 break-all;
+}
+
+.view-details-btn {
+  @apply w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors;
+}
+
+/* Modal */
+.modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4;
+}
+
+.modal-container {
+  @apply bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl;
+}
+
+.modal-header {
+  @apply sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center rounded-t-2xl z-10;
+}
+
+.modal-title {
+  @apply text-xl font-bold text-gray-800;
+}
+
+.modal-close-btn {
+  @apply p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all;
+}
+
+.modal-close-icon {
+  @apply w-5 h-5;
+}
+
+.modal-content {
+  @apply p-6 space-y-6;
+}
+
+.profile-header {
+  @apply flex items-center gap-4 pb-6 border-b border-gray-200;
+}
+
+.profile-info {
+  @apply flex-1;
+}
+
+.profile-name {
+  @apply text-xl font-bold text-gray-800;
+}
+
+.profile-tags {
+  @apply flex items-center gap-2 mt-1 flex-wrap;
+}
+
+.blood-type-tag {
+  @apply px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium;
+}
+
+.donor-status-tag {
+  @apply px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium;
+}
+
+.donation-count-tag {
+  @apply px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium;
+}
+
+.info-grid {
+  @apply grid md:grid-cols-2 gap-6;
+}
+
+.info-section {
+  @apply bg-gray-50 rounded-lg p-5;
+}
+
+.section-title {
+  @apply text-lg font-bold text-gray-800 mb-4;
+}
+
+.info-fields {
+  @apply space-y-3;
+}
+
+.info-field {
+  @apply space-y-1;
+}
+
+.info-label {
+  @apply text-sm text-gray-600;
+}
+
+.info-value {
+  @apply text-base font-medium text-gray-800;
+}
+
+.donation-stats {
+  @apply mt-6 pt-6 border-t border-gray-200;
+}
+
+.stats-title {
+  @apply font-semibold text-gray-800 mb-3;
+}
+
+.stats-grid {
+  @apply grid grid-cols-3 gap-4 text-center;
+}
+
+.stat-item {
+  @apply flex flex-col;
+}
+
+.stat-value {
+  @apply text-2xl font-bold text-red-600;
+}
+
+.stat-label {
+  @apply text-xs text-gray-600 mt-1;
+}
+
+.modal-actions {
+  @apply flex justify-end gap-4 pt-6 border-t border-gray-200;
+}
+
+.close-btn {
+  @apply px-6 py-2.5 rounded-lg font-semibold text-sm transition-all bg-gray-100 text-gray-700 hover:bg-gray-200;
+}
+
+/* Edit Modal - FIXED: Added missing dot */
+.edit-modal-container {
+  @apply bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-2xl;
+}
+
+.edit-modal-content {
+  @apply p-6;
+}
+
+/* Reuse existing grid and form styles, but ensure consistency */
+.edit-form-grid {
+  @apply grid md:grid-cols-2 gap-8 mb-8;
+}
+
+.edit-form-section {
+  @apply space-y-5;
+}
+
+.edit-modal-section-title {
+  @apply text-lg font-bold text-gray-800 mb-4 pb-2 border-b-2 border-red-100;
+}
+
+.edit-form-field {
+  @apply space-y-2;
+}
+
+.edit-form-label {
+  @apply block text-sm font-semibold text-gray-700;
+}
+
+.edit-form-input,
+.edit-form-textarea,
+.edit-form-select {
+  @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm;
+}
+
+.edit-form-textarea {
+  @apply resize-none;
+}
+
+.edit-form-select {
+  @apply bg-white;
+}
+
+.user-id-input {
+  @apply bg-gray-100 cursor-not-allowed;
+}
+
+.cancel-btn {
+  @apply px-6 py-2.5 rounded-lg font-semibold text-sm transition-all bg-gray-100 text-gray-700 hover:bg-gray-200;
+}
+
+.save-btn {
+  @apply px-6 py-2.5 rounded-lg font-semibold text-sm transition-all bg-red-600 text-white hover:bg-red-700;
+}
+
+/* Delete Confirmation Modal */
+.delete-confirm-modal {
+  @apply bg-white rounded-2xl max-w-md w-full shadow-2xl p-6 text-center;
+}
+
+.delete-icon-container {
+  @apply mx-auto w-16 h-16 flex items-center justify-center rounded-full bg-red-100 mb-4;
+}
+
+.delete-icon {
+  @apply w-8 h-8 text-red-600;
+}
+
+.delete-title {
+  @apply text-xl font-bold text-gray-800 mb-2;
+}
+
+.delete-message {
+  @apply text-gray-600 mb-6;
+}
+
+.delete-actions {
+  @apply flex gap-3 justify-center;
+}
+
+.delete-btn {
+  @apply px-6 py-2.5 rounded-lg font-semibold text-sm transition-all bg-red-600 text-white hover:bg-red-700;
+}
+
+/* Pagination */
+.pagination {
+  @apply flex justify-between items-center bg-white rounded-lg border border-gray-200 px-6 py-4;
+}
+
+.pagination-info {
+  @apply flex items-center gap-4 text-sm text-gray-600;
+}
+
+.items-per-page-select {
+  @apply border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+}
+
+.pagination-range {
+  @apply font-medium;
+}
+
+.pagination-controls {
+  @apply flex items-center gap-2;
+}
+
+.pagination-btn {
+  @apply w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  @apply text-gray-800 border-gray-400;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .user-management-content {
+    @apply p-4;
+  }
+
+  .user-header-container {
+    @apply flex-col gap-4 items-stretch;
+  }
+
+  .users-grid {
+    @apply grid-cols-1;
+  }
+
+  .user-filters-row {
+    @apply flex-col;
+  }
+
+  .user-search-input-container {
+    @apply w-full min-w-full;
+  }
+
+  .user-status-filter,
+  .user-blood-type-filter {
+    @apply w-full;
+  }
+
+  .pagination {
+    @apply flex-col gap-4 items-stretch;
+  }
+
+  .pagination-info {
+    @apply justify-center;
+  }
+
+  .pagination-controls {
+    @apply justify-center;
+  }
+}
+
+/* Custom scrollbar for better UX */
+.user-management-content::-webkit-scrollbar {
+  @apply w-2;
+}
+
+.user-management-content::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+.user-management-content::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full;
+}
+
+.user-management-content::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400;
+}
+
+/* Loading states and animations */
+.user-card-wrapper {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Focus states for accessibility */
+.add-member-btn:focus,
+.add-record-button:focus,
+.user-action-button:focus,
+.pagination-btn:focus,
+.items-per-page-select:focus,
+.edit-form-input:focus,
+.edit-form-textarea:focus,
+.edit-form-select:focus,
+.cancel-btn:focus,
+.save-btn:focus,
+.delete-btn:focus,
+.close-btn:focus,
+.modal-close-btn:focus,
+.view-details-btn:focus {
+  @apply outline-none ring-2 ring-red-500 ring-offset-2;
+}
+
+/* Print styles */
+@media print {
+  .user-card-actions,
+  .pagination,
+  .add-member-btn,
+  .add-record-button {
+    @apply hidden;
+  }
+
+  .users-grid {
+    @apply grid-cols-2;
+  }
+
+  .user-management-content {
+    @apply p-0 bg-white;
+  }
+}

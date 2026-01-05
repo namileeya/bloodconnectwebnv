@@ -1,0 +1,716 @@
+/* DonationRecords.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Loading Spinner */
+.loading-container {
+  @apply flex items-center justify-center min-h-96;
+}
+
+.loading-content {
+  @apply text-center;
+}
+
+.loading-spinner {
+  @apply animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4;
+}
+
+.loading-text {
+  @apply text-gray-600;
+}
+
+/* Header */
+.records-header-container {
+  @apply flex justify-between items-center flex-wrap gap-4;
+}
+
+.records-header-title {
+  @apply text-3xl font-bold text-gray-800;
+}
+
+.records-header-actions {
+  @apply flex items-center gap-3;
+}
+
+.add-record-button {
+  @apply px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-semibold;
+}
+
+/* Error Message */
+.error-container {
+  @apply border rounded-lg p-4 flex items-center gap-3;
+}
+
+.error-alert {
+  @apply bg-red-50 border-red-200;
+}
+
+.success-alert {
+  @apply bg-green-50 border-green-200;
+}
+
+.error-icon {
+  @apply w-5 h-5 flex-shrink-0;
+}
+
+.error-alert .error-icon {
+  @apply text-red-600;
+}
+
+.success-alert .error-icon {
+  @apply text-green-600;
+}
+
+.error-text {
+  @apply flex-1;
+}
+
+.error-alert .error-text {
+  @apply text-red-800;
+}
+
+.success-alert .error-text {
+  @apply text-green-800;
+}
+
+.error-close {
+  @apply ml-auto hover:opacity-75 transition-opacity;
+}
+
+.error-close-icon {
+  @apply w-4 h-4;
+}
+
+/* Stats Cards */
+.records-stats-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6;
+}
+
+.records-stat-card {
+  @apply bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow;
+}
+
+.stat-card-total {
+  @apply border-l-4 border-blue-500;
+}
+
+.stat-card-completed {
+  @apply border-l-4 border-green-500;
+}
+
+.stat-card-scheduled {
+  @apply border-l-4 border-orange-500;
+}
+
+.stat-card-confirmed {
+  @apply border-l-4 border-teal-500;
+}
+
+.stat-card-pending {
+  @apply border-l-4 border-purple-500;
+}
+
+.stat-card-rejected {
+  @apply border-l-4 border-red-500;
+}
+
+.stat-card-cancelled {
+  @apply border-l-4 border-gray-500;
+}
+
+.stat-card-noshow {
+  @apply border-l-4 border-yellow-500;
+}
+
+.stat-number-blue {
+  @apply text-3xl font-bold text-blue-600 mb-2;
+}
+
+.stat-number-green {
+  @apply text-3xl font-bold text-green-600 mb-2;
+}
+
+.stat-number-orange {
+  @apply text-3xl font-bold text-orange-600 mb-2;
+}
+
+.stat-number-teal {
+  @apply text-3xl font-bold text-teal-600 mb-2;
+}
+
+.stat-number-purple {
+  @apply text-3xl font-bold text-purple-600 mb-2;
+}
+
+.stat-number-red {
+  @apply text-3xl font-bold text-red-600 mb-2;
+}
+
+.stat-number-gray {
+  @apply text-3xl font-bold text-gray-600 mb-2;
+}
+
+.stat-number-yellow {
+  @apply text-3xl font-bold text-yellow-600 mb-2;
+}
+
+.stat-label {
+  @apply text-gray-600 text-sm font-medium;
+}
+
+/* Search and Filters */
+.records-filters-container {
+  @apply bg-white p-6 rounded-xl shadow-sm;
+}
+
+.records-filters-grid {
+  @apply flex flex-wrap gap-4 items-end;
+}
+
+.records-search-container {
+  @apply flex-1 min-w-80;
+}
+
+.records-filter-label {
+  @apply block text-sm font-semibold text-gray-700 mb-2;
+}
+
+.records-search-input-container {
+  @apply relative;
+}
+
+.records-search-icon {
+  @apply absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400;
+}
+
+.records-search-input {
+  @apply w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm;
+}
+
+.records-filter-select-container {
+  @apply min-w-40;
+}
+
+.records-status-filter,
+.records-month-filter,
+.records-year-filter {
+  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm bg-white;
+}
+
+/* Table */
+.records-table-container {
+  @apply bg-white rounded-xl shadow-sm overflow-hidden;
+}
+
+.records-table-wrapper {
+  @apply overflow-x-auto;
+}
+
+.records-table {
+  @apply w-full;
+}
+
+.records-table-header {
+  @apply bg-gray-50 border-b border-gray-200;
+}
+
+.records-table-header-cell {
+  @apply px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider;
+}
+
+.records-table-body {
+  @apply bg-white divide-y divide-gray-100;
+}
+
+.records-table-row {
+  @apply hover:bg-gray-50 transition-colors;
+}
+
+.records-table-cell {
+  @apply px-6 py-4 text-sm;
+}
+
+.records-id-cell {
+  @apply text-gray-900 font-semibold;
+}
+
+/* Donor Info Cell */
+.donor-info-cell {
+  @apply flex flex-col;
+}
+
+.name-text {
+  @apply text-gray-900 font-medium text-sm;
+}
+
+.event-info-badge {
+  @apply inline-flex items-center gap-1 bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs mt-1;
+}
+
+.event-info-badge svg {
+  @apply w-3 h-3;
+}
+
+/* Hospital Cell */
+.hospital-cell {
+  @apply flex items-center gap-1.5;
+}
+
+.hospital-text {
+  @apply text-gray-700 text-sm;
+}
+
+/* Address Cell */
+.address-cell {
+  @apply flex items-center gap-1.5;
+}
+
+.address-text {
+  @apply text-gray-600 text-sm;
+}
+
+.date-text {
+  @apply text-gray-600 text-sm;
+}
+
+/* Status Badge */
+.records-status-badge {
+  @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold;
+}
+
+.status-completed {
+  @apply bg-green-100 text-green-800;
+}
+
+.status-scheduled {
+  @apply bg-orange-100 text-orange-800;
+}
+
+.status-confirmed {
+  @apply bg-teal-100 text-teal-800;
+}
+
+.status-pending {
+  @apply bg-purple-100 text-purple-800;
+}
+
+.status-rejected {
+  @apply bg-red-100 text-red-800;
+}
+
+.status-cancelled {
+  @apply bg-gray-100 text-gray-800;
+}
+
+.status-no-show {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.status-used {
+  @apply bg-gray-100 text-gray-600;
+}
+
+.status-expired {
+  @apply bg-red-50 text-red-600 border border-red-200;
+}
+
+/* Action Buttons */
+.records-actions-container {
+  @apply flex items-center gap-2 flex-wrap;
+}
+
+.records-action-button {
+  @apply p-2 rounded-lg transition-all;
+}
+
+.records-action-icon {
+  @apply w-4 h-4;
+}
+
+.view-button {
+  @apply text-blue-600 hover:text-blue-800 hover:bg-blue-50;
+}
+
+.used-button {
+  @apply text-white bg-green-500 hover:bg-green-600;
+}
+
+.approve-button {
+  @apply text-green-600 hover:text-green-800 hover:bg-green-50;
+}
+
+.schedule-button {
+  @apply text-orange-600 hover:text-orange-800 hover:bg-orange-50;
+}
+
+.confirm-button {
+  @apply text-teal-600 hover:text-teal-800 hover:bg-teal-50;
+}
+
+.reject-button {
+  @apply text-red-600 hover:text-red-800 hover:bg-red-50;
+}
+
+.cancel-button {
+  @apply text-gray-600 hover:text-gray-800 hover:bg-gray-50;
+}
+
+.cancel-status-button {
+  @apply text-gray-600 hover:text-gray-800 hover:bg-gray-50;
+}
+
+.noshow-button {
+  @apply text-yellow-600 hover:text-yellow-800 hover:bg-yellow-50;
+}
+
+.reschedule-button {
+  @apply text-orange-600 hover:text-orange-800 hover:bg-orange-50;
+}
+
+/* Empty State */
+.records-empty-state {
+  @apply text-center py-12;
+}
+
+.records-empty-state-icon {
+  @apply text-gray-400 mb-4;
+}
+
+.records-empty-state-icon svg {
+  @apply w-12 h-12 mx-auto;
+}
+
+.records-empty-state-title {
+  @apply text-lg font-semibold text-gray-600 mb-2;
+}
+
+.records-empty-state-description {
+  @apply text-gray-500 text-sm;
+}
+
+/* Modal */
+.records-modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4;
+}
+
+.records-modal-container {
+  @apply bg-white rounded-2xl max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto;
+}
+
+.records-modal-header {
+  @apply flex justify-between items-center border-b border-gray-200 px-6 py-4 sticky top-0 bg-white z-10;
+}
+
+.records-modal-title {
+  @apply text-xl font-bold text-gray-800;
+}
+
+.records-modal-close {
+  @apply p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all;
+}
+
+.records-modal-close-icon {
+  @apply w-5 h-5;
+}
+
+.records-modal-body {
+  @apply p-6;
+}
+
+.records-modal-form {
+  @apply space-y-4 mb-6;
+}
+
+.records-form-group {
+  @apply space-y-2;
+}
+
+.records-form-label {
+  @apply block text-sm font-semibold text-gray-700;
+}
+
+.records-form-input {
+  @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm;
+}
+
+.records-form-input:disabled {
+  @apply bg-gray-100 cursor-not-allowed;
+}
+
+.records-form-select {
+  @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm bg-white;
+}
+
+.records-modal-actions {
+  @apply flex justify-end gap-3 pt-4 border-t border-gray-200;
+}
+
+.records-modal-button {
+  @apply px-6 py-2.5 rounded-lg font-semibold text-sm transition-all;
+}
+
+.records-cancel-button {
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+}
+
+.records-save-button {
+  @apply bg-red-600 text-white hover:bg-red-700;
+}
+
+.records-save-button:disabled {
+  @apply opacity-50 cursor-not-allowed bg-red-400;
+}
+
+.records-save-button:disabled:hover {
+  @apply bg-red-400;
+}
+
+/* Delete Confirmation Modal */
+.records-confirm-modal {
+  @apply bg-white rounded-2xl max-w-md w-full shadow-2xl p-6 text-center;
+}
+
+.records-confirm-icon-container {
+  @apply mx-auto w-16 h-16 flex items-center justify-center rounded-full mb-4;
+}
+
+.records-confirm-icon {
+  @apply w-8 h-8;
+}
+
+.records-confirm-title {
+  @apply text-xl font-bold text-gray-800 mb-2;
+}
+
+.records-confirm-message {
+  @apply text-gray-600 mb-6;
+}
+
+.records-confirm-actions {
+  @apply flex gap-3 justify-center;
+}
+
+.records-confirm-button {
+  @apply px-6 py-2.5 rounded-lg font-semibold text-sm transition-all;
+}
+
+.records-confirm-cancel {
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+}
+
+.records-confirm-delete {
+  @apply bg-red-600 text-white hover:bg-red-700;
+}
+
+.records-confirm-used {
+  @apply bg-green-600 text-white hover:bg-green-700;
+}
+
+/* Used Details in Modal */
+.records-used-details {
+  @apply bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4;
+}
+
+.records-used-detail-row {
+  @apply flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0;
+}
+
+.records-used-detail-label {
+  @apply text-sm font-medium text-gray-600;
+}
+
+.records-used-detail-value {
+  @apply text-sm font-semibold text-gray-900;
+}
+
+/* Pagination */
+.records-pagination {
+  @apply flex justify-between items-center bg-white rounded-lg border border-gray-200 px-6 py-4;
+}
+
+.records-pagination-info {
+  @apply flex items-center gap-4 text-sm text-gray-600;
+}
+
+.records-items-per-page-select {
+  @apply border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent;
+}
+
+.records-pagination-range {
+  @apply font-medium;
+}
+
+.records-pagination-controls {
+  @apply flex items-center gap-2;
+}
+
+.records-pagination-btn {
+  @apply w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent;
+}
+
+.records-pagination-btn:hover:not(:disabled) {
+  @apply text-gray-800 border-gray-400;
+}
+
+/* Form input placeholder styling */
+.records-form-input::placeholder {
+  @apply text-gray-400;
+}
+
+/* Details Modal */
+.records-details-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-6 mb-6;
+}
+
+.records-detail-item {
+  @apply space-y-1;
+}
+
+.records-detail-item.records-detail-full-width {
+  @apply md:col-span-2;
+}
+
+.records-detail-label {
+  @apply text-sm font-semibold text-gray-600;
+}
+
+.records-detail-value {
+  @apply text-base text-gray-900 font-medium;
+}
+
+/* Donation Details Display */
+.records-donation-details-grid {
+  @apply grid grid-cols-2 gap-4 mt-3 p-4 bg-teal-50 rounded-lg border border-teal-100;
+}
+
+.records-donation-detail-item {
+  @apply flex flex-col space-y-1;
+}
+
+.records-donation-detail-label {
+  @apply text-xs text-gray-600 font-medium;
+}
+
+.records-donation-detail-value {
+  @apply text-sm text-gray-900 font-semibold;
+}
+
+/* Completion Modal */
+.records-completion-modal {
+  @apply bg-white rounded-2xl max-w-2xl w-full shadow-2xl;
+}
+
+.records-completion-donor-info {
+  @apply bg-gradient-to-r from-teal-50 to-blue-50 rounded-xl p-6 mb-6 border border-teal-100;
+}
+
+.records-completion-donor-header {
+  @apply flex items-center gap-4 mb-4;
+}
+
+.records-completion-donor-header .w-6 {
+  @apply text-teal-600;
+}
+
+.records-completion-donor-name {
+  @apply text-xl font-bold text-gray-900;
+}
+
+.records-completion-donor-meta {
+  @apply text-sm text-gray-600;
+}
+
+.records-completion-event-info {
+  @apply space-y-1 text-sm;
+}
+
+.records-completion-event-info p {
+  @apply text-gray-700;
+}
+
+.records-completion-form {
+  @apply space-y-5;
+}
+
+.records-completion-form-group {
+  @apply space-y-2;
+}
+
+.records-completion-form-label {
+  @apply block text-sm font-semibold text-gray-700;
+}
+
+.records-completion-form-input {
+  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-sm;
+}
+
+.records-completion-form-input.input-error {
+  @apply border-red-500 focus:ring-red-500;
+}
+
+.records-completion-form-error {
+  @apply text-xs text-red-600 mt-1;
+}
+
+.records-completion-modal-actions {
+  @apply flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200;
+}
+
+.records-complete-button {
+  @apply bg-teal-600 text-white hover:bg-teal-700 flex items-center;
+}
+
+/* Reject Textarea */
+.records-reject-textarea {
+  @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm resize-none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .records-pagination {
+    @apply flex-col gap-4 items-stretch;
+  }
+
+  .records-pagination-info {
+    @apply justify-center;
+  }
+
+  .records-pagination-controls {
+    @apply justify-center;
+  }
+
+  .records-stats-grid {
+    @apply grid-cols-1;
+  }
+
+  .records-filters-grid {
+    @apply flex-col;
+  }
+
+  .records-search-container {
+    @apply w-full min-w-full;
+  }
+
+  .records-filter-select-container {
+    @apply w-full;
+  }
+
+  .records-status-filter {
+    @apply w-full;
+  }
+
+  .records-donation-details-grid {
+    @apply grid-cols-1;
+  }
+}
+
+@media (max-width: 768px) {
+  .records-table-wrapper {
+    @apply overflow-x-scroll;
+  }
+
+  .records-table {
+    @apply min-w-full;
+  }
+}

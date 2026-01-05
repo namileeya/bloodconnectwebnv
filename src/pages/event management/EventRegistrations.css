@@ -1,0 +1,965 @@
+/* EventRegistrations.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Remove container padding since Layout handles it */
+.space-y-6>*+* {
+  @apply mt-6;
+}
+
+/* Loading */
+.loading-container {
+  @apply flex items-center justify-center min-h-96;
+}
+
+.loading-content {
+  @apply text-center;
+}
+
+.loading-spinner {
+  @apply animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4;
+}
+
+.loading-text {
+  @apply text-gray-600;
+}
+
+/* Header */
+.registration-header-container {
+  @apply flex justify-between items-center flex-wrap gap-4;
+}
+
+.registration-header-title {
+  @apply text-3xl font-bold text-gray-800;
+}
+
+.export-button {
+  @apply px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold text-sm;
+}
+
+/* Error Message */
+.error-container {
+  @apply bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3;
+}
+
+.error-icon {
+  @apply w-5 h-5 text-red-600 flex-shrink-0;
+}
+
+.error-text {
+  @apply text-red-800 flex-1;
+}
+
+.error-close {
+  @apply ml-auto text-red-600 hover:text-red-800;
+}
+
+.error-close-icon {
+  @apply w-4 h-4;
+}
+
+/* Stats Cards */
+.registration-stats-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6;
+}
+
+.registration-stat-card {
+  @apply bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center gap-4;
+}
+
+.stat-card-total {
+  @apply border-l-4 border-blue-500;
+}
+
+.stat-card-pending {
+  @apply border-l-4 border-purple-500;
+}
+
+.stat-card-approved {
+  @apply border-l-4 border-green-500;
+}
+
+.stat-card-checkedin {
+  @apply border-l-4 border-orange-500;
+}
+
+.stat-icon {
+  @apply w-10 h-10 flex-shrink-0;
+}
+
+.stat-number-blue {
+  @apply text-3xl font-bold text-blue-600;
+}
+
+.stat-number-purple {
+  @apply text-3xl font-bold text-purple-600;
+}
+
+.stat-number-green {
+  @apply text-3xl font-bold text-green-600;
+}
+
+.stat-number-orange {
+  @apply text-3xl font-bold text-orange-600;
+}
+
+.stat-label {
+  @apply text-gray-600 text-sm font-medium mt-1;
+}
+
+/* Filters */
+.registration-filters-container {
+  @apply bg-white p-6 rounded-xl shadow-sm;
+}
+
+.registration-filters-row {
+  @apply flex flex-wrap gap-4 items-center;
+}
+
+.registration-search-input-container {
+  @apply relative flex-1 min-w-80;
+}
+
+.registration-search-icon {
+  @apply absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400;
+}
+
+.registration-search-input {
+  @apply w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm;
+}
+
+.registration-event-filter,
+.registration-status-filter,
+.registration-bloodtype-filter {
+  @apply px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm bg-white min-w-40;
+}
+
+/* Selected Event Card */
+.selected-event-card {
+  @apply bg-gradient-to-r from-red-50 to-orange-50 rounded-xl shadow-sm p-6 border border-red-100;
+}
+
+.selected-event-header {
+  @apply flex flex-wrap justify-between items-start gap-6;
+}
+
+.selected-event-title {
+  @apply text-2xl font-bold text-gray-900 mb-3;
+}
+
+.selected-event-meta {
+  @apply flex flex-wrap gap-4 text-sm text-gray-600;
+}
+
+.selected-event-meta-item {
+  @apply flex items-center gap-2;
+}
+
+.selected-event-stats {
+  @apply flex gap-6;
+}
+
+.selected-event-stat {
+  @apply text-center;
+}
+
+.selected-event-stat-number {
+  @apply block text-2xl font-bold text-red-600;
+}
+
+.selected-event-stat-label {
+  @apply block text-xs text-gray-600 mt-1;
+}
+
+/* View Mode Toggle */
+.view-mode-container {
+  @apply flex justify-end;
+}
+
+.view-mode-buttons {
+  @apply flex gap-2 bg-white rounded-lg p-1 shadow-sm;
+}
+
+.view-mode-button {
+  @apply px-6 py-2 rounded-lg font-medium text-sm transition-all;
+}
+
+.view-mode-active {
+  @apply bg-red-600 text-white;
+}
+
+.view-mode-button:not(.view-mode-active) {
+  @apply text-gray-700 hover:bg-gray-100;
+}
+
+/* Grouped View */
+.grouped-view-container {
+  @apply space-y-4;
+}
+
+.slot-group-card {
+  @apply bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200;
+}
+
+.slot-group-header {
+  @apply p-6 bg-gradient-to-r from-gray-50 to-white flex justify-between items-center cursor-pointer hover:bg-gray-100 transition-colors;
+}
+
+.slot-group-info {
+  @apply flex-1;
+}
+
+.slot-group-time {
+  @apply flex items-center gap-3 mb-2;
+}
+
+.slot-time-text {
+  @apply text-xl font-bold text-gray-900;
+}
+
+.slot-venue-name {
+  @apply text-base font-semibold text-gray-700;
+}
+
+.slot-venue-address {
+  @apply text-sm text-gray-500;
+}
+
+.slot-group-summary {
+  @apply flex items-center gap-3;
+}
+
+.slot-count-badge {
+  @apply px-4 py-2 bg-red-100 text-red-700 rounded-full text-sm font-bold;
+}
+
+.slot-group-body {
+  @apply border-t border-gray-200;
+}
+
+.slot-registrations-table-wrapper {
+  @apply overflow-x-auto;
+}
+
+.slot-registrations-table {
+  @apply w-full;
+}
+
+.slot-registrations-table-header {
+  @apply bg-gray-50;
+}
+
+.slot-table-header-cell {
+  @apply px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider;
+}
+
+.slot-registrations-table-body {
+  @apply bg-white divide-y divide-gray-100;
+}
+
+.slot-table-row {
+  @apply hover:bg-gray-50 transition-colors;
+}
+
+.slot-table-cell {
+  @apply px-6 py-4 text-sm;
+}
+
+/* List View Table */
+.registration-table-container {
+  @apply bg-white rounded-xl shadow-sm overflow-hidden;
+}
+
+.registration-table-wrapper {
+  @apply overflow-x-auto;
+}
+
+.registration-table {
+  @apply w-full;
+}
+
+.registration-table-header {
+  @apply bg-gray-50 border-b border-gray-200;
+}
+
+.registration-table-header-cell {
+  @apply px-6 py-4 text-left text-[10px] font-bold text-gray-700 uppercase tracking-wider;
+}
+
+.registration-table-body {
+  @apply bg-white divide-y divide-gray-100;
+}
+
+.registration-table-row {
+  @apply hover:bg-gray-50 transition-colors;
+}
+
+.registration-table-cell {
+  @apply px-6 py-4 text-sm;
+}
+
+/* Donor Info */
+.donor-info {
+  @apply flex flex-col;
+}
+
+.donor-name {
+  @apply text-gray-900 font-medium text-sm;
+}
+
+.donor-ic {
+  @apply text-gray-500 text-xs mt-1;
+}
+
+/* Contact Info */
+.contact-info {
+  @apply flex flex-col;
+}
+
+.contact-phone {
+  @apply text-gray-900 font-medium;
+}
+
+.contact-email {
+  @apply text-gray-500 text-xs mt-1;
+}
+
+/* Event Info */
+.event-info {
+  @apply flex flex-col;
+}
+
+.event-name {
+  @apply text-gray-900 font-medium;
+}
+
+.event-date {
+  @apply text-gray-500 text-xs mt-1;
+}
+
+/* Slot Info */
+.slot-info {
+  @apply flex flex-col;
+}
+
+.slot-time {
+  @apply text-gray-900 font-semibold;
+}
+
+.slot-venue {
+  @apply text-gray-500 text-xs mt-1;
+}
+
+/* Blood Type Badge */
+.blood-type-badge {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800;
+}
+
+/* Status Badge */
+.registration-status-badge {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-bold;
+}
+
+.status-registered {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.status-pending {
+  @apply bg-purple-100 text-purple-800;
+}
+
+.status-approved {
+  @apply bg-green-100 text-green-800;
+}
+
+.status-checked-in {
+  @apply bg-orange-100 text-orange-800;
+}
+
+.status-completed {
+  @apply bg-teal-100 text-teal-800;
+}
+
+.status-rejected {
+  @apply bg-red-100 text-red-800;
+}
+
+.status-cancelled {
+  @apply bg-gray-100 text-gray-800;
+}
+
+.status-default {
+  @apply bg-gray-100 text-gray-800;
+}
+
+/* Action Buttons */
+.registration-actions-container {
+  @apply flex items-center gap-2;
+}
+
+.registration-action-button {
+  @apply p-2 rounded-lg transition-all;
+}
+
+.view-button {
+  @apply text-blue-600 hover:text-blue-800 hover:bg-blue-50;
+}
+
+.approve-button {
+  @apply text-green-600 hover:text-green-800 hover:bg-green-50;
+}
+
+.reject-button {
+  @apply text-red-600 hover:text-red-800 hover:bg-red-50;
+}
+
+.checkin-button {
+  @apply text-orange-600 hover:text-orange-800 hover:bg-orange-50;
+}
+
+.complete-button {
+  @apply text-teal-600 hover:text-teal-800 hover:bg-teal-50;
+}
+
+.cancel-button {
+  @apply text-gray-600 hover:text-gray-800 hover:bg-gray-50;
+}
+
+.registration-action-icon {
+  @apply w-4 h-4;
+}
+
+/* Empty State */
+.registration-empty-state {
+  @apply text-center py-16;
+}
+
+.registration-empty-icon {
+  @apply w-16 h-16 mx-auto mb-4 text-gray-300;
+}
+
+.registration-empty-title {
+  @apply text-xl font-semibold text-gray-600 mb-2;
+}
+
+.registration-empty-description {
+  @apply text-gray-500 text-sm;
+}
+
+/* Pagination */
+.registration-pagination {
+  @apply flex justify-between items-center bg-white rounded-lg border border-gray-200 px-6 py-4;
+}
+
+.registration-pagination-info {
+  @apply flex items-center gap-4 text-sm text-gray-600;
+}
+
+.registration-items-per-page-select {
+  @apply border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent;
+}
+
+.registration-pagination-range {
+  @apply font-medium;
+}
+
+.registration-pagination-controls {
+  @apply flex items-center gap-2;
+}
+
+.registration-pagination-btn {
+  @apply w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent;
+}
+
+.registration-pagination-btn:hover:not(:disabled) {
+  @apply text-gray-800 border-gray-400;
+}
+
+/* Modal Overlay */
+.registration-modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4;
+}
+
+/* Modal Container */
+.registration-modal-container {
+  @apply bg-white rounded-2xl max-w-4xl w-full shadow-2xl max-h-[90vh] overflow-y-auto;
+}
+
+.registration-modal-header {
+  @apply flex justify-between items-center border-b border-gray-200 px-6 py-4 sticky top-0 bg-white z-10;
+}
+
+.registration-modal-title {
+  @apply text-xl font-bold text-gray-800;
+}
+
+.registration-modal-close {
+  @apply p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all;
+}
+
+.registration-modal-close-icon {
+  @apply w-5 h-5;
+}
+
+.registration-modal-body {
+  @apply p-6;
+}
+
+/* Detail Grid */
+.detail-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-6 mb-6;
+}
+
+.detail-item {
+  @apply space-y-1;
+}
+
+.detail-item.full-width {
+  @apply md:col-span-2;
+}
+
+.detail-label {
+  @apply text-sm font-semibold text-gray-600;
+}
+
+.detail-value {
+  @apply text-base text-gray-900 font-medium;
+}
+
+.detail-subvalue {
+  @apply text-sm text-gray-500 mt-1;
+}
+
+/* Health Screening */
+.health-screening-grid {
+  @apply grid grid-cols-2 gap-4 mt-3 p-4 bg-gray-50 rounded-lg;
+}
+
+.health-item {
+  @apply flex justify-between text-sm;
+}
+
+.health-label {
+  @apply text-gray-600 font-medium;
+}
+
+/* Modal Actions */
+.registration-modal-actions {
+  @apply flex justify-end gap-3 pt-4 border-t border-gray-200;
+}
+
+.registration-modal-button {
+  @apply px-6 py-2.5 rounded-lg font-semibold text-sm transition-all;
+}
+
+.registration-close-button {
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+}
+
+/* Confirm Modal */
+.registration-confirm-modal {
+  @apply bg-white rounded-2xl max-w-md w-full shadow-2xl p-6 text-center;
+}
+
+.registration-confirm-icon-container {
+  @apply mx-auto w-16 h-16 flex items-center justify-center rounded-full mb-4;
+}
+
+.registration-confirm-icon {
+  @apply w-8 h-8;
+}
+
+.approve-icon {
+  @apply text-green-600;
+}
+
+.registration-confirm-icon-container:has(.approve-icon) {
+  @apply bg-green-100;
+}
+
+.reject-icon {
+  @apply text-red-600;
+}
+
+.registration-confirm-icon-container:has(.reject-icon) {
+  @apply bg-red-100;
+}
+
+.checkin-icon {
+  @apply text-orange-600;
+}
+
+.registration-confirm-icon-container:has(.checkin-icon) {
+  @apply bg-orange-100;
+}
+
+.cancel-icon {
+  @apply text-gray-600;
+}
+
+.registration-confirm-icon-container:has(.cancel-icon) {
+  @apply bg-gray-100;
+}
+
+.complete-icon {
+  @apply text-teal-600;
+}
+
+.registration-confirm-icon-container:has(.complete-icon) {
+  @apply bg-teal-100;
+}
+
+.registration-confirm-title {
+  @apply text-xl font-bold text-gray-800 mb-2;
+}
+
+.registration-confirm-message {
+  @apply text-gray-600 mb-4 text-sm;
+}
+
+/* Rejection Reason */
+.rejection-reason-container {
+  @apply mb-4 text-left;
+}
+
+.rejection-textarea {
+  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm resize-none;
+}
+
+.registration-confirm-details {
+  @apply bg-gray-50 p-4 rounded-lg mb-6 text-left;
+}
+
+.registration-confirm-details p {
+  @apply text-sm text-gray-700 mb-2;
+}
+
+.registration-confirm-details p:last-child {
+  @apply mb-0;
+}
+
+.registration-confirm-actions {
+  @apply flex gap-3 justify-center;
+}
+
+.registration-confirm-button {
+  @apply px-6 py-2.5 rounded-lg font-semibold text-sm transition-all;
+}
+
+.registration-confirm-button:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+.registration-confirm-cancel {
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+}
+
+.registration-confirm-approve {
+  @apply bg-green-600 text-white hover:bg-green-700;
+}
+
+.registration-confirm-reject {
+  @apply bg-red-600 text-white hover:bg-red-700;
+}
+
+.registration-confirm-reject:disabled {
+  @apply bg-red-400 hover:bg-red-400;
+}
+
+.registration-confirm-checkin {
+  @apply bg-orange-600 text-white hover:bg-orange-700;
+}
+
+.registration-confirm-complete {
+  @apply bg-teal-600 text-white hover:bg-teal-700;
+}
+
+.registration-confirm-delete {
+  @apply bg-gray-600 text-white hover:bg-gray-700;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 640px) {
+  .registration-pagination {
+    @apply flex-col gap-4 items-stretch;
+  }
+
+  .registration-pagination-info {
+    @apply justify-center;
+  }
+
+  .registration-pagination-controls {
+    @apply justify-center;
+  }
+
+  .registration-stats-grid {
+    @apply grid-cols-1;
+  }
+
+  .registration-filters-row {
+    @apply flex-col;
+  }
+
+  .registration-search-input-container {
+    @apply w-full min-w-full;
+  }
+
+  .registration-event-filter,
+  .registration-status-filter,
+  .registration-bloodtype-filter {
+    @apply w-full;
+  }
+
+  .selected-event-header {
+    @apply flex-col;
+  }
+
+  .selected-event-stats {
+    @apply w-full justify-around;
+  }
+
+  .view-mode-container {
+    @apply justify-center;
+  }
+
+  .slot-group-header {
+    @apply flex-col items-start gap-4;
+  }
+
+  .slot-group-summary {
+    @apply w-full justify-between;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .registration-table-wrapper,
+  .slot-registrations-table-wrapper {
+    @apply overflow-x-scroll;
+  }
+
+  .registration-table,
+  .slot-registrations-table {
+    @apply min-w-full;
+  }
+
+  .health-screening-grid {
+    @apply grid-cols-1;
+  }
+}
+
+/* Completion Modal */
+.registration-completion-modal {
+  @apply bg-white rounded-2xl max-w-2xl w-full shadow-2xl;
+}
+
+.completion-donor-info {
+  @apply bg-gradient-to-r from-teal-50 to-blue-50 rounded-xl p-6 mb-6 border border-teal-100;
+}
+
+.completion-donor-header {
+  @apply flex items-center gap-4 mb-4;
+}
+
+.completion-donor-name {
+  @apply text-xl font-bold text-gray-900;
+}
+
+.completion-donor-meta {
+  @apply text-sm text-gray-600;
+}
+
+.completion-event-info {
+  @apply space-y-1 text-sm;
+}
+
+.completion-event-info p {
+  @apply text-gray-700;
+}
+
+.completion-form {
+  @apply space-y-5;
+}
+
+.completion-form-group {
+  @apply space-y-2;
+}
+
+.completion-form-label {
+  @apply block text-sm font-semibold text-gray-700;
+}
+
+.completion-form-input {
+  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-sm;
+}
+
+.completion-form-input.input-error {
+  @apply border-red-500 focus:ring-red-500;
+}
+
+.completion-form-error {
+  @apply text-xs text-red-600 mt-1;
+}
+
+.completion-modal-actions {
+  @apply flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200;
+}
+
+.registration-complete-button {
+  @apply bg-teal-600 text-white hover:bg-teal-700 flex items-center;
+}
+
+/* Donation Details Display */
+.donation-details-grid {
+  @apply grid grid-cols-2 gap-4 mt-3 p-4 bg-teal-50 rounded-lg border border-teal-100;
+}
+
+.donation-detail-item {
+  @apply flex flex-col space-y-1;
+}
+
+.donation-detail-label {
+  @apply text-xs text-gray-600 font-medium;
+}
+
+.donation-detail-value {
+  @apply text-sm text-gray-900 font-semibold;
+}
+
+@media (max-width: 640px) {
+  .donation-details-grid {
+    @apply grid-cols-1;
+  }
+}
+
+/* Contact Information */
+.contact-info {
+  @apply flex flex-col;
+}
+
+.contact-phone {
+  @apply text-gray-900 font-medium text-sm;
+}
+
+.contact-email {
+  @apply text-gray-500 text-xs mt-1;
+}
+
+/* Donor Information */
+.donor-info {
+  @apply flex flex-col;
+}
+
+.donor-name {
+  @apply text-gray-900 font-medium text-sm;
+}
+
+.donor-ic {
+  @apply text-gray-500 text-xs mt-1;
+}
+
+/* Event Information */
+.event-info {
+  @apply flex flex-col;
+}
+
+.event-name {
+  @apply text-gray-900 font-medium text-sm;
+}
+
+.event-date {
+  @apply text-gray-500 text-xs mt-1;
+}
+
+/* Slot Information */
+.slot-info {
+  @apply flex flex-col;
+}
+
+.slot-time {
+  @apply text-gray-900 font-semibold text-sm;
+}
+
+.slot-venue {
+  @apply text-gray-500 text-xs mt-1;
+}
+
+/* Used Modal Details */
+.registration-used-details {
+  @apply bg-gray-50 p-4 rounded-lg mb-6 text-left space-y-2;
+}
+
+.registration-used-detail-row {
+  @apply flex justify-between items-center;
+}
+
+.registration-used-detail-label {
+  @apply text-sm font-medium text-gray-600;
+}
+
+.registration-used-detail-value {
+  @apply text-sm font-semibold text-gray-800;
+}
+
+.registration-confirm-used {
+  @apply bg-green-600 text-white hover:bg-green-700;
+}
+
+/* Success Alert */
+.success-alert {
+  @apply bg-green-50 border-green-200;
+}
+
+.success-alert .error-icon {
+  @apply text-green-600;
+}
+
+.success-alert .error-text {
+  @apply text-green-800;
+}
+
+.success-alert .error-close {
+  @apply text-green-600 hover:text-green-800;
+}
+
+/* Action Buttons - Add used-button style */
+.used-button {
+  @apply text-pink-600 hover:text-pink-800 hover:bg-pink-50;
+}
+
+.used-button:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+/* Detail Modal Specific Styles - Add these if missing */
+.detail-item.full-width {
+  @apply md:col-span-2;
+}
+
+.detail-subvalue {
+  @apply text-sm text-gray-500 mt-1;
+}
+
+/* Add to EventRegistrations.css */
+
+/* Used Button States */
+.used-button {
+  @apply text-pink-600 hover:text-pink-800 hover:bg-pink-50;
+}
+
+.used-button:disabled {
+  @apply opacity-50 cursor-not-allowed text-green-600 hover:text-green-600 hover:bg-transparent;
+}
+
+.used-button:not(:disabled):hover {
+  @apply bg-pink-50 text-pink-800;
+}
+
+.used-completed {
+  @apply text-green-600 opacity-50 cursor-default;
+}
+
+.used-completed:hover {
+  @apply text-green-600 bg-transparent;
+}

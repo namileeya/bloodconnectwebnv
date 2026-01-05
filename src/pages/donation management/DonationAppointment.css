@@ -1,0 +1,557 @@
+/* DonationAppointment.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Remove container padding since Layout handles it */
+.space-y-6 > * + * {
+  @apply mt-6;
+}
+
+/* Loading */
+.loading-container {
+  @apply flex items-center justify-center min-h-96;
+}
+
+.loading-content {
+  @apply text-center;
+}
+
+.loading-spinner {
+  @apply animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4;
+}
+
+.loading-text {
+  @apply text-gray-600;
+}
+
+/* Header */
+.appointment-header-container {
+  @apply flex justify-between items-center flex-wrap gap-4;
+}
+
+.appointment-header-title {
+  @apply text-3xl font-bold text-gray-800;
+}
+
+/* Error Message */
+.error-container {
+  @apply bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3;
+}
+
+.error-icon {
+  @apply w-5 h-5 text-red-600 flex-shrink-0;
+}
+
+.error-text {
+  @apply text-red-800 flex-1;
+}
+
+.error-close {
+  @apply ml-auto text-red-600 hover:text-red-800;
+}
+
+.error-close-icon {
+  @apply w-4 h-4;
+}
+
+/* Stats Cards */
+.appointment-stats-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6;
+}
+
+.appointment-stat-card {
+  @apply bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center gap-4;
+}
+
+.stat-card-total {
+  @apply border-l-4 border-blue-500;
+}
+
+.stat-card-pending {
+  @apply border-l-4 border-purple-500;
+}
+
+.stat-card-confirmed {
+  @apply border-l-4 border-green-500;
+}
+
+.stat-card-rescheduled {
+  @apply border-l-4 border-orange-500;
+}
+
+.stat-icon {
+  @apply w-10 h-10 flex-shrink-0;
+}
+
+.stat-number-blue {
+  @apply text-3xl font-bold text-blue-600;
+}
+
+.stat-number-purple {
+  @apply text-3xl font-bold text-purple-600;
+}
+
+.stat-number-green {
+  @apply text-3xl font-bold text-green-600;
+}
+
+.stat-number-orange {
+  @apply text-3xl font-bold text-orange-600;
+}
+
+.stat-label {
+  @apply text-gray-600 text-sm font-medium mt-1;
+}
+
+/* Filters */
+.appointment-filters-container {
+  @apply bg-white p-6 rounded-xl shadow-sm;
+}
+
+.appointment-filters-row {
+  @apply flex flex-wrap gap-4 items-center;
+}
+
+.appointment-search-input-container {
+  @apply relative flex-1 min-w-80;
+}
+
+.appointment-search-icon {
+  @apply absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400;
+}
+
+.appointment-search-input {
+  @apply w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm;
+}
+
+.appointment-status-filter,
+.appointment-location-filter,
+.appointment-date-filter {
+  @apply px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm bg-white min-w-40;
+}
+
+/* Table */
+.appointment-table-container {
+  @apply bg-white rounded-xl shadow-sm overflow-hidden;
+}
+
+.appointment-table-wrapper {
+  @apply overflow-x-auto;
+}
+
+.appointment-table {
+  @apply w-full;
+}
+
+.appointment-table-header {
+  @apply bg-gray-50 border-b border-gray-200;
+}
+
+.appointment-table-header-cell {
+  @apply px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider;
+}
+
+.appointment-table-body {
+  @apply bg-white divide-y divide-gray-100;
+}
+
+.appointment-table-row {
+  @apply hover:bg-gray-50 transition-colors;
+}
+
+.appointment-table-cell {
+  @apply px-6 py-4 text-sm;
+}
+
+.appointment-id-cell {
+  @apply text-gray-900 font-semibold;
+}
+
+/* Donor Info */
+.donor-info {
+  @apply flex flex-col;
+}
+
+.donor-name {
+  @apply text-gray-900 font-medium text-sm;
+}
+
+.donor-phone {
+  @apply text-gray-500 text-xs mt-1;
+}
+
+/* Location Info */
+.location-info {
+  @apply flex flex-col;
+}
+
+.location-name {
+  @apply text-gray-900 font-medium text-sm;
+}
+
+.location-address {
+  @apply text-gray-500 text-xs mt-1;
+}
+
+/* DateTime Info */
+.datetime-info {
+  @apply flex flex-col;
+}
+
+.date-text {
+  @apply text-gray-900 font-medium;
+}
+
+.time-text {
+  @apply text-gray-500 text-xs mt-1;
+}
+
+/* Blood Type Badge */
+.blood-type-badge {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800;
+}
+
+/* Status Badge */
+.appointment-status-badge {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-bold;
+}
+
+.status-confirmed {
+  @apply bg-green-100 text-green-800;
+}
+
+.status-pending {
+  @apply bg-purple-100 text-purple-800;
+}
+
+.status-rescheduled {
+  @apply bg-orange-100 text-orange-800;
+}
+
+.status-cancelled {
+  @apply bg-red-100 text-red-800;
+}
+
+.status-default {
+  @apply bg-gray-100 text-gray-800;
+}
+
+/* Action Buttons */
+.appointment-actions-container {
+  @apply flex items-center gap-2;
+}
+
+.appointment-action-button {
+  @apply p-2 rounded-lg transition-all;
+}
+
+.view-button {
+  @apply text-blue-600 hover:text-blue-800 hover:bg-blue-50;
+}
+
+.confirm-button {
+  @apply text-green-600 hover:text-green-800 hover:bg-green-50;
+}
+
+.reschedule-button {
+  @apply text-orange-600 hover:text-orange-800 hover:bg-orange-50;
+}
+
+.cancel-button {
+  @apply text-red-600 hover:text-red-800 hover:bg-red-50;
+}
+
+.appointment-action-icon {
+  @apply w-4 h-4;
+}
+
+/* Empty State */
+.appointment-empty-state {
+  @apply text-center py-12;
+}
+
+.appointment-empty-state-icon {
+  @apply text-gray-400 mb-4;
+}
+
+.appointment-empty-state-icon svg {
+  @apply w-12 h-12 mx-auto;
+}
+
+.appointment-empty-state-title {
+  @apply text-lg font-semibold text-gray-600 mb-2;
+}
+
+.appointment-empty-state-description {
+  @apply text-gray-500 text-sm;
+}
+
+/* Pagination */
+.appointment-pagination {
+  @apply flex justify-between items-center bg-white rounded-lg border border-gray-200 px-6 py-4;
+}
+
+.appointment-pagination-info {
+  @apply flex items-center gap-4 text-sm text-gray-600;
+}
+
+.appointment-items-per-page-select {
+  @apply border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent;
+}
+
+.appointment-pagination-range {
+  @apply font-medium;
+}
+
+.appointment-pagination-controls {
+  @apply flex items-center gap-2;
+}
+
+.appointment-pagination-btn {
+  @apply w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent;
+}
+
+.appointment-pagination-btn:hover:not(:disabled) {
+  @apply text-gray-800 border-gray-400;
+}
+
+/* Modal Overlay */
+.appointment-modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4;
+}
+
+/* Modal Container */
+.appointment-modal-container {
+  @apply bg-white rounded-2xl max-w-3xl w-full shadow-2xl max-h-[90vh] overflow-y-auto;
+}
+
+.appointment-modal-header {
+  @apply flex justify-between items-center border-b border-gray-200 px-6 py-4 sticky top-0 bg-white z-10;
+}
+
+.appointment-modal-title {
+  @apply text-xl font-bold text-gray-800;
+}
+
+.appointment-modal-close {
+  @apply p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all;
+}
+
+.appointment-modal-close-icon {
+  @apply w-5 h-5;
+}
+
+.appointment-modal-body {
+  @apply p-6;
+}
+
+/* Detail Grid */
+.detail-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-6 mb-6;
+}
+
+.detail-item {
+  @apply space-y-1;
+}
+
+.detail-item.full-width {
+  @apply md:col-span-2;
+}
+
+.detail-label {
+  @apply text-sm font-semibold text-gray-600;
+}
+
+.detail-value {
+  @apply text-base text-gray-900 font-medium;
+}
+
+.detail-subvalue {
+  @apply text-sm text-gray-500 mt-1;
+}
+
+/* Reschedule Info */
+.reschedule-info {
+  @apply bg-gray-50 p-4 rounded-lg mb-6;
+}
+
+.reschedule-donor {
+  @apply text-gray-700 mb-2;
+}
+
+.reschedule-current {
+  @apply text-sm text-gray-600;
+}
+
+/* Modal Form */
+.appointment-modal-form {
+  @apply space-y-4 mb-6;
+}
+
+.appointment-form-group {
+  @apply space-y-2;
+}
+
+.appointment-form-label {
+  @apply block text-sm font-semibold text-gray-700;
+}
+
+.appointment-form-input {
+  @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm;
+}
+
+.appointment-form-input:disabled {
+  @apply bg-gray-100 cursor-not-allowed;
+}
+
+.appointment-form-select {
+  @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm bg-white;
+}
+
+/* Modal Actions */
+.appointment-modal-actions {
+  @apply flex justify-end gap-3 pt-4 border-t border-gray-200;
+}
+
+.appointment-modal-button {
+  @apply px-6 py-2.5 rounded-lg font-semibold text-sm transition-all;
+}
+
+.appointment-cancel-button {
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+}
+
+.appointment-close-button {
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+}
+
+.appointment-save-button {
+  @apply bg-red-600 text-white hover:bg-red-700;
+}
+
+.appointment-save-button:disabled {
+  @apply opacity-50 cursor-not-allowed bg-red-400;
+}
+
+.appointment-save-button:disabled:hover {
+  @apply bg-red-400;
+}
+
+/* Confirm Modal */
+.appointment-confirm-modal {
+  @apply bg-white rounded-2xl max-w-md w-full shadow-2xl p-6 text-center;
+}
+
+.appointment-confirm-icon-container {
+  @apply mx-auto w-16 h-16 flex items-center justify-center rounded-full mb-4;
+}
+
+.confirm-icon {
+  width: 32px !important;
+  height: 32px !important;
+  color: #22c55e !important;
+  stroke: #22c55e !important;
+  display: block !important;
+  margin: auto !important;
+}
+
+.appointment-confirm-icon-container:has(.confirm-icon) {
+  @apply bg-green-100;
+}
+
+.cancel-icon {
+  width: 32px !important;
+  height: 32px !important;
+  color: #dc2626 !important;
+  stroke: #dc2626 !important;
+  display: block !important;
+  margin: auto !important;
+}
+
+.appointment-confirm-icon-container:has(.cancel-icon) {
+  @apply bg-red-100;
+}
+
+.appointment-confirm-title {
+  @apply text-xl font-bold text-gray-800 mb-2;
+}
+
+.appointment-confirm-message {
+  @apply text-gray-600 mb-4;
+}
+
+.appointment-confirm-details {
+  @apply bg-gray-50 p-4 rounded-lg mb-6 text-left;
+}
+
+.appointment-confirm-details p {
+  @apply text-sm text-gray-700 mb-2;
+}
+
+.appointment-confirm-details p:last-child {
+  @apply mb-0;
+}
+
+.appointment-confirm-actions {
+  @apply flex gap-3 justify-center;
+}
+
+.appointment-confirm-button {
+  @apply px-6 py-2.5 rounded-lg font-semibold text-sm transition-all;
+}
+
+.appointment-confirm-cancel {
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+}
+
+.appointment-confirm-confirm {
+  @apply bg-green-600 text-white hover:bg-green-700;
+}
+
+.appointment-confirm-delete {
+  @apply bg-red-600 text-white hover:bg-red-700;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 640px) {
+  .appointment-pagination {
+    @apply flex-col gap-4 items-stretch;
+  }
+  
+  .appointment-pagination-info {
+    @apply justify-center;
+  }
+  
+  .appointment-pagination-controls {
+    @apply justify-center;
+  }
+
+  .appointment-stats-grid {
+    @apply grid-cols-1;
+  }
+
+  .appointment-filters-row {
+    @apply flex-col;
+  }
+
+  .appointment-search-input-container {
+    @apply w-full min-w-full;
+  }
+
+  .appointment-status-filter,
+  .appointment-location-filter,
+  .appointment-date-filter {
+    @apply w-full;
+  }
+}
+
+@media (max-width: 768px) {
+  .appointment-table-wrapper {
+    @apply overflow-x-scroll;
+  }
+
+  .appointment-table {
+    @apply min-w-full;
+  }
+}

@@ -1,0 +1,348 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Loading Spinner */
+.loading-container {
+  @apply flex items-center justify-center min-h-96;
+}
+
+.loading-content {
+  @apply text-center;
+}
+
+.loading-spinner {
+  @apply animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4;
+}
+
+.loading-text {
+  @apply text-gray-600;
+}
+
+/* Header */
+.community-header-container {
+  @apply flex justify-between items-center;
+}
+
+.community-header-title {
+  @apply text-3xl font-bold text-gray-800;
+}
+
+/* Search and Filters */
+.community-filters-container {
+  @apply bg-white p-6 rounded-xl shadow-sm;
+}
+
+.community-filters-grid {
+  @apply flex flex-wrap gap-4 items-end;
+}
+
+.community-search-container {
+  @apply flex-1 min-w-80;
+}
+
+.community-filter-label {
+  @apply block text-sm font-semibold text-gray-700 mb-2;
+}
+
+.community-search-input-container {
+  @apply relative;
+}
+
+.community-search-icon {
+  @apply absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400;
+}
+
+.community-search-input {
+  @apply w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm;
+}
+
+.community-filter-select-container {
+  @apply min-w-32;
+}
+
+.community-filter-select {
+  @apply w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm;
+}
+
+/* Error Message */
+.error-container {
+  @apply bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3;
+}
+
+.error-icon {
+  @apply w-5 h-5 text-red-600 flex-shrink-0;
+}
+
+.error-text {
+  @apply text-red-800 flex-1;
+}
+
+.error-close {
+  @apply ml-auto text-red-600 hover:text-red-800;
+}
+
+.error-close-icon {
+  @apply w-4 h-4;
+}
+
+/* Upload Announcement Button */
+.upload-announcement-container {
+  @apply flex justify-start;
+}
+
+.upload-announcement-button {
+  @apply px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-semibold flex items-center gap-2;
+}
+
+.upload-icon {
+  @apply w-4 h-4;
+}
+
+/* Section Spacing */
+.community-section {
+  @apply mb-8;
+}
+
+/* Table */
+.community-table-container {
+  @apply bg-white rounded-xl shadow-sm overflow-hidden;
+}
+
+.community-table-wrapper {
+  @apply overflow-x-auto;
+}
+
+.community-table {
+  @apply w-full;
+}
+
+.community-table-header {
+  @apply bg-gray-50 border-b border-gray-200;
+}
+
+.community-table-header-cell {
+  @apply px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider;
+}
+
+.community-table-body {
+  @apply bg-white divide-y divide-gray-100;
+}
+
+.community-table-row {
+  @apply hover:bg-gray-50 transition-colors;
+}
+
+.community-table-cell {
+  @apply px-6 py-4 text-sm;
+}
+
+.community-id-cell {
+  @apply text-gray-900 font-medium;
+}
+
+.community-name-cell {
+  @apply text-gray-900 font-semibold;
+}
+
+.community-members-cell {
+  @apply text-gray-900;
+}
+
+.community-content-cell {
+  @apply text-gray-600 max-w-md;
+}
+
+.community-date-cell {
+  @apply text-gray-600;
+}
+
+.community-action-cell {
+  @apply flex items-center gap-2;
+}
+
+/* Status Badges */
+.status-badge {
+  @apply px-3 py-1 rounded-full text-xs font-semibold inline-block;
+}
+
+.status-active {
+  @apply bg-teal-100 text-teal-800;
+}
+
+.status-review {
+  @apply bg-purple-100 text-purple-800;
+}
+
+.status-rejected {
+  @apply bg-red-100 text-red-800;
+}
+
+/* Action Buttons */
+.action-button {
+  @apply p-2 rounded-lg transition-colors;
+}
+
+.action-edit {
+  @apply text-gray-600 hover:bg-gray-100 hover:text-gray-900;
+}
+
+.action-delete {
+  @apply text-red-500 hover:bg-red-50 hover:text-red-700;
+}
+
+.action-icon {
+  @apply w-4 h-4;
+}
+
+/* Pagination */
+.pagination-container {
+  @apply flex items-center justify-between px-6 py-4 border-t border-gray-200;
+}
+
+.pagination-button {
+  @apply flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white;
+}
+
+.pagination-icon {
+  @apply w-4 h-4;
+}
+
+.pagination-info {
+  @apply flex items-center gap-2;
+}
+
+.pagination-text {
+  @apply text-sm text-gray-700 font-medium;
+}
+
+/* Modal */
+.community-modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4;
+}
+
+.community-modal-container {
+  @apply bg-white rounded-2xl max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto;
+}
+
+.community-modal-header {
+  @apply flex justify-between items-center border-b border-gray-200 px-6 py-4 sticky top-0 bg-white z-10;
+}
+
+.community-modal-title {
+  @apply text-xl font-bold text-gray-800;
+}
+
+.community-modal-close {
+  @apply p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all;
+}
+
+.community-modal-close-icon {
+  @apply w-5 h-5;
+}
+
+.community-modal-body {
+  @apply p-6;
+}
+
+.community-modal-form {
+  @apply space-y-4 mb-6;
+}
+
+.community-form-group {
+  @apply space-y-2;
+}
+
+.community-form-label {
+  @apply block text-sm font-semibold text-gray-700;
+}
+
+.community-form-input {
+  @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm;
+}
+
+.community-form-input:disabled {
+  @apply bg-gray-100 cursor-not-allowed;
+}
+
+.community-form-textarea {
+  @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm resize-none;
+}
+
+.community-form-select {
+  @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm bg-white;
+}
+
+.community-modal-actions {
+  @apply flex justify-end gap-3 pt-4 border-t border-gray-200;
+}
+
+.community-modal-button {
+  @apply px-6 py-2.5 rounded-lg font-semibold text-sm transition-all;
+}
+
+.community-cancel-button {
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+}
+
+.community-save-button {
+  @apply bg-red-600 text-white hover:bg-red-700;
+}
+
+/* Delete Confirmation Modal */
+.community-confirm-modal {
+  @apply bg-white rounded-2xl max-w-md w-full shadow-2xl p-6 text-center;
+}
+
+.community-confirm-icon-container {
+  @apply mx-auto w-16 h-16 flex items-center justify-center rounded-full bg-red-100 mb-4;
+}
+
+.community-confirm-icon {
+  @apply w-8 h-8 text-red-600;
+}
+
+.community-confirm-title {
+  @apply text-xl font-bold text-gray-800 mb-2;
+}
+
+.community-confirm-message {
+  @apply text-gray-600 mb-6;
+}
+
+.community-confirm-actions {
+  @apply flex gap-3 justify-center;
+}
+
+.community-confirm-button {
+  @apply px-6 py-2.5 rounded-lg font-semibold text-sm transition-all;
+}
+
+.community-confirm-cancel {
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+}
+
+.community-confirm-delete {
+  @apply bg-red-600 text-white hover:bg-red-700;
+}
+
+/* Empty State */
+.community-empty-state {
+  @apply text-center py-12;
+}
+
+.community-empty-state-icon {
+  @apply text-gray-400 mb-4;
+}
+
+.community-empty-state-icon svg {
+  @apply w-12 h-12 mx-auto;
+}
+
+.community-empty-state-title {
+  @apply text-lg font-semibold text-gray-600 mb-2;
+}
+
+.community-empty-state-description {
+  @apply text-gray-500 text-sm;
+}

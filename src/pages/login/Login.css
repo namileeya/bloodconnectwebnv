@@ -1,0 +1,244 @@
+/* src/pages/login/Login.css - Custom animations and styles for the modern login page */
+
+/* Floating animation for organic blob shapes */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-15px) rotate(2deg);
+  }
+  66% {
+    transform: translateY(8px) rotate(-1deg);
+  }
+}
+
+/* Enhanced card entrance animation */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Subtle pulse animation for background elements */
+@keyframes bgPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.2;
+  }
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Modern organic background shapes - Updated for visibility over background image */
+.bg-shape {
+  animation: float 6s ease-in-out infinite;
+  filter: blur(60px);
+  mix-blend-mode: overlay;
+}
+
+.bg-shape-1 {
+  background: linear-gradient(135deg, #ff3333, #ff6666);
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  animation-duration: 8s;
+  animation-delay: 0s;
+}
+
+.bg-shape-2 {
+  background: linear-gradient(135deg, #ff4444, #ff7777);
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  animation-duration: 10s;
+  animation-direction: reverse;
+  animation-delay: -2s;
+}
+
+.bg-shape-3 {
+  background: linear-gradient(135deg, #ff5555, #ff8888);
+  border-radius: 40% 60% 60% 40% / 60% 30% 70% 40%;
+  animation-duration: 7s;
+  animation-delay: -4s;
+}
+
+.bg-shape-4 {
+  background: linear-gradient(135deg, #ff2222, #ff5555);
+  border-radius: 70% 30% 30% 70% / 60% 40% 60% 40%;
+  animation-duration: 9s;
+  animation-delay: -1s;
+}
+
+/* Background pulse animation */
+.bg-pulse {
+  animation: bgPulse 8s ease-in-out infinite;
+}
+
+/* Enhanced login card animation */
+.login-card-animated {
+  animation: slideInUp 0.8s ease-out;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease-out;
+}
+
+.login-card-animated:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 25px 50px -12px rgba(239, 68, 68, 0.15);
+}
+
+/* Enhanced input styling */
+.login-input {
+  transition: all 0.3s ease;
+  border: 1px solid #e5e7eb;
+}
+
+.login-input:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1), 0 0 20px rgba(239, 68, 68, 0.05);
+  background-color: #ffffff;
+}
+
+.login-input:hover:not(:disabled) {
+  border-color: #d1d5db;
+  background-color: #ffffff;
+}
+
+.login-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Password toggle button styling */
+.password-toggle {
+  transition: color 0.2s ease;
+}
+
+.password-toggle:hover:not(:disabled) {
+  color: #6b7280;
+}
+
+.password-toggle:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Enhanced button styling */
+.login-button {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.login-button:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.login-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);
+  transform: translateY(-1px);
+}
+
+.login-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Checkbox styling */
+.login-checkbox {
+  accent-color: #ef4444;
+  transition: all 0.2s ease;
+}
+
+.login-checkbox:focus {
+  outline: 2px solid rgba(239, 68, 68, 0.3);
+  outline-offset: 2px;
+}
+
+/* Link hover effects */
+.login-link {
+  transition: color 0.2s ease;
+  position: relative;
+}
+
+.login-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 1px;
+  bottom: -2px;
+  left: 0;
+  background-color: #ef4444;
+  transition: width 0.3s ease;
+}
+
+.login-link:hover:not(:disabled)::after {
+  width: 100%;
+}
+
+.login-link:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Loading spinner */
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* Responsive enhancements */
+@media (max-width: 640px) {
+  .login-card-animated {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+  
+  .bg-shape {
+    filter: blur(40px);
+  }
+}
+
+/* Focus management for accessibility */
+.login-input:focus,
+.login-button:focus,
+.login-checkbox:focus,
+.login-link:focus {
+  outline: 2px solid rgba(239, 68, 68, 0.5);
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .bg-shape,
+  .bg-pulse {
+    display: none;
+  }
+  
+  .login-card-animated {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+}

@@ -1,0 +1,393 @@
+/* DonorEligibility.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Page Container */
+.eligibility-page {
+  @apply space-y-8 p-6;
+}
+
+/* Loading */
+.loading-container {
+  @apply flex flex-col items-center justify-center min-h-96 text-gray-600;
+}
+
+.loading-spinner {
+  @apply animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mb-4;
+}
+
+/* Header */
+.eligibility-header-container {
+  @apply flex justify-between items-center mb-2;
+}
+
+.eligibility-header-title {
+  @apply text-3xl font-bold text-gray-900;
+}
+
+/* Stats */
+.eligibility-stats-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5;
+}
+
+.eligibility-stat-card {
+  @apply bg-white p-6 rounded-xl shadow-sm border-l-4 transition-all hover:shadow-md;
+}
+
+.eligibility-stat-card.total { 
+  @apply border-blue-500; 
+}
+
+.eligibility-stat-card.eligible { 
+  @apply border-green-500; 
+}
+
+.eligibility-stat-card.eligible .stat-number {
+  @apply text-green-600;
+}
+
+.eligibility-stat-card.deferred { 
+  @apply border-yellow-500; 
+}
+
+.eligibility-stat-card.deferred .stat-number {
+  @apply text-yellow-600;
+}
+
+.eligibility-stat-card.ineligible { 
+  @apply border-red-500; 
+}
+
+.eligibility-stat-card.ineligible .stat-number {
+  @apply text-red-600;
+}
+
+.stat-number {
+  @apply text-3xl font-bold mb-1 text-gray-800;
+}
+
+.stat-label {
+  @apply text-gray-600 text-sm font-medium;
+}
+
+/* Filters */
+.eligibility-filters-container {
+  @apply bg-white p-6 rounded-xl shadow-sm;
+}
+
+.eligibility-filters-grid {
+  @apply flex flex-wrap gap-6 items-end;
+}
+
+.eligibility-search-container {
+  @apply flex-1 min-w-72;
+}
+
+.eligibility-filter-select-container {
+  @apply min-w-64;
+}
+
+.eligibility-filter-label {
+  @apply block text-sm font-semibold text-gray-700 mb-2;
+}
+
+.eligibility-search-input-container {
+  @apply relative;
+}
+
+.eligibility-search-icon {
+  @apply absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5;
+}
+
+.eligibility-search-input {
+  @apply w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all;
+}
+
+.eligibility-status-filter {
+  @apply px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white w-full transition-all;
+}
+
+/* Grid & Cards */
+.eligibility-grid {
+  @apply grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6;
+}
+
+.eligibility-card {
+  @apply bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md hover:border-gray-300 transition-all duration-300;
+}
+
+.eligibility-card-header {
+  @apply bg-gray-50 border-b-2 border-red-500 p-6 flex items-start gap-4;
+}
+
+.donor-avatar {
+  @apply w-14 h-14 rounded-full bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-500 text-red-700 flex items-center justify-center text-base font-bold flex-shrink-0;
+}
+
+.donor-info {
+  @apply flex-1 min-w-0;
+}
+
+.donor-name {
+  @apply text-base font-bold mb-1 truncate text-gray-900;
+}
+
+.donor-ic {
+  @apply text-xs mb-3 text-gray-500 font-medium;
+}
+
+.donor-tags {
+  @apply flex gap-2 flex-wrap;
+}
+
+.blood-type-tag {
+  @apply bg-white border border-red-300 text-red-700 px-2.5 py-0.5 rounded-md text-xs font-semibold;
+}
+
+.eligibility-badge {
+  @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold border;
+}
+
+.eligibility-eligible {
+  @apply bg-green-50 text-green-700 border-green-300;
+}
+
+.eligibility-deferred {
+  @apply bg-yellow-50 text-yellow-700 border-yellow-300;
+}
+
+.eligibility-ineligible {
+  @apply bg-red-50 text-red-700 border-red-300;
+}
+
+.eligibility-icon {
+  @apply w-3.5 h-3.5;
+}
+
+.eligibility-card-body {
+  @apply p-6 space-y-5;
+}
+
+.eligibility-info-row {
+  @apply flex flex-col gap-2;
+}
+
+.info-label {
+  @apply text-xs font-bold text-gray-500 uppercase tracking-wider;
+}
+
+.info-value {
+  @apply text-sm text-gray-900 font-normal leading-relaxed;
+}
+
+.medical-summary {
+  @apply space-y-3 pt-5 border-t border-gray-200;
+}
+
+.medical-item {
+  @apply flex justify-between items-start gap-3;
+}
+
+.medical-label {
+  @apply text-xs font-bold text-gray-500 uppercase tracking-wider flex-shrink-0;
+}
+
+.medical-value {
+  @apply text-sm text-gray-900 font-normal text-right;
+}
+
+.eligibility-card-actions {
+  @apply px-6 py-4 flex justify-between items-center bg-gray-50 border-t border-gray-200;
+}
+
+.action-btn {
+  @apply flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all;
+}
+
+.edit-btn {
+  @apply bg-red-600 text-white hover:bg-red-700 shadow-sm hover:shadow;
+}
+
+.delete-btn {
+  @apply text-gray-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors;
+}
+
+/* Empty State */
+.eligibility-empty-state {
+  @apply col-span-full text-center py-20 text-gray-500;
+}
+
+.eligibility-empty-state h3 {
+  @apply text-xl font-semibold mb-2 text-gray-700;
+}
+
+.eligibility-empty-state p {
+  @apply text-gray-500;
+}
+
+.empty-icon {
+  @apply w-16 h-16 mx-auto mb-4 text-gray-400;
+}
+
+/* Pagination */
+.eligibility-pagination {
+  @apply flex justify-between items-center bg-white rounded-xl border border-gray-200 px-6 py-4 shadow-sm;
+}
+
+.pagination-info {
+  @apply flex items-center gap-4 text-sm text-gray-600;
+}
+
+.items-select {
+  @apply border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all;
+}
+
+.range {
+  @apply font-medium text-gray-800;
+}
+
+.pagination-controls {
+  @apply flex items-center gap-2;
+}
+
+.pagination-controls button {
+  @apply w-9 h-9 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-red-50 hover:border-red-500 hover:text-red-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-300 disabled:hover:text-gray-400;
+}
+
+/* Modal */
+.eligibility-modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm;
+}
+
+.eligibility-modal,
+.confirm-modal {
+  @apply bg-white rounded-2xl w-full shadow-2xl;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+.eligibility-modal {
+  @apply max-w-2xl;
+}
+
+.modal-header {
+  @apply flex justify-between items-center border-b border-gray-200 px-6 py-4 bg-gradient-to-r from-red-50 to-white;
+}
+
+.modal-header h2 {
+  @apply text-xl font-bold text-gray-900;
+}
+
+.close-btn {
+  @apply p-2 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-gray-700 transition-colors;
+}
+
+.modal-body {
+  @apply p-6 space-y-5 max-h-[calc(100vh-16rem)] overflow-y-auto;
+}
+
+.donor-header {
+  @apply pb-4 border-b border-gray-200;
+}
+
+.donor-header h3 {
+  @apply text-lg font-bold text-gray-900 mb-1;
+}
+
+.donor-header p {
+  @apply text-sm text-gray-600;
+}
+
+.form-group {
+  @apply space-y-2;
+}
+
+.form-group label {
+  @apply block text-sm font-semibold text-gray-700;
+}
+
+.form-select,
+.form-input,
+.form-textarea {
+  @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all;
+}
+
+.form-textarea {
+  @apply resize-none;
+}
+
+.modal-actions {
+  @apply flex justify-end gap-3 pt-4 border-t border-gray-200 px-6 pb-6;
+}
+
+.cancel-btn {
+  @apply px-6 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors;
+}
+
+.save-btn {
+  @apply px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors shadow-sm hover:shadow;
+}
+
+.confirm-modal {
+  @apply text-center p-8 max-w-md;
+}
+
+.confirm-icon {
+  @apply w-16 h-16 text-red-600 mx-auto mb-4;
+}
+
+.confirm-modal h3 {
+  @apply text-xl font-bold text-gray-900 mb-2;
+}
+
+.confirm-modal p {
+  @apply text-gray-600 mb-6;
+}
+
+.confirm-actions {
+  @apply flex gap-3 justify-center;
+}
+
+.delete-confirm-btn {
+  @apply px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors shadow-sm hover:shadow;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .eligibility-page {
+    @apply p-4 space-y-6;
+  }
+
+  .eligibility-header-title {
+    @apply text-2xl;
+  }
+
+  .eligibility-filters-grid {
+    @apply flex-col;
+  }
+
+  .eligibility-search-container,
+  .eligibility-filter-select-container {
+    @apply min-w-full;
+  }
+
+  .eligibility-grid {
+    @apply grid-cols-1;
+  }
+
+  .pagination-info {
+    @apply flex-wrap;
+  }
+}
+
+/* Animation */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

@@ -1,0 +1,605 @@
+/* DigitalDonorCards.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Remove container padding since Layout handles it */
+.space-y-6 > * + * {
+  @apply mt-6;
+}
+
+/* Loading */
+.loading-container {
+  @apply flex items-center justify-center min-h-96;
+}
+
+.loading-content {
+  @apply text-center;
+}
+
+.loading-spinner {
+  @apply animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4;
+}
+
+.loading-text {
+  @apply text-gray-600;
+}
+
+/* Header */
+.donor-cards-header-container {
+  @apply flex flex-col gap-2;
+}
+
+.donor-cards-header-title {
+  @apply text-3xl font-bold text-gray-800;
+}
+
+.donor-cards-header-subtitle {
+  @apply text-gray-600;
+}
+
+/* Error Message */
+.error-container {
+  @apply bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3;
+}
+
+.error-icon {
+  @apply w-5 h-5 text-red-600 flex-shrink-0;
+}
+
+.error-text {
+  @apply text-red-800 flex-1;
+}
+
+.error-close {
+  @apply ml-auto text-red-600 hover:text-red-800;
+}
+
+.error-close-icon {
+  @apply w-4 h-4;
+}
+
+/* Stats Cards */
+.donor-cards-stats-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 gap-6;
+}
+
+.donor-stat-card {
+  @apply bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center gap-4;
+}
+
+.stat-card-total {
+  @apply border-l-4 border-blue-500;
+}
+
+.stat-card-aplus {
+  @apply border-l-4 border-red-500;
+}
+
+.stat-card-oplus {
+  @apply border-l-4 border-green-500;
+}
+
+.stat-card-rare {
+  @apply border-l-4 border-purple-500;
+}
+
+.stat-icon {
+  @apply w-10 h-10 flex-shrink-0;
+}
+
+.stat-number-blue {
+  @apply text-3xl font-bold text-blue-600;
+}
+
+.stat-number-red {
+  @apply text-3xl font-bold text-red-600;
+}
+
+.stat-number-green {
+  @apply text-3xl font-bold text-green-600;
+}
+
+.stat-number-purple {
+  @apply text-3xl font-bold text-purple-600;
+}
+
+.stat-label {
+  @apply text-gray-600 text-sm font-medium mt-1;
+}
+
+/* Action Buttons & Filters */
+.donor-cards-actions-container {
+  @apply bg-white p-6 rounded-xl shadow-sm space-y-4;
+}
+
+.donor-cards-button-group {
+  @apply flex flex-wrap gap-3;
+}
+
+.donor-action-btn {
+  @apply px-6 py-3 rounded-lg font-semibold transition-all flex items-center gap-2 text-sm;
+}
+
+.add-btn {
+  @apply bg-red-600 text-white hover:bg-red-700;
+}
+
+.verify-btn {
+  @apply bg-blue-600 text-white hover:bg-blue-700;
+}
+
+.donor-cards-filters-row {
+  @apply flex flex-wrap gap-4 items-center;
+}
+
+.donor-search-input-container {
+  @apply relative flex-1 min-w-80;
+}
+
+.donor-search-icon {
+  @apply absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400;
+}
+
+.donor-search-input {
+  @apply w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm;
+}
+
+.donor-bloodtype-filter {
+  @apply px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm bg-white min-w-40;
+}
+
+/* Donor List Section */
+.donor-list-section {
+  @apply bg-white rounded-xl shadow-sm p-6;
+}
+
+.donor-list-header {
+  @apply flex justify-between items-center mb-6;
+}
+
+.donor-list-title {
+  @apply text-xl font-bold text-gray-800;
+}
+
+.donor-count-badge {
+  @apply bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold;
+}
+
+/* Donor Cards Grid */
+.donor-cards-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6;
+}
+
+/* Donor Card - Matching UserManagement Style */
+.donor-card-wrapper {
+  @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6 relative hover:shadow-md transition-shadow duration-200;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.donor-card-actions {
+  @apply absolute top-4 right-4 flex gap-2 opacity-100 transition-opacity duration-200;
+}
+
+.donor-action-button {
+  @apply p-2 rounded-lg transition-all;
+}
+
+.donor-edit-button {
+  @apply text-gray-600 hover:text-gray-800 hover:bg-gray-100;
+}
+
+.donor-delete-button {
+  @apply text-red-600 hover:text-red-800 hover:bg-red-50;
+}
+
+.donor-action-icon {
+  @apply w-4 h-4;
+}
+
+.donor-card-content {
+  @apply flex flex-col items-center;
+}
+
+.donor-qr-container {
+  @apply mb-4;
+}
+
+.donor-qr-badge {
+  @apply w-20 h-20 rounded-full bg-red-50 flex items-center justify-center text-red-600;
+}
+
+.donor-info {
+  @apply text-center w-full;
+}
+
+.donor-name {
+  @apply text-lg font-semibold text-gray-800 mb-1 line-clamp-2;
+}
+
+.donor-status {
+  @apply flex items-center justify-center gap-2 mb-2;
+}
+
+.blood-type {
+  @apply text-sm font-medium text-red-600;
+}
+
+.separator {
+  @apply text-gray-400;
+}
+
+.donor-id {
+  @apply text-sm text-gray-500;
+}
+
+.donor-last-donation {
+  @apply text-sm text-gray-600 mb-4;
+}
+
+.view-details-btn {
+  @apply w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors;
+}
+
+/* Empty State */
+.donor-empty-state {
+  @apply text-center py-12;
+}
+
+.donor-empty-state-icon {
+  @apply text-gray-400 mb-4;
+}
+
+.donor-empty-state-icon svg {
+  @apply w-12 h-12 mx-auto;
+}
+
+.donor-empty-state-title {
+  @apply text-lg font-semibold text-gray-600 mb-2;
+}
+
+.donor-empty-state-description {
+  @apply text-gray-500 text-sm;
+}
+
+/* Modal Overlay */
+.card-modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4;
+}
+
+/* Modal Container */
+.card-modal-content {
+  @apply max-w-md w-full;
+}
+
+.verify-modal-width {
+  @apply max-w-lg;
+}
+
+.modal-card {
+  @apply bg-white rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto;
+}
+
+.modal-card-header {
+  @apply bg-red-600 text-white p-6 flex justify-between items-center sticky top-0 z-10;
+}
+
+.verify-header {
+  @apply bg-blue-600;
+}
+
+.modal-card-header h2 {
+  @apply text-xl font-bold;
+}
+
+.modal-close-btn {
+  @apply text-white hover:bg-red-700 p-2 rounded-full transition-colors;
+}
+
+.verify-header .modal-close-btn {
+  @apply hover:bg-blue-700;
+}
+
+.modal-qr-section {
+  @apply bg-red-50 p-8 flex justify-center;
+}
+
+.modal-qr-code {
+  @apply bg-white p-6 rounded-2xl shadow-md;
+}
+
+.modal-card-details {
+  @apply p-8 space-y-6;
+}
+
+.modal-detail-row {
+  @apply flex justify-between items-center;
+}
+
+.detail-label {
+  @apply text-gray-600 font-medium;
+}
+
+.detail-value {
+  @apply font-semibold text-gray-900 text-right;
+}
+
+.blood-type-large {
+  @apply text-3xl font-bold text-red-600;
+}
+
+.detail-badge {
+  @apply px-3 py-1 rounded-full text-sm font-semibold;
+}
+
+.badge-eligible {
+  @apply bg-green-100 text-green-800;
+}
+
+.badge-ineligible {
+  @apply bg-red-100 text-red-800;
+}
+
+/* Modal Actions */
+.modal-actions {
+  @apply p-6 pt-0 space-y-3;
+}
+
+.modal-download-button {
+  @apply w-full bg-green-600 text-white font-semibold py-3 rounded-xl hover:bg-green-700 transition-colors flex items-center justify-center gap-2;
+}
+
+.modal-close-button {
+  @apply w-full bg-red-600 text-white font-semibold py-3 rounded-xl hover:bg-red-700 transition-colors;
+}
+
+/* Modal Form */
+.modal-form-content {
+  @apply p-6 space-y-4 max-h-[60vh] overflow-y-auto;
+}
+
+.modal-form-row {
+  @apply grid grid-cols-1 sm:grid-cols-2 gap-4;
+}
+
+.modal-form-group {
+  @apply space-y-2;
+}
+
+.modal-form-label {
+  @apply block text-sm font-semibold text-gray-700;
+}
+
+.modal-form-input {
+  @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm;
+}
+
+.modal-form-select {
+  @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm bg-white;
+}
+
+.modal-form-textarea {
+  @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm resize-none;
+}
+
+.modal-form-file-input {
+  @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm bg-white file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100;
+}
+
+.file-input-hint {
+  @apply text-xs text-gray-500 mt-1;
+}
+
+.modal-form-checkbox-label {
+  @apply flex items-center gap-2 cursor-pointer;
+}
+
+.modal-form-checkbox {
+  @apply w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500;
+}
+
+.modal-section-divider {
+  @apply flex items-center my-4;
+}
+
+.modal-section-title {
+  @apply text-sm font-semibold text-gray-700 bg-gray-50 px-3 py-1 rounded;
+}
+
+.modal-form-actions {
+  @apply flex gap-3 p-6 pt-4 border-t border-gray-200;
+}
+
+.modal-cancel-button {
+  @apply flex-1 bg-gray-100 text-gray-700 font-semibold py-3 rounded-lg hover:bg-gray-200 transition-colors;
+}
+
+.modal-save-button {
+  @apply flex-1 bg-red-600 text-white font-semibold py-3 rounded-lg hover:bg-red-700 transition-colors;
+}
+
+/* Verify Modal */
+.verify-description {
+  @apply text-gray-600 text-sm mb-4;
+}
+
+.verify-divider {
+  @apply flex items-center justify-center my-4;
+}
+
+.verify-divider span {
+  @apply bg-gray-100 px-4 py-1 rounded-full text-sm text-gray-600 font-medium;
+}
+
+.verify-button {
+  @apply w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed;
+}
+
+.verification-result {
+  @apply p-4 rounded-lg mt-4;
+}
+
+.result-valid {
+  @apply bg-green-50 border border-green-200;
+}
+
+.result-invalid {
+  @apply bg-red-50 border border-red-200;
+}
+
+.verification-result-header {
+  @apply flex items-center gap-3 mb-3;
+}
+
+.verification-icon {
+  @apply flex-shrink-0;
+}
+
+.valid-icon {
+  @apply text-green-600;
+}
+
+.invalid-icon {
+  @apply text-red-600;
+}
+
+.verification-result-title {
+  @apply font-bold;
+}
+
+.result-valid .verification-result-title {
+  @apply text-green-800;
+}
+
+.result-invalid .verification-result-title {
+  @apply text-red-800;
+}
+
+.verification-details {
+  @apply space-y-1 text-sm text-gray-700;
+}
+
+.verification-status {
+  @apply font-semibold;
+}
+
+.status-eligible {
+  @apply text-green-600;
+}
+
+.status-ineligible {
+  @apply text-red-600;
+}
+
+.verification-error-message {
+  @apply text-sm text-red-700;
+}
+
+/* Confirm Modal */
+.confirm-modal {
+  @apply bg-white rounded-2xl max-w-md w-full shadow-2xl p-6 text-center;
+}
+
+.confirm-icon-container {
+  @apply mx-auto w-16 h-16 flex items-center justify-center rounded-full mb-4;
+}
+
+.delete-icon-bg {
+  @apply bg-red-100;
+}
+
+.confirm-icon {
+  @apply w-8 h-8;
+}
+
+.delete-icon {
+  @apply text-red-600;
+}
+
+.confirm-title {
+  @apply text-xl font-bold text-gray-800 mb-2;
+}
+
+.confirm-message {
+  @apply text-gray-600 mb-4;
+}
+
+.confirm-details {
+  @apply bg-gray-50 p-4 rounded-lg mb-6 text-left;
+}
+
+.confirm-details p {
+  @apply text-sm text-gray-700 mb-2;
+}
+
+.confirm-details p:last-child {
+  @apply mb-0;
+}
+
+.confirm-actions {
+  @apply flex gap-3 justify-center;
+}
+
+.confirm-button {
+  @apply px-6 py-2.5 rounded-lg font-semibold text-sm transition-all;
+}
+
+.confirm-cancel {
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+}
+
+.confirm-delete {
+  @apply bg-red-600 text-white hover:bg-red-700;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 640px) {
+  .donor-cards-stats-grid {
+    @apply grid-cols-1;
+  }
+
+  .donor-cards-button-group {
+    @apply flex-col;
+  }
+
+  .donor-action-btn {
+    @apply w-full justify-center;
+  }
+
+  .donor-cards-filters-row {
+    @apply flex-col;
+  }
+
+  .donor-search-input-container {
+    @apply w-full min-w-full;
+  }
+
+  .donor-bloodtype-filter {
+    @apply w-full;
+  }
+
+  .donor-cards-grid {
+    @apply grid-cols-1;
+  }
+  
+  .modal-form-row {
+    @apply grid-cols-1;
+  }
+}
+
+@media (max-width: 768px) {
+  .donor-cards-grid {
+    @apply grid-cols-1 sm:grid-cols-2;
+  }
+}

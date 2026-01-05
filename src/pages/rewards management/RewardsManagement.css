@@ -1,0 +1,389 @@
+/* RewardsManagement.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Header */
+.rewards-header {
+    @apply flex justify-between items-center mb-6;
+}
+
+.rewards-title {
+    @apply text-3xl font-bold text-gray-800;
+}
+
+.add-reward-btn {
+    @apply flex items-center gap-2 bg-red-600 text-white px-5 py-3 rounded-lg hover:bg-red-700 transition font-medium;
+}
+
+/* Stats */
+.rewards-stats-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6;
+}
+
+.stat-card {
+    @apply bg-white p-6 rounded-xl shadow-sm border-l-4;
+}
+
+.stat-card h3 {
+    @apply text-3xl font-bold mb-2;
+}
+
+.stat-card p {
+    @apply text-gray-600 text-sm font-medium;
+}
+
+.stat-card.total {
+    @apply border-l-blue-500;
+}
+
+.stat-card.vouchers {
+    @apply border-l-purple-500;
+}
+
+.stat-card.products {
+    @apply border-l-green-500;
+}
+
+.stat-card.active {
+    @apply border-l-teal-500;
+}
+
+.stat-card.total h3 {
+    @apply text-blue-600;
+}
+
+.stat-card.vouchers h3 {
+    @apply text-purple-600;
+}
+
+.stat-card.products h3 {
+    @apply text-green-600;
+}
+
+.stat-card.active h3 {
+    @apply text-teal-600;
+}
+
+/* Filters */
+.rewards-filters {
+    @apply bg-white p-5 rounded-xl shadow-sm flex flex-wrap gap-4 items-center;
+}
+
+.search-box {
+    @apply relative flex-1 min-w-64;
+}
+
+.search-box input {
+    @apply w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent;
+}
+
+.search-box svg {
+    @apply absolute left-3 top-1/2 -translate-y-1/2 text-gray-400;
+}
+
+.rewards-filters select {
+    @apply px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 bg-white;
+}
+
+/* Table */
+.rewards-table-container {
+    @apply bg-white rounded-xl shadow-sm overflow-hidden;
+}
+
+.rewards-table {
+    @apply w-full text-sm;
+}
+
+.rewards-table th {
+    @apply bg-gray-50 px-6 py-4 text-left font-bold text-gray-700 uppercase tracking-wider;
+}
+
+.rewards-table td {
+    @apply px-6 py-4 border-t border-gray-100;
+}
+
+.reward-name {
+    @apply font-semibold text-gray-900 flex items-center gap-2;
+}
+
+.reward-icon {
+    @apply text-red-600;
+}
+
+.type-badge {
+    @apply inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold;
+}
+
+.type-badge.voucher {
+    @apply bg-purple-100 text-purple-800;
+}
+
+.type-badge.product {
+    @apply bg-green-100 text-green-800;
+}
+
+.points {
+    @apply font-bold text-red-600;
+}
+
+.toggle-status {
+    @apply flex items-center gap-2;
+}
+
+.toggle-status.active {
+    @apply text-green-600;
+}
+
+.toggle-status.inactive {
+    @apply text-gray-500;
+}
+
+.toggle-label {
+    @apply text-xs font-medium;
+}
+
+/* Action Buttons */
+.records-actions-container {
+    @apply flex items-center gap-2;
+}
+
+.records-action-button {
+    @apply p-2 rounded-lg transition-all;
+}
+
+.reschedule-button {
+    @apply text-orange-600 hover:text-orange-800 hover:bg-orange-50;
+}
+
+.cancel-button {
+    @apply text-red-600 hover:text-red-800 hover:bg-red-50;
+}
+
+.records-action-icon {
+    @apply w-4 h-4;
+}
+
+/* Empty State */
+.empty-state {
+    @apply text-center py-16 text-gray-500;
+}
+
+.empty-state svg {
+    @apply mx-auto mb-4 text-gray-300;
+}
+
+/* Modal */
+.modal-overlay {
+    @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4;
+}
+
+.modal {
+    @apply bg-white rounded-2xl max-w-3xl w-full max-h-screen overflow-y-auto shadow-2xl;
+}
+
+.modal-header {
+    @apply flex justify-between items-center p-6 border-b border-gray-200;
+}
+
+.modal-header h2 {
+    @apply text-xl font-bold text-gray-800;
+}
+
+.modal-header button {
+    @apply p-2 hover:bg-gray-100 rounded-lg transition;
+}
+
+.modal-body {
+    @apply p-6;
+}
+
+.form-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-5 mb-6;
+}
+
+.form-group label {
+    @apply block text-sm font-semibold text-gray-700 mb-2;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition;
+}
+
+.modal-actions {
+    @apply flex justify-end gap-3 pt-4 border-t border-gray-200;
+}
+
+.cancel-btn {
+    @apply px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition;
+}
+
+.save-btn {
+    @apply px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+/* Delete Confirm */
+.confirm-modal {
+    @apply bg-white rounded-2xl p-8 text-center max-w-md w-full shadow-2xl;
+}
+
+.warning-icon {
+    @apply text-red-600 mx-auto mb-4;
+}
+
+.confirm-modal h3 {
+    @apply text-xl font-bold text-gray-800 mb-3;
+}
+
+.confirm-modal p {
+    @apply text-gray-600 mb-8;
+}
+
+.confirm-actions {
+    @apply flex gap-3 justify-center;
+}
+
+.confirm-actions button {
+    @apply px-6 py-3 rounded-lg font-medium transition;
+}
+
+.confirm-actions button:first-child {
+    @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+}
+
+.delete-confirm {
+    @apply bg-red-600 text-white hover:bg-red-700;
+}
+
+.loading-container {
+    @apply flex flex-col items-center justify-center min-h-96;
+}
+
+.loading-spinner {
+    @apply animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mb-4;
+}
+
+/* Pagination */
+.rewards-pagination {
+    @apply flex justify-between items-center bg-white rounded-lg border border-gray-200 px-6 py-4;
+}
+
+.rewards-pagination-info {
+    @apply flex items-center gap-4 text-sm text-gray-600;
+}
+
+.rewards-items-per-page-select {
+    @apply border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent;
+}
+
+.rewards-pagination-range {
+    @apply font-medium;
+}
+
+.rewards-pagination-controls {
+    @apply flex items-center gap-2;
+}
+
+.rewards-pagination-btn {
+    @apply w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent;
+}
+
+.rewards-pagination-btn:hover:not(:disabled) {
+    @apply text-gray-800 border-gray-400;
+}
+
+/* ===== NEW STYLES ADDED ===== */
+/* Days Remaining Column Styles */
+.days-remaining {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.expired-badge {
+    background-color: #fef2f2;
+    color: #dc2626;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.expiring-badge {
+    background-color: #fffbeb;
+    color: #d97706;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* Full width form group for description */
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+/* Form small text */
+.form-group small {
+    @apply text-gray-500 text-xs mt-1 block;
+}
+
+/* Responsive table adjustments for new column */
+@media (max-width: 1200px) {
+    .rewards-table th:nth-child(6),
+    .rewards-table td:nth-child(6) {
+        min-width: 120px;
+    }
+}
+
+/* Ensure table still fits with new column */
+@media (max-width: 1024px) {
+    .rewards-table-container {
+        @apply overflow-x-auto;
+    }
+    
+    .rewards-table {
+        @apply min-w-[1000px];
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .rewards-pagination {
+        @apply flex-col gap-4 items-stretch;
+    }
+    
+    .rewards-pagination-info {
+        @apply justify-center;
+    }
+    
+    .rewards-pagination-controls {
+        @apply justify-center;
+    }
+
+    .rewards-stats-grid {
+        @apply grid-cols-1;
+    }
+
+    .rewards-filters {
+        @apply flex-col;
+    }
+
+    .search-box {
+        @apply w-full min-w-full;
+    }
+}
+
+@media (max-width: 768px) {
+    .rewards-table-container {
+        @apply overflow-x-scroll;
+    }
+
+    .rewards-table {
+        @apply min-w-full;
+    }
+}
