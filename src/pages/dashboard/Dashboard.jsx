@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Layout from '../../components/Layout';
-import './dashboard.css';
+import './Dashboard.css';
 import dashboardService from '../../services/dashboardServices';
 
 const Dashboard = ({ onNavigate }) => {
