@@ -54,6 +54,7 @@ const Dashboard = ({ onNavigate }) => {
     critical: 0,
     urgent: 0
   });
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [recentActivities, setRecentActivities] = useState([]);
@@ -64,12 +65,76 @@ const Dashboard = ({ onNavigate }) => {
   const [urgentRequests, setUrgentRequests] = useState([]);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [debugInfo, setDebugInfo] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Load all dashboard data (all-time data)
-  const loadDashboardData = useCallback(async () => {
+  // Debug: Test each service method individually
+  const testAllServices = async () => {
+    console.log('=== TESTING ALL SERVICES ===');
+    let debugText = 'Dashboard Service Test Results:\n\n';
+
     try {
-      setLoading(true);
+      // Test 1: Check if service file is loaded
+      debugText += '✅ Service loaded: ' + (dashboardService ? 'YES' : 'NO') + '\n\n';
+
+      // Test 2: Check each method
+      const methods = [
+        'getDashboardStats',
+        'getBloodTypeDistribution',
+        'getUrgentRequests',
+        'getRecentActivities',
+        'getDonationTrends',
+        'getMonthlyComparison',
+        'getTopDonors',
+        'getUpcomingEvents'
+      ];
+
+      for (const method of methods) {
+        if (dashboardService[method]) {
+          try {
+            debugText += `✅ ${method}: EXISTS\n`;
+            const startTime = Date.now();
+            const result = await dashboardService[method]();
+            const endTime = Date.now();
+
+            if (Array.isArray(result)) {
+              debugText += `   📊 Result: ${result.length} items returned (${endTime - startTime}ms)\n`;
+              if (result.length > 0) {
+                debugText += `   📝 First item: ${JSON.stringify(result[0]).substring(0, 80)}...\n`;
+              }
+            } else if (typeof result === 'object') {
+              debugText += `   📊 Result: Object with ${Object.keys(result).length} properties\n`;
+              debugText += `   📝 Sample: ${JSON.stringify(result).substring(0, 100)}...\n`;
+            } else {
+              debugText += `   📊 Result: ${result}\n`;
+            }
+            debugText += '\n';
+          } catch (err) {
+            debugText += `❌ ${method} ERROR: ${err.message}\n\n`;
+          }
+        } else {
+          debugText += `❌ ${method}: MISSING from service!\n\n`;
+        }
+      }
+
+    } catch (err) {
+      debugText += '❌ Test failed: ' + err.message + '\n';
+    }
+
+    setDebugInfo(debugText);
+    console.log('Debug info:', debugText);
+  };
+
+  // Load all dashboard data
+  const loadDashboardData = useCallback(async (showLoading = true) => {
+    try {
+      if (showLoading) {
+        setLoading(true);
+      }
+      setRefreshing(true);
       setError('');
+
+      console.log('=== STARTING DATA LOAD ===');
 
       // Load all data in parallel
       const [
@@ -82,43 +147,82 @@ const Dashboard = ({ onNavigate }) => {
         requests,
         events
       ] = await Promise.all([
-        dashboardService.getDashboardStats(),
-        dashboardService.getRecentActivities(),
-        dashboardService.getDonationTrends(),
-        dashboardService.getBloodTypeDistribution(),
-        dashboardService.getMonthlyComparison(),
-        dashboardService.getTopDonors(),
-        dashboardService.getUrgentRequests(),
-        dashboardService.getUpcomingEvents()
+        dashboardService.getDashboardStats().catch(err => {
+          console.error('getDashboardStats error:', err);
+          return dashboardService.getDefaultStats();
+        }),
+        dashboardService.getRecentActivities().catch(err => {
+          console.error('getRecentActivities error:', err);
+          return [];
+        }),
+        dashboardService.getDonationTrends().catch(err => {
+          console.error('getDonationTrends error:', err);
+          return [];
+        }),
+        dashboardService.getBloodTypeDistribution().catch(err => {
+          console.error('getBloodTypeDistribution error:', err);
+          return [];
+        }),
+        dashboardService.getMonthlyComparison().catch(err => {
+          console.error('getMonthlyComparison error:', err);
+          return [];
+        }),
+        dashboardService.getTopDonors().catch(err => {
+          console.error('getTopDonors error:', err);
+          return [];
+        }),
+        dashboardService.getUrgentRequests().catch(err => {
+          console.error('getUrgentRequests error:', err);
+          return [];
+        }),
+        dashboardService.getUpcomingEvents().catch(err => {
+          console.error('getUpcomingEvents error:', err);
+          return [];
+        })
       ]);
 
-      setStats(dashboardStats);
-      setRecentActivities(activities);
-      setDonationTrends(trends);
-      setBloodTypeData(bloodTypes);
-      setMonthlyComparison(monthlyData);
-      setTopDonors(donors);
-      setUrgentRequests(requests);
-      setUpcomingEvents(events);
+      console.log('=== DATA LOAD COMPLETE ===');
+      console.log('Dashboard Stats:', dashboardStats);
+      console.log('Activities:', activities?.length || 0);
+      console.log('Blood Types:', bloodTypes?.length || 0);
+      console.log('Urgent Requests:', requests?.length || 0);
+
+      // Update state
+      if (dashboardStats) {
+        setStats(prev => ({
+          ...prev,
+          ...dashboardStats
+        }));
+      }
+      setRecentActivities(activities || []);
+      setDonationTrends(trends || []);
+      setBloodTypeData(bloodTypes || []);
+      setMonthlyComparison(monthlyData || []);
+      setTopDonors(donors || []);
+      setUrgentRequests(requests || []);
+      setUpcomingEvents(events || []);
       setLastUpdated(new Date());
-      setLoading(false);
+
     } catch (err) {
       console.error('Error loading dashboard data:', err);
-      setError('Failed to load dashboard data. Please try again.');
+      setError(`Failed to load dashboard data: ${err.message}. Please check your connection.`);
+    } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
   // Initial load
   useEffect(() => {
+    console.log('Dashboard component mounted');
     loadDashboardData();
   }, [loadDashboardData]);
 
   // Real-time subscription
   useEffect(() => {
     const unsubscribe = dashboardService.subscribeToDashboardData(() => {
-      // Refresh data when changes occur
-      loadDashboardData();
+      console.log('Real-time update triggered');
+      loadDashboardData(false); // Don't show loading spinner for real-time updates
     });
 
     return () => unsubscribe();
@@ -128,6 +232,7 @@ const Dashboard = ({ onNavigate }) => {
     switch (type) {
       case 'donation': return <Heart className="activity-icon-donation" />;
       case 'request': return <AlertCircle className="activity-icon-request" />;
+      case 'appointment': return <Calendar className="activity-icon-request" />;
       case 'campaign':
       case 'story': return <Users className="activity-icon-campaign" />;
       default: return <Activity className="activity-icon-default" />;
@@ -135,18 +240,22 @@ const Dashboard = ({ onNavigate }) => {
   };
 
   const getActivityStatusClass = (status) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case 'completed':
-      case 'used': return 'activity-status-completed';
+      case 'used':
+      case 'published':
+      case 'confirmed': return 'activity-status-completed';
       case 'pending': return 'activity-status-pending';
-      case 'active': return 'activity-status-active';
+      case 'active':
+      case 'scheduled': return 'activity-status-active';
       default: return 'activity-status-default';
     }
   };
 
   const getUrgencyClass = (urgency) => {
-    switch (urgency) {
-      case 'critical': return 'urgency-critical';
+    switch (urgency?.toLowerCase()) {
+      case 'critical':
+      case 'emergency': return 'urgency-critical';
       case 'high': return 'urgency-high';
       case 'medium': return 'urgency-medium';
       default: return 'urgency-low';
@@ -169,6 +278,10 @@ const Dashboard = ({ onNavigate }) => {
     return lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
+  const handleRefresh = async () => {
+    await loadDashboardData();
+  };
+
   if (loading) {
     return (
       <Layout onNavigate={onNavigate} currentPage="dashboard">
@@ -176,6 +289,7 @@ const Dashboard = ({ onNavigate }) => {
           <div className="loading-content">
             <div className="loading-spinner"></div>
             <p className="loading-text">Loading dashboard data...</p>
+            <p className="text-sm text-gray-500 mt-2">Fetching real-time statistics</p>
           </div>
         </div>
       </Layout>
@@ -185,7 +299,7 @@ const Dashboard = ({ onNavigate }) => {
   return (
     <Layout onNavigate={onNavigate} currentPage="dashboard">
       <div className="space-y-6">
-        {/* Header - Simplified without period selector */}
+        {/* Header */}
         <div className="dashboard-header-container">
           <div>
             <h1 className="dashboard-header-title">Dashboard</h1>
@@ -200,20 +314,71 @@ const Dashboard = ({ onNavigate }) => {
           </div>
           <div className="dashboard-header-actions">
             <button
-              onClick={loadDashboardData}
-              className="px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold text-sm shadow-sm flex items-center gap-2"
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className={`px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold text-sm shadow-sm flex items-center gap-2 ${refreshing ? 'opacity-75 cursor-not-allowed' : ''}`}
             >
-              <RefreshCw className="w-4 h-4" />
-              Refresh
+              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+              {refreshing ? 'Refreshing...' : 'Refresh'}
+            </button>
+            <button
+              onClick={testAllServices}
+              className="px-4 py-2.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-semibold text-sm shadow-sm"
+            >
+              Debug Services
             </button>
           </div>
         </div>
+
+        {/* Debug Panel */}
+        {debugInfo && (
+          <div className="bg-gray-900 text-white p-4 rounded-lg">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="font-bold text-lg">Debug Information</h3>
+              <button onClick={() => setDebugInfo('')} className="text-gray-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <pre className="text-xs whitespace-pre-wrap font-mono bg-gray-800 p-3 rounded overflow-auto max-h-64">
+              {debugInfo}
+            </pre>
+            <div className="mt-3 pt-3 border-t border-gray-700">
+              <h4 className="font-bold mb-2">Current State Summary:</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                <div>
+                  <span className="text-gray-400">Blood Types: </span>
+                  <span className="font-bold">{bloodTypeData.length}</span>
+                </div>
+                <div>
+                  <span className="text-gray-400">Urgent Requests: </span>
+                  <span className="font-bold">{urgentRequests.length}</span>
+                </div>
+                <div>
+                  <span className="text-gray-400">Total Stock: </span>
+                  <span className="font-bold">{stats.totalBloodStock}</span>
+                </div>
+                <div>
+                  <span className="text-gray-400">Activities: </span>
+                  <span className="font-bold">{recentActivities.length}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Error Message */}
         {error && (
           <div className="error-container">
             <AlertCircle className="error-icon" />
-            <p className="error-text">{error}</p>
+            <div className="flex-1">
+              <p className="error-text">{error}</p>
+              <button
+                onClick={handleRefresh}
+                className="text-red-600 hover:text-red-800 text-sm font-medium mt-1"
+              >
+                Try again
+              </button>
+            </div>
             <button onClick={() => setError('')} className="error-close">
               <X className="error-close-icon" />
             </button>
@@ -256,10 +421,10 @@ const Dashboard = ({ onNavigate }) => {
             </div>
             <div className="stat-content">
               <h3 className="stat-number-community">{stats.communityParticipation.toLocaleString()}</h3>
-              <p className="stat-label">Community Members</p>
+              <p className="stat-label">Active Donors</p>
               <div className="stat-badge stat-badge-success">
                 <ArrowUp className="stat-badge-icon" />
-                <span>Registered donors</span>
+                <span>Registered community</span>
               </div>
             </div>
           </div>
@@ -282,9 +447,9 @@ const Dashboard = ({ onNavigate }) => {
           <div className="dashboard-secondary-card card-pending">
             <div className="secondary-card-header">
               <AlertCircle className="secondary-card-icon icon-pending" />
-              <span className="secondary-card-title">Pending Requests</span>
+              <span className="secondary-card-title">Urgent Requests</span>
             </div>
-            <div className="secondary-card-value">{stats.pendingRequests}</div>
+            <div className="secondary-card-value">{urgentRequests.length}</div>
             <div className="secondary-card-trend trend-down">
               <ArrowDown className="trend-icon" />
               <span>Needs attention</span>
@@ -294,12 +459,12 @@ const Dashboard = ({ onNavigate }) => {
           <div className="dashboard-secondary-card card-completed">
             <div className="secondary-card-header">
               <Award className="secondary-card-icon icon-completed" />
-              <span className="secondary-card-title">Completed This Month</span>
+              <span className="secondary-card-title">This Month</span>
             </div>
             <div className="secondary-card-value">{stats.completedThisMonth}</div>
             <div className="secondary-card-trend trend-up">
               <ArrowUp className="trend-icon" />
-              <span>Monthly progress</span>
+              <span>Donations completed</span>
             </div>
           </div>
 
@@ -316,7 +481,7 @@ const Dashboard = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* System-Wide Overview - Show all data */}
+        {/* System-Wide Overview */}
         <div className="dashboard-overview-section">
           <h2 className="dashboard-section-title">System Overview</h2>
           <p className="text-gray-600 mb-6">All-time statistics and system-wide metrics</p>
@@ -345,7 +510,7 @@ const Dashboard = ({ onNavigate }) => {
               </div>
             </div>
 
-            {/* Blood Inventory Group - Shows ACTUAL bloodstock quantities */}
+            {/* Blood Inventory Group */}
             <div className="overview-category-card">
               <div className="category-header">
                 <div className="category-icon-wrapper category-icon-blue">
@@ -360,11 +525,11 @@ const Dashboard = ({ onNavigate }) => {
                 </div>
                 <div className="category-stat-item">
                   <span className="category-stat-label">Critical</span>
-                  <span className="category-stat-value" style={{ color: '#dc2626' }}>{stats.critical}</span>
+                  <span className="category-stat-value text-red-600">{stats.critical}</span>
                 </div>
                 <div className="category-stat-item">
                   <span className="category-stat-label">Urgent</span>
-                  <span className="category-stat-value" style={{ color: '#ea580c' }}>{stats.urgent}</span>
+                  <span className="category-stat-value text-orange-600">{stats.urgent}</span>
                 </div>
               </div>
             </div>
@@ -467,7 +632,7 @@ const Dashboard = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* Charts Section - All showing actual data */}
+        {/* Charts Section */}
         <div className="dashboard-charts-grid">
           <div className="dashboard-chart-card chart-full">
             <div className="chart-header">
@@ -504,10 +669,10 @@ const Dashboard = ({ onNavigate }) => {
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="text-center py-12 text-gray-500">
-                  <Activity className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                  <p className="text-lg font-medium">No donation history data available</p>
-                  <p className="text-sm text-gray-400 mt-1">Donation records will appear here</p>
+                <div className="chart-empty-state">
+                  <Activity className="chart-empty-icon" />
+                  <p className="chart-empty-text">No donation history data available</p>
+                  <p className="chart-empty-subtext">Donation records will appear here</p>
                 </div>
               )}
             </div>
@@ -527,7 +692,7 @@ const Dashboard = ({ onNavigate }) => {
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, value }) => `${name}: ${value} units`}
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
@@ -545,13 +710,14 @@ const Dashboard = ({ onNavigate }) => {
                         borderRadius: '8px'
                       }}
                     />
+                    <Legend />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="text-center py-12 text-gray-500">
-                  <Droplet className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                  <p className="text-lg font-medium">No blood type data available</p>
-                  <p className="text-sm text-gray-400 mt-1">Blood inventory will appear here</p>
+                <div className="chart-empty-state">
+                  <Droplet className="chart-empty-icon" />
+                  <p className="chart-empty-text">No blood type data available</p>
+                  <p className="chart-empty-subtext">Blood inventory will appear here</p>
                 </div>
               )}
             </div>
@@ -559,7 +725,7 @@ const Dashboard = ({ onNavigate }) => {
 
           <div className="dashboard-chart-card chart-half">
             <div className="chart-header">
-              <h3 className="chart-title">Recent Month Comparison</h3>
+              <h3 className="chart-title">Monthly Comparison</h3>
               <p className="chart-subtitle">Donation status comparison</p>
             </div>
             <div className="chart-container">
@@ -584,10 +750,10 @@ const Dashboard = ({ onNavigate }) => {
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="text-center py-12 text-gray-500">
-                  <TrendingUp className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                  <p className="text-lg font-medium">No monthly comparison data</p>
-                  <p className="text-sm text-gray-400 mt-1">Monthly donation data will appear here</p>
+                <div className="chart-empty-state">
+                  <TrendingUp className="chart-empty-icon" />
+                  <p className="chart-empty-text">No monthly comparison data</p>
+                  <p className="chart-empty-subtext">Monthly donation data will appear here</p>
                 </div>
               )}
             </div>
@@ -596,7 +762,7 @@ const Dashboard = ({ onNavigate }) => {
 
         {/* Two Column Layout */}
         <div className="dashboard-two-column">
-          {/* Urgent Blood Requests - Shows ACTUAL pending requests only */}
+          {/* Urgent Blood Requests */}
           <div className="dashboard-urgent-container">
             <div className="dashboard-urgent-header">
               <div className="urgent-header-left">
@@ -623,7 +789,7 @@ const Dashboard = ({ onNavigate }) => {
                     <div className="urgent-item-details">
                       <div className="urgent-detail-row">
                         <MapPin className="urgent-detail-icon" />
-                        <span className="urgent-hospital">{request.state}</span>
+                        <span className="urgent-hospital">{request.state || 'Unknown Location'}</span>
                       </div>
                       <div className="urgent-detail-row">
                         <Target className="urgent-detail-icon" />
@@ -643,10 +809,10 @@ const Dashboard = ({ onNavigate }) => {
                   </div>
                 ))
               ) : (
-                <div className="text-center py-12 text-gray-500">
-                  <AlertCircle className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                  <p className="text-lg font-medium">No urgent requests at the moment</p>
-                  <p className="text-sm text-gray-400 mt-1">Great job keeping up with requests!</p>
+                <div className="urgent-empty-state">
+                  <AlertCircle className="chart-empty-icon" />
+                  <p className="chart-empty-text">No urgent requests at the moment</p>
+                  <p className="chart-empty-subtext">Great job keeping up with requests!</p>
                 </div>
               )}
             </div>
@@ -683,10 +849,10 @@ const Dashboard = ({ onNavigate }) => {
                   </div>
                 ))
               ) : (
-                <div className="text-center py-12 text-gray-500">
-                  <Users className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                  <p className="text-lg font-medium">No donor data available</p>
-                  <p className="text-sm text-gray-400 mt-1">Donation records will appear here</p>
+                <div className="urgent-empty-state">
+                  <Users className="chart-empty-icon" />
+                  <p className="chart-empty-text">No donor data available</p>
+                  <p className="chart-empty-subtext">Donation records will appear here</p>
                 </div>
               )}
             </div>
@@ -736,10 +902,10 @@ const Dashboard = ({ onNavigate }) => {
                 </div>
               ))
             ) : (
-              <div className="text-center py-12 text-gray-500 col-span-3">
-                <Calendar className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                <p className="text-lg font-medium">No upcoming events scheduled</p>
-                <p className="text-sm text-gray-400 mt-1">Create events to engage your community</p>
+              <div className="urgent-empty-state col-span-3">
+                <Calendar className="chart-empty-icon" />
+                <p className="chart-empty-text">No upcoming events scheduled</p>
+                <p className="chart-empty-subtext">Create events to engage your community</p>
               </div>
             )}
           </div>
@@ -773,16 +939,16 @@ const Dashboard = ({ onNavigate }) => {
                 </div>
               ))
             ) : (
-              <div className="text-center py-12 text-gray-500">
-                <Activity className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                <p className="text-lg font-medium">No recent activities</p>
-                <p className="text-sm text-gray-400 mt-1">Activities will appear here as they happen</p>
+              <div className="urgent-empty-state">
+                <Activity className="chart-empty-icon" />
+                <p className="chart-empty-text">No recent activities</p>
+                <p className="chart-empty-subtext">Activities will appear here as they happen</p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Quick Actions - Organized by Category */}
+        {/* Quick Actions */}
         <div className="dashboard-quick-actions">
           <h2 className="dashboard-quick-actions-title">Quick Actions</h2>
 
