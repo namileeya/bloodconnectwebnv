@@ -96,7 +96,7 @@ const Login = ({ onLoginSuccess }) => {
       const emailExists = validCredentials.some(
         cred => cred.email.toLowerCase() === email.toLowerCase()
       );
-      
+
       if (emailExists) {
         setErrorMessage('Incorrect password. Please try again.');
       } else {
@@ -110,7 +110,7 @@ const Login = ({ onLoginSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Apply decision logic
     if (!validateLogin()) {
       setShowErrorPopup(true);
@@ -125,7 +125,7 @@ const Login = ({ onLoginSuccess }) => {
         console.log('Login successful', { email, rememberPassword });
         setIsLoading(false);
         setShowSuccessPopup(true);
-        
+
         // Hide popup and navigate to dashboard after 2 seconds
         setTimeout(() => {
           setShowSuccessPopup(false);
@@ -140,7 +140,7 @@ const Login = ({ onLoginSuccess }) => {
   return (
     <>
       <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{
-        backgroundImage: 'url(src/assets/background.png)',
+        backgroundImage: 'url(/images/background.png)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat'
@@ -151,7 +151,7 @@ const Login = ({ onLoginSuccess }) => {
           <div className="bg-shape bg-shape-2 absolute -bottom-24 -right-24 w-80 h-80 opacity-50"></div>
           <div className="bg-shape bg-shape-3 absolute top-20 right-20 w-48 h-48 opacity-40"></div>
           <div className="bg-shape bg-shape-4 absolute top-1/2 -left-16 w-64 h-64 opacity-30"></div>
-          
+
           {/* Additional decorative elements with pulse animation */}
           <div className="absolute top-1/3 right-1/3 w-32 h-32 bg-white opacity-5 rounded-full bg-pulse"></div>
           <div className="absolute bottom-1/4 left-1/4 w-24 h-24 bg-white opacity-10 rounded-full bg-pulse"></div>
@@ -265,9 +265,9 @@ const Login = ({ onLoginSuccess }) => {
       </div>
 
       {/* Success Popup */}
-      <SuccessPopup 
-        isVisible={showSuccessPopup} 
-        onClose={() => setShowSuccessPopup(false)} 
+      <SuccessPopup
+        isVisible={showSuccessPopup}
+        onClose={() => setShowSuccessPopup(false)}
       />
 
       {/* Error Popup */}
