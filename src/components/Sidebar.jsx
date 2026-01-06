@@ -109,10 +109,10 @@ const Sidebar = ({ isCollapsed, activeItem, setActiveItem, onNavigate, currentPa
       {/* Logo */}
       <div className={`border-b border-white border-opacity-10 flex-shrink-0 transition-all duration-300 ${isCollapsed ? 'p-3' : 'p-6'}`}>
         <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'}`}>
-          <img 
-            src="src/assets/bloodconnect logo 6.png" 
-            alt="Logo" 
-            className="w-10 h-10 flex-shrink-0" 
+          <img
+            src="/images/bloodconnect logo 6.png"
+            alt="Logo"
+            className="w-10 h-10 flex-shrink-0"
           />
           <span className={`ml-3 text-xl font-bold whitespace-nowrap transition-opacity duration-300 ${isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>
             BloodConnect
@@ -148,9 +148,8 @@ const Sidebar = ({ isCollapsed, activeItem, setActiveItem, onNavigate, currentPa
                 {/* Dropdown Button */}
                 <button
                   onClick={toggleDropdown}
-                  className={`w-full flex items-center justify-between py-3 text-left font-medium transition-all duration-200 ${
-                    isAnySubActive ? 'bg-white bg-opacity-90 text-[#DE0D0D]' : 'hover:bg-white hover:bg-opacity-10'
-                  } ${isCollapsed ? 'justify-center px-3' : 'px-5'}`}
+                  className={`w-full flex items-center justify-between py-3 text-left font-medium transition-all duration-200 ${isAnySubActive ? 'bg-white bg-opacity-90 text-[#DE0D0D]' : 'hover:bg-white hover:bg-opacity-10'
+                    } ${isCollapsed ? 'justify-center px-3' : 'px-5'}`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <Icon size={20} className="flex-shrink-0" />
@@ -179,11 +178,10 @@ const Sidebar = ({ isCollapsed, activeItem, setActiveItem, onNavigate, currentPa
                         <button
                           key={subItem.page}
                           onClick={(e) => handleSubmenuClick(e, subItem.page, item.name)}
-                          className={`block w-full text-left py-2.5 px-12 text-sm font-medium transition-all duration-200 cursor-pointer ${
-                            isSubActive
+                          className={`block w-full text-left py-2.5 px-12 text-sm font-medium transition-all duration-200 cursor-pointer ${isSubActive
                               ? 'bg-white bg-opacity-30 text-white border-l-4 border-white'
                               : 'hover:bg-white hover:bg-opacity-10 border-l-4 border-transparent'
-                          }`}
+                            }`}
                         >
                           {subItem.label}
                         </button>
@@ -200,9 +198,8 @@ const Sidebar = ({ isCollapsed, activeItem, setActiveItem, onNavigate, currentPa
             <div key={item.name} className="relative group">
               <button
                 onClick={() => handleItemClick(item)}
-                className={`w-full flex items-center gap-3 py-3 text-left font-medium transition-all duration-200 ${
-                  isActive && currentPage === item.page ? 'bg-white bg-opacity-90 text-[#DE0D0D]' : 'hover:bg-white hover:bg-opacity-10'
-                } ${isCollapsed ? 'justify-center px-3' : 'px-5'}`}
+                className={`w-full flex items-center gap-3 py-3 text-left font-medium transition-all duration-200 ${isActive && currentPage === item.page ? 'bg-white bg-opacity-90 text-[#DE0D0D]' : 'hover:bg-white hover:bg-opacity-10'
+                  } ${isCollapsed ? 'justify-center px-3' : 'px-5'}`}
                 title={isCollapsed ? item.name : ''}
               >
                 <Icon size={20} className="flex-shrink-0" />
@@ -228,9 +225,8 @@ const Sidebar = ({ isCollapsed, activeItem, setActiveItem, onNavigate, currentPa
             <div key={item.name} className="relative group">
               <button
                 onClick={() => handleItemClick(item)}
-                className={`w-full flex items-center gap-3 py-3 text-left font-medium hover:bg-white hover:bg-opacity-10 transition-all duration-200 ${
-                  isCollapsed ? 'justify-center px-3' : 'px-5'
-                }`}
+                className={`w-full flex items-center gap-3 py-3 text-left font-medium hover:bg-white hover:bg-opacity-10 transition-all duration-200 ${isCollapsed ? 'justify-center px-3' : 'px-5'
+                  }`}
               >
                 <Icon size={20} className="flex-shrink-0" />
                 <span className={`whitespace-nowrap transition-opacity duration-300 ${isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>
