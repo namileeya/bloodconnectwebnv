@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Clock, Users, FileText, Grid3X3, BarChart3, Calendar,
-  FileBarChart, UsersRound, Settings, LogOut, ChevronDown, ChevronRight,
-  Gift
+  Clock, User, CalendarDays, Users, LogOut, ChevronDown, ChevronRight,
+  Gift, HeartHandshake, Droplet, ClipboardPlus, ChartColumn
 } from 'lucide-react';
 
+import logoImage from '../assets/bloodconnect_logo_6.png';
+
 const Sidebar = ({ isCollapsed, activeItem, setActiveItem, onNavigate, currentPage }) => {
-  const [donationDropdownOpen, setDonationDropdownOpen] = useState(true);
-  const [eventDropdownOpen, setEventDropdownOpen] = useState(true);
-  const [userDropdownOpen, setUserDropdownOpen] = useState(true);
+  const [donationDropdownOpen, setDonationDropdownOpen] = useState(false);
+  const [eventDropdownOpen, setEventDropdownOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const navRef = React.useRef(null);
 
   // Close all dropdowns when sidebar collapses
   useEffect(() => {
@@ -19,38 +21,62 @@ const Sidebar = ({ isCollapsed, activeItem, setActiveItem, onNavigate, currentPa
     }
   }, [isCollapsed]);
 
+  // Restore scroll position when navigating
+  useEffect(() => {
+    const savedScrollPos = sessionStorage.getItem('sidebarScrollPos');
+    if (savedScrollPos && navRef.current) {
+      navRef.current.scrollTop = parseInt(savedScrollPos, 10);
+    }
+  }, [currentPage]);
+
+  // Restore dropdown states from sessionStorage on mount
+  useEffect(() => {
+    const savedDonationState = sessionStorage.getItem('donationDropdownOpen');
+    const savedEventState = sessionStorage.getItem('eventDropdownOpen');
+    const savedUserState = sessionStorage.getItem('userDropdownOpen');
+
+    if (savedDonationState !== null) setDonationDropdownOpen(savedDonationState === 'true');
+    if (savedEventState !== null) setEventDropdownOpen(savedEventState === 'true');
+    if (savedUserState !== null) setUserDropdownOpen(savedUserState === 'true');
+  }, []);
+
+  const saveScrollPosition = () => {
+    if (navRef.current) {
+      sessionStorage.setItem('sidebarScrollPos', navRef.current.scrollTop.toString());
+    }
+  };
+
   const mainItems = [
     { name: 'Dashboard', icon: Clock, page: 'dashboard' },
     {
       name: 'User Management',
-      icon: Users,
+      icon: User,
       page: 'user-management',
       isDropdown: true,
       dropdownType: 'user'
     },
     {
       name: 'Donation Management',
-      icon: FileText,
+      icon: HeartHandshake,
       page: 'donation-management',
       isDropdown: true,
       dropdownType: 'donation'
     },
-    { name: 'Blood Inventory', icon: Grid3X3, page: 'blood-inventory' },
-    { name: 'Blood Request', icon: BarChart3, page: 'blood-request' },
-    { name: 'Reports', icon: FileBarChart, page: 'reports' },
+    { name: 'Blood Inventory', icon: Droplet, page: 'blood-inventory' },
+    { name: 'Blood Request', icon: ClipboardPlus, page: 'blood-request' },
+    { name: 'Reports', icon: ChartColumn, page: 'reports' },
     {
       name: 'Event Management',
-      icon: Calendar,
+      icon: CalendarDays,
       page: 'event-management',
       isDropdown: true,
       dropdownType: 'event'
     },
     { name: 'Rewards Management', icon: Gift, page: 'rewards-management' },
-    { name: 'Community Management', icon: UsersRound, page: 'community-management' },
+    { name: 'Community Management', icon: Users, page: 'community-management' },
   ];
 
   const bottomItems = [
-    { name: 'Settings', icon: Settings, page: 'settings' },
     { name: 'Logout', icon: LogOut, page: 'logout' },
   ];
 
@@ -71,6 +97,7 @@ const Sidebar = ({ isCollapsed, activeItem, setActiveItem, onNavigate, currentPa
   ];
 
   const handleItemClick = (item) => {
+    saveScrollPosition();
     if (item.name === 'Logout') {
       onNavigate('logout');
       return;
@@ -82,6 +109,7 @@ const Sidebar = ({ isCollapsed, activeItem, setActiveItem, onNavigate, currentPa
   const handleSubmenuClick = (e, page, parentName) => {
     e.preventDefault();
     e.stopPropagation();
+    saveScrollPosition();
     setActiveItem(parentName);
     onNavigate(page);
   };
@@ -89,19 +117,25 @@ const Sidebar = ({ isCollapsed, activeItem, setActiveItem, onNavigate, currentPa
   const toggleDonationDropdown = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setDonationDropdownOpen(!donationDropdownOpen);
+    const newState = !donationDropdownOpen;
+    setDonationDropdownOpen(newState);
+    sessionStorage.setItem('donationDropdownOpen', newState.toString());
   };
 
   const toggleEventDropdown = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setEventDropdownOpen(!eventDropdownOpen);
+    const newState = !eventDropdownOpen;
+    setEventDropdownOpen(newState);
+    sessionStorage.setItem('eventDropdownOpen', newState.toString());
   };
 
   const toggleUserDropdown = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setUserDropdownOpen(!userDropdownOpen);
+    const newState = !userDropdownOpen;
+    setUserDropdownOpen(newState);
+    sessionStorage.setItem('userDropdownOpen', newState.toString());
   };
 
   return (
@@ -110,9 +144,9 @@ const Sidebar = ({ isCollapsed, activeItem, setActiveItem, onNavigate, currentPa
       <div className={`border-b border-white border-opacity-10 flex-shrink-0 transition-all duration-300 ${isCollapsed ? 'p-3' : 'p-6'}`}>
         <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'}`}>
           <img
-            src="/images/bloodconnect logo 6.png"
-            alt="Logo"
-            className="w-10 h-10 flex-shrink-0"
+            src={logoImage}
+            alt="BloodConnect Logo"
+            className="w-10 h-10 flex-shrink-0 object-contain"
           />
           <span className={`ml-3 text-xl font-bold whitespace-nowrap transition-opacity duration-300 ${isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>
             BloodConnect
@@ -120,7 +154,7 @@ const Sidebar = ({ isCollapsed, activeItem, setActiveItem, onNavigate, currentPa
         </div>
       </div>
 
-      <nav className="flex-1 py-5 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-white scrollbar-thumb-opacity-20 scrollbar-track-transparent">
+      <nav ref={navRef} className="flex-1 py-5 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-white scrollbar-thumb-opacity-20 scrollbar-track-transparent">
         {mainItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeItem === item.name;
@@ -179,8 +213,8 @@ const Sidebar = ({ isCollapsed, activeItem, setActiveItem, onNavigate, currentPa
                           key={subItem.page}
                           onClick={(e) => handleSubmenuClick(e, subItem.page, item.name)}
                           className={`block w-full text-left py-2.5 px-12 text-sm font-medium transition-all duration-200 cursor-pointer ${isSubActive
-                              ? 'bg-white bg-opacity-30 text-white border-l-4 border-white'
-                              : 'hover:bg-white hover:bg-opacity-10 border-l-4 border-transparent'
+                            ? 'bg-white bg-opacity-30 text-white border-l-4 border-white'
+                            : 'hover:bg-white hover:bg-opacity-10 border-l-4 border-transparent'
                             }`}
                         >
                           {subItem.label}
