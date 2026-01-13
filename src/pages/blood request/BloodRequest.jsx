@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Search, Eye, Check, X, Calendar, MapPin, AlertCircle,
-  ChevronLeft, ChevronRight, Loader2, RefreshCw, Edit2
+  ChevronLeft, ChevronRight, Edit2
 } from 'lucide-react';
 import Layout from '../../components/Layout';
 import {
@@ -529,12 +529,6 @@ const BloodRequest = ({ onNavigate }) => {
     critical: requests.filter(r => r.urgency.toLowerCase() === 'critical').length
   };
 
-  // Refresh data
-  const handleRefresh = () => {
-    setLoading(true);
-    window.location.reload();
-  };
-
   // Clear filters
   const clearFilters = () => {
     setFilters({
@@ -553,7 +547,6 @@ const BloodRequest = ({ onNavigate }) => {
           <div className="loading-content">
             <div className="loading-spinner"></div>
             <p className="loading-text">Loading blood requests...</p>
-            <p className="text-sm text-gray-500 mt-2">Connecting to Firebase collection: blood_requests</p>
           </div>
         </div>
       </Layout>
@@ -561,649 +554,637 @@ const BloodRequest = ({ onNavigate }) => {
   }
 
   return (
-    <Layout onNavigate={onNavigate} currentPage="blood-request">
-      {/* Toast Notification */}
-      {showToast.show && (
-        <div className={`fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 ${showToast.type === 'success'
-          ? 'bg-green-500 text-white'
-          : showToast.type === 'error'
-            ? 'bg-red-500 text-white'
-            : 'bg-blue-500 text-white'
-          }`}>
-          <div className="flex items-center gap-2">
-            {showToast.type === 'success' ? (
-              <Check className="w-5 h-5" />
-            ) : showToast.type === 'error' ? (
-              <AlertCircle className="w-5 h-5" />
-            ) : (
-              <AlertCircle className="w-5 h-5" />
+    <>
+      <Layout onNavigate={onNavigate} currentPage="blood-request">
+        {/* Toast Notification */}
+        {showToast.show && (
+          <div className={`fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 ${showToast.type === 'success'
+            ? 'bg-green-500 text-white'
+            : showToast.type === 'error'
+              ? 'bg-red-500 text-white'
+              : 'bg-blue-500 text-white'
+            }`}>
+            <div className="flex items-center gap-2">
+              {showToast.type === 'success' ? (
+                <Check className="w-5 h-5" />
+              ) : showToast.type === 'error' ? (
+                <AlertCircle className="w-5 h-5" />
+              ) : (
+                <AlertCircle className="w-5 h-5" />
+              )}
+              <span>{showToast.message}</span>
+            </div>
+          </div>
+        )}
+
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="header-container">
+            <h1 className="header-title">Blood Request Management</h1>
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="error-container">
+              <AlertCircle className="error-icon" />
+              <p className="error-text">{error}</p>
+              <button
+                onClick={() => setError('')}
+                className="error-close"
+              >
+                <X className="error-close-icon" />
+              </button>
+            </div>
+          )}
+
+          {/* Stats Cards */}
+          <div className="request-stats-grid">
+            <div className="request-stat-card stat-card-total">
+              <h3 className="stat-number-blue">{stats.total}</h3>
+              <p className="stat-label">Total Requests</p>
+            </div>
+            <div className="request-stat-card stat-card-pending">
+              <h3 className="stat-number-purple">{stats.pending}</h3>
+              <p className="stat-label">Pending Approval</p>
+            </div>
+            <div className="request-stat-card stat-card-approved">
+              <h3 className="stat-number-green">{stats.approved}</h3>
+              <p className="stat-label">Approved Requests</p>
+            </div>
+            <div className="request-stat-card stat-card-critical">
+              <h3 className="stat-number-red">{stats.critical}</h3>
+              <p className="stat-label">Critical Cases</p>
+            </div>
+          </div>
+
+          {/* Filters */}
+          <div className="filters-container">
+            <div className="filters-grid">
+              <div className="search-container">
+                <label className="filter-label">Search Requests</label>
+                <div className="search-input-container">
+                  <Search className="search-icon" />
+                  <input
+                    type="text"
+                    placeholder="Search by patient name, request ID, requester, or email..."
+                    className="search-input"
+                    value={filters.search}
+                    onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="filter-select-container">
+                <label className="filter-label">Status</label>
+                <select
+                  className="filter-select"
+                  value={filters.status}
+                  onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                >
+                  <option value="All">All Status</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Approved">Approved</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+              </div>
+              <div className="filter-select-container">
+                <label className="filter-label">Blood Type</label>
+                <select
+                  className="filter-select"
+                  value={filters.bloodType}
+                  onChange={(e) => setFilters({ ...filters, bloodType: e.target.value })}
+                >
+                  <option value="All">All Types</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                </select>
+              </div>
+              <div className="filter-select-container">
+                <label className="filter-label">Urgency</label>
+                <select
+                  className="filter-select"
+                  value={filters.urgency}
+                  onChange={(e) => setFilters({ ...filters, urgency: e.target.value })}
+                >
+                  <option value="All">All Urgency</option>
+                  <option value="Critical">Critical</option>
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                </select>
+              </div>
+            </div>
+            <div className="mt-4">
+              <span className="text-sm text-gray-600">
+                Showing {filteredRequests.length} of {requests.length} request(s)
+              </span>
+            </div>
+          </div>
+
+          {/* Requests Table */}
+          <div className="table-container">
+            <div className="table-wrapper">
+              {loading && (
+                <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center z-10">
+                  <Loader2 className="animate-spin text-red-600" size={32} />
+                  <span className="ml-3 text-gray-600">Loading data...</span>
+                </div>
+              )}
+
+              <table className="table">
+                <thead className="table-header">
+                  <tr>
+                    <th className="table-header-cell">REQUEST INFO</th>
+                    <th className="table-header-cell">PATIENT DETAILS</th>
+                    <th className="table-header-cell">REQUESTER INFO</th>
+                    <th className="table-header-cell">BLOOD TYPE</th>
+                    <th className="table-header-cell">URGENCY</th>
+                    <th className="table-header-cell">STATUS</th>
+                    <th className="table-header-cell">ACTIONS</th>
+                  </tr>
+                </thead>
+                <tbody className="table-body">
+                  {paginatedRequests.length > 0 ? (
+                    paginatedRequests.map((request) => (
+                      <tr key={request.id} className="table-row">
+                        <td className="table-cell">
+                          <div className="table-cell-content">
+                            <div className="request-id">{request.requestId}</div>
+                            <div className="request-date">
+                              <Calendar className="date-icon" />
+                              {request.requestDate}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="table-cell">
+                          <div className="table-cell-content">
+                            <div className="patient-name">{request.patientName}</div>
+                            <div className="patient-location">
+                              {request.location}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="table-cell">
+                          <div className="table-cell-content">
+                            <div className="requester-name">{request.requesterName}</div>
+                            <div className="requester-email">{request.userEmail}</div>
+                            <div className="requester-phone text-xs text-gray-600">
+                              {request.contactNumber}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="table-cell">
+                          <span className="blood-type-badge">
+                            {request.bloodType}
+                          </span>
+                        </td>
+                        <td className="table-cell">
+                          <div className="flex flex-col items-start gap-1">
+                            <span className={`urgency-badge ${getUrgencyClasses(request.urgency)}`}>
+                              {request.urgency}
+                            </span>
+                            <button
+                              onClick={() => handleUrgencyChange(request)}
+                              className="text-xs text-blue-600 hover:text-blue-800 font-medium hover:underline flex items-center gap-1"
+                              disabled={updatingId === request.id}
+                            >
+                              <Edit2 size={12} />
+                              Change
+                            </button>
+                          </div>
+                        </td>
+                        <td className="table-cell">
+                          <span className={`status-badge ${getStatusClasses(request.status)}`}>
+                            {request.status.charAt(0).toUpperCase() + request.status.slice(1).toLowerCase()}
+                          </span>
+                        </td>
+                        <td className="table-cell">
+                          <div className="actions-container">
+                            <button
+                              onClick={() => handleViewDetails(request)}
+                              className="action-button view-button"
+                              title="View Details"
+                            >
+                              <Eye className="action-icon" />
+                            </button>
+                            {request.status.toLowerCase() === 'pending' && (
+                              <>
+                                <button
+                                  onClick={() => handleStatusChange(request.id, 'Approved')}
+                                  className="action-button approve-button"
+                                  title="Approve Request"
+                                  disabled={updatingId === request.id}
+                                >
+                                  {updatingId === request.id ? (
+                                    <Loader2 className="action-icon animate-spin" />
+                                  ) : (
+                                    <Check className="action-icon" />
+                                  )}
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(request.id, 'Rejected')}
+                                  className="action-button reject-button"
+                                  title="Reject Request"
+                                  disabled={updatingId === request.id}
+                                >
+                                  {updatingId === request.id ? (
+                                    <Loader2 className="action-icon animate-spin" />
+                                  ) : (
+                                    <X className="action-icon" />
+                                  )}
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="7" className="text-center py-8">
+                        <div className="empty-state">
+                          <div className="empty-state-icon">
+                            <Search />
+                          </div>
+                          <h3 className="empty-state-title">
+                            {requests.length === 0
+                              ? "No blood requests found"
+                              : "No matching requests"}
+                          </h3>
+                          <p className="empty-state-description">
+                            {requests.length === 0
+                              ? "There are no blood requests in the database yet."
+                              : "Try adjusting your search or filter criteria."}
+                          </p>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            {filteredRequests.length > 0 && (
+              <div className="blood-request-pagination">
+                <div className="blood-request-pagination-info">
+                  <span>Items per page:</span>
+                  <select
+                    value={itemsPerPage}
+                    onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                    className="blood-request-items-per-page-select"
+                  >
+                    <option value={6}>6</option>
+                    <option value={8}>8</option>
+                    <option value={12}>12</option>
+                    <option value={16}>16</option>
+                  </select>
+                  <span className="blood-request-pagination-range">
+                    {startIndex + 1}-{Math.min(endIndex, filteredRequests.length)} of {filteredRequests.length}
+                  </span>
+                </div>
+
+                <div className="blood-request-pagination-controls">
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="blood-request-pagination-btn"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <span className="text-sm text-gray-600 mx-4">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="blood-request-pagination-btn"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              </div>
             )}
-            <span>{showToast.message}</span>
+          </div>
+        </div>
+      </Layout>
+
+      {/* Modal for Request Details */}
+      {showModal && selectedRequest && (
+        <div className="modal-overlay">
+          <div className="modal-container">
+            <div className="modal-header">
+              <div className="modal-header-content">
+                <h2 className="modal-title">Blood Request Details</h2>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="modal-close"
+                >
+                  <X className="modal-close-icon" />
+                </button>
+              </div>
+            </div>
+
+            <div className="modal-body">
+              <div className="modal-grid">
+                <div className="modal-section">
+                  <div className="modal-field modal-field-highlighted">
+                    <label className="modal-field-label">Request ID</label>
+                    <p className="modal-field-value-large">{selectedRequest.requestId}</p>
+                  </div>
+                  <div className="modal-field">
+                    <label className="modal-field-label">Patient Name</label>
+                    <p className="modal-field-value">{selectedRequest.patientName}</p>
+                  </div>
+                  <div className="modal-field">
+                    <label className="modal-field-label">Blood Type</label>
+                    <span className="blood-type-badge" style={{ fontSize: '16px', padding: '6px 14px' }}>
+                      {selectedRequest.bloodType}
+                    </span>
+                  </div>
+                  <div className="modal-field">
+                    <label className="modal-field-label">Urgency Level</label>
+                    <div className="flex items-center gap-2">
+                      <span className={`urgency-badge ${getUrgencyClasses(selectedRequest.urgency)}`} style={{ padding: '6px 14px' }}>
+                        {selectedRequest.urgency}
+                      </span>
+                      <button
+                        onClick={() => {
+                          setShowModal(false);
+                          handleUrgencyChange(selectedRequest);
+                        }}
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
+                      >
+                        <Edit2 size={14} />
+                        Change
+                      </button>
+                    </div>
+                  </div>
+                  <div className="modal-field">
+                    <label className="modal-field-label">Current Status</label>
+                    <span className={`status-badge ${getStatusClasses(selectedRequest.status)}`} style={{ padding: '6px 14px' }}>
+                      {selectedRequest.status.charAt(0).toUpperCase() + selectedRequest.status.slice(1).toLowerCase()}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="modal-section">
+                  <div className="modal-field">
+                    <label className="modal-field-label">Requester Name</label>
+                    <p className="modal-field-value">{selectedRequest.requesterName}</p>
+                  </div>
+                  <div className="modal-field">
+                    <label className="modal-field-label">Contact Email</label>
+                    <p className="modal-field-value">{selectedRequest.userEmail}</p>
+                  </div>
+                  <div className="modal-field">
+                    <label className="modal-field-label">Contact Number</label>
+                    <p className="modal-field-value">{selectedRequest.contactNumber}</p>
+                  </div>
+                  <div className="modal-field">
+                    <label className="modal-field-label">Patient Location</label>
+                    <p className="modal-field-value-location">
+                      <MapPin className="modal-location-icon" />
+                      <span style={{ fontWeight: 500 }}>{selectedRequest.location}</span>
+                    </p>
+                  </div>
+                  <div className="modal-field">
+                    <label className="modal-field-label">Request Date</label>
+                    <p className="modal-field-value-date">
+                      <Calendar className="modal-clock-icon" />
+                      <span style={{ fontWeight: 600 }}>{selectedRequest.requestDate}</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-reason-section">
+                <label className="modal-reason-label">Reason for Blood Request</label>
+                <div className="modal-reason-content">
+                  <p className="modal-reason-text">{selectedRequest.reason}</p>
+                </div>
+              </div>
+
+              {selectedRequest.rejectionReason && (
+                <div className="modal-reason-section" style={{ backgroundColor: '#FEF2F2', border: '1px solid #FECACA' }}>
+                  <label className="modal-reason-label" style={{ color: '#DC2626' }}>Rejection Reason</label>
+                  <div className="modal-reason-content">
+                    <p className="modal-reason-text" style={{ color: '#991B1B' }}>{selectedRequest.rejectionReason}</p>
+                  </div>
+                </div>
+              )}
+
+              {selectedRequest.status.toLowerCase() === 'pending' && (
+                <div className="modal-actions">
+                  <button
+                    onClick={() => handleStatusChange(selectedRequest.id, 'Rejected')}
+                    className="modal-button modal-button-reject"
+                    disabled={updatingId === selectedRequest.id}
+                  >
+                    {updatingId === selectedRequest.id ? (
+                      <>
+                        <Loader2 className="animate-spin mr-2" size={16} />
+                        Updating...
+                      </>
+                    ) : 'Reject Request'}
+                  </button>
+                  <button
+                    onClick={() => handleStatusChange(selectedRequest.id, 'Approved')}
+                    className="modal-button modal-button-approve"
+                    disabled={updatingId === selectedRequest.id}
+                  >
+                    {updatingId === selectedRequest.id ? (
+                      <>
+                        <Loader2 className="animate-spin mr-2" size={16} />
+                        Updating...
+                      </>
+                    ) : 'Approve Request'}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
 
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="header-container">
-          <div>
-            <h1 className="header-title">Blood Request Management</h1>
-          </div>
-          <button
-            onClick={handleRefresh}
-            className="refresh-button flex items-center gap-2"
-            disabled={loading}
-          >
-            {loading ? (
-              <Loader2 className="animate-spin" size={16} />
-            ) : (
-              <RefreshCw size={16} />
-            )}
-            {loading ? 'Refreshing...' : 'Refresh'}
-          </button>
-        </div>
+      {/* Reject Reason Modal */}
+      {showRejectModal && selectedRequest && (
+        <div className="modal-overlay">
+          <div className="modal-container" style={{ maxWidth: '28rem' }}>
+            <div className="modal-header">
+              <div className="modal-header-content">
+                <h2 className="modal-title">Reject Request</h2>
+                <button
+                  onClick={() => {
+                    setShowRejectModal(false);
+                    setRejectReason('');
+                  }}
+                  className="modal-close"
+                >
+                  <X className="modal-close-icon" />
+                </button>
+              </div>
+            </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="error-container">
-            <AlertCircle className="error-icon" />
-            <p className="error-text">{error}</p>
-            <button
-              onClick={() => setError('')}
-              className="error-close"
-            >
-              <X className="error-close-icon" />
-            </button>
-          </div>
-        )}
+            <div className="modal-body">
+              <div className="mb-4">
+                <p className="text-gray-600 mb-2">
+                  You are about to reject request <strong>{selectedRequest.requestId}</strong>.
+                </p>
+                <p className="text-gray-600">
+                  Please provide a reason for rejection. This will be sent to the requester.
+                </p>
+              </div>
 
-        {/* Stats Cards */}
-        <div className="request-stats-grid">
-          <div className="request-stat-card stat-card-total">
-            <h3 className="stat-number-blue">{stats.total}</h3>
-            <p className="stat-label">Total Requests</p>
-          </div>
-          <div className="request-stat-card stat-card-pending">
-            <h3 className="stat-number-purple">{stats.pending}</h3>
-            <p className="stat-label">Pending Approval</p>
-          </div>
-          <div className="request-stat-card stat-card-approved">
-            <h3 className="stat-number-green">{stats.approved}</h3>
-            <p className="stat-label">Approved Requests</p>
-          </div>
-          <div className="request-stat-card stat-card-critical">
-            <h3 className="stat-number-red">{stats.critical}</h3>
-            <p className="stat-label">Critical Cases</p>
-          </div>
-        </div>
-
-        {/* Filters */}
-        <div className="filters-container">
-          <div className="filters-grid">
-            <div className="search-container">
-              <label className="filter-label">Search Requests</label>
-              <div className="search-input-container">
-                <Search className="search-icon" />
-                <input
-                  type="text"
-                  placeholder="Search by patient name, request ID, requester, or email..."
-                  className="search-input"
-                  value={filters.search}
-                  onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Rejection Reason *
+                </label>
+                <textarea
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  placeholder="Enter reason for rejection (minimum 10 characters)..."
+                  className="w-full h-32 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  required
                 />
-              </div>
-            </div>
-            <div className="filter-select-container">
-              <label className="filter-label">Status</label>
-              <select
-                className="filter-select"
-                value={filters.status}
-                onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-              >
-                <option value="All">All Status</option>
-                <option value="Pending">Pending</option>
-                <option value="Approved">Approved</option>
-                <option value="Rejected">Rejected</option>
-              </select>
-            </div>
-            <div className="filter-select-container">
-              <label className="filter-label">Blood Type</label>
-              <select
-                className="filter-select"
-                value={filters.bloodType}
-                onChange={(e) => setFilters({ ...filters, bloodType: e.target.value })}
-              >
-                <option value="All">All Types</option>
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-              </select>
-            </div>
-            <div className="filter-select-container">
-              <label className="filter-label">Urgency</label>
-              <select
-                className="filter-select"
-                value={filters.urgency}
-                onChange={(e) => setFilters({ ...filters, urgency: e.target.value })}
-              >
-                <option value="All">All Urgency</option>
-                <option value="Critical">Critical</option>
-                <option value="High">High</option>
-                <option value="Medium">Medium</option>
-                <option value="Low">Low</option>
-              </select>
-            </div>
-          </div>
-          <div className="mt-4">
-            <span className="text-sm text-gray-600">
-              Showing {filteredRequests.length} of {requests.length} request(s)
-            </span>
-          </div>
-        </div>
-
-        {/* Requests Table */}
-        <div className="table-container">
-          <div className="table-wrapper">
-            {loading && (
-              <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center z-10">
-                <Loader2 className="animate-spin text-red-600" size={32} />
-                <span className="ml-3 text-gray-600">Loading data...</span>
-              </div>
-            )}
-
-            <table className="table">
-              <thead className="table-header">
-                <tr>
-                  <th className="table-header-cell">REQUEST INFO</th>
-                  <th className="table-header-cell">PATIENT DETAILS</th>
-                  <th className="table-header-cell">REQUESTER INFO</th>
-                  <th className="table-header-cell">BLOOD TYPE</th>
-                  <th className="table-header-cell">URGENCY</th>
-                  <th className="table-header-cell">STATUS</th>
-                  <th className="table-header-cell">ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody className="table-body">
-                {paginatedRequests.length > 0 ? (
-                  paginatedRequests.map((request) => (
-                    <tr key={request.id} className="table-row">
-                      <td className="table-cell">
-                        <div className="table-cell-content">
-                          <div className="request-id">{request.requestId}</div>
-                          <div className="request-date">
-                            <Calendar className="date-icon" />
-                            {request.requestDate}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="table-cell">
-                        <div className="table-cell-content">
-                          <div className="patient-name">{request.patientName}</div>
-                          <div className="patient-location">
-                            {request.location}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="table-cell">
-                        <div className="table-cell-content">
-                          <div className="requester-name">{request.requesterName}</div>
-                          <div className="requester-email">{request.userEmail}</div>
-                          <div className="requester-phone text-xs text-gray-600">
-                            {request.contactNumber}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="table-cell">
-                        <span className="blood-type-badge">
-                          {request.bloodType}
-                        </span>
-                      </td>
-                      <td className="table-cell">
-                        <div className="flex flex-col items-start gap-1">
-                          <span className={`urgency-badge ${getUrgencyClasses(request.urgency)}`}>
-                            {request.urgency}
-                          </span>
-                          <button
-                            onClick={() => handleUrgencyChange(request)}
-                            className="text-xs text-blue-600 hover:text-blue-800 font-medium hover:underline flex items-center gap-1"
-                            disabled={updatingId === request.id}
-                          >
-                            <Edit2 size={12} />
-                            Change
-                          </button>
-                        </div>
-                      </td>
-                      <td className="table-cell">
-                        <span className={`status-badge ${getStatusClasses(request.status)}`}>
-                          {request.status.charAt(0).toUpperCase() + request.status.slice(1).toLowerCase()}
-                        </span>
-                      </td>
-                      <td className="table-cell">
-                        <div className="actions-container">
-                          <button
-                            onClick={() => handleViewDetails(request)}
-                            className="action-button view-button"
-                            title="View Details"
-                          >
-                            <Eye className="action-icon" />
-                          </button>
-                          {request.status.toLowerCase() === 'pending' && (
-                            <>
-                              <button
-                                onClick={() => handleStatusChange(request.id, 'Approved')}
-                                className="action-button approve-button"
-                                title="Approve Request"
-                                disabled={updatingId === request.id}
-                              >
-                                {updatingId === request.id ? (
-                                  <Loader2 className="action-icon animate-spin" />
-                                ) : (
-                                  <Check className="action-icon" />
-                                )}
-                              </button>
-                              <button
-                                onClick={() => handleStatusChange(request.id, 'Rejected')}
-                                className="action-button reject-button"
-                                title="Reject Request"
-                                disabled={updatingId === request.id}
-                              >
-                                {updatingId === request.id ? (
-                                  <Loader2 className="action-icon animate-spin" />
-                                ) : (
-                                  <X className="action-icon" />
-                                )}
-                              </button>
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="7" className="text-center py-8">
-                      <div className="empty-state">
-                        <div className="empty-state-icon">
-                          <Search />
-                        </div>
-                        <h3 className="empty-state-title">
-                          {requests.length === 0
-                            ? "No blood requests found"
-                            : "No matching requests"}
-                        </h3>
-                        <p className="empty-state-description">
-                          {requests.length === 0
-                            ? "There are no blood requests in the database yet."
-                            : "Try adjusting your search or filter criteria."}
-                        </p>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          {filteredRequests.length > 0 && (
-            <div className="blood-request-pagination">
-              <div className="blood-request-pagination-info">
-                <span>Items per page:</span>
-                <select
-                  value={itemsPerPage}
-                  onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                  className="blood-request-items-per-page-select"
-                >
-                  <option value={6}>6</option>
-                  <option value={8}>8</option>
-                  <option value={12}>12</option>
-                  <option value={16}>16</option>
-                </select>
-                <span className="blood-request-pagination-range">
-                  {startIndex + 1}-{Math.min(endIndex, filteredRequests.length)} of {filteredRequests.length}
-                </span>
+                <p className="text-sm text-gray-500 mt-1">
+                  {rejectReason.length}/10 characters (minimum 10 required)
+                </p>
               </div>
 
-              <div className="blood-request-pagination-controls">
+              <div className="flex justify-end gap-3">
                 <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="blood-request-pagination-btn"
+                  onClick={() => {
+                    setShowRejectModal(false);
+                    setRejectReason('');
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium"
+                  disabled={updatingId === selectedRequest.id}
                 >
-                  <ChevronLeft size={16} />
+                  Cancel
                 </button>
-                <span className="text-sm text-gray-600 mx-4">
-                  Page {currentPage} of {totalPages}
-                </span>
                 <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className="blood-request-pagination-btn"
+                  onClick={handleRejectWithReason}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={updatingId === selectedRequest.id || rejectReason.trim().length < 10}
                 >
-                  <ChevronRight size={16} />
+                  {updatingId === selectedRequest.id ? (
+                    <>
+                      <Loader2 className="animate-spin mr-2 inline" size={16} />
+                      Rejecting...
+                    </>
+                  ) : 'Confirm Reject'}
                 </button>
               </div>
             </div>
-          )}
+          </div>
         </div>
+      )}
 
-        {/* Modal for Request Details */}
-        {showModal && selectedRequest && (
-          <div className="modal-overlay">
-            <div className="modal-container">
-              <div className="modal-header">
-                <div className="modal-header-content">
-                  <h2 className="modal-title">Blood Request Details</h2>
-                  <button
-                    onClick={() => setShowModal(false)}
-                    className="modal-close"
-                  >
-                    <X className="modal-close-icon" />
-                  </button>
-                </div>
+      {/* Urgency Update Modal */}
+      {showUrgencyModal && selectedRequest && (
+        <div className="modal-overlay">
+          <div className="modal-container" style={{ maxWidth: '28rem' }}>
+            <div className="modal-header">
+              <div className="modal-header-content">
+                <h2 className="modal-title">Update Urgency Level</h2>
+                <button
+                  onClick={() => setShowUrgencyModal(false)}
+                  className="modal-close"
+                >
+                  <X className="modal-close-icon" />
+                </button>
+              </div>
+            </div>
+
+            <div className="modal-body">
+              <div className="mb-4">
+                <p className="text-gray-600 mb-2">
+                  Update urgency level for request <strong>{selectedRequest.requestId}</strong>.
+                </p>
+                <p className="text-gray-600">
+                  Patient: <strong>{selectedRequest.patientName}</strong> ({selectedRequest.bloodType})
+                </p>
+                <p className="text-gray-600">
+                  Current urgency: <span className={`font-semibold ${getUrgencyClasses(selectedRequest.urgency)}`}>
+                    {selectedRequest.urgency}
+                  </span>
+                </p>
               </div>
 
-              <div className="modal-body">
-                <div className="modal-grid">
-                  <div className="modal-section">
-                    <div className="modal-field modal-field-highlighted">
-                      <label className="modal-field-label">Request ID</label>
-                      <p className="modal-field-value-large">{selectedRequest.requestId}</p>
-                    </div>
-                    <div className="modal-field">
-                      <label className="modal-field-label">Patient Name</label>
-                      <p className="modal-field-value">{selectedRequest.patientName}</p>
-                    </div>
-                    <div className="modal-field">
-                      <label className="modal-field-label">Blood Type</label>
-                      <span className="blood-type-badge" style={{ fontSize: '16px', padding: '6px 14px' }}>
-                        {selectedRequest.bloodType}
-                      </span>
-                    </div>
-                    <div className="modal-field">
-                      <label className="modal-field-label">Urgency Level</label>
-                      <div className="flex items-center gap-2">
-                        <span className={`urgency-badge ${getUrgencyClasses(selectedRequest.urgency)}`} style={{ padding: '6px 14px' }}>
-                          {selectedRequest.urgency}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Select New Urgency Level *
+                </label>
+                <div className="space-y-2">
+                  {['Critical', 'High', 'Medium', 'Low'].map((level) => (
+                    <label
+                      key={level}
+                      className={`flex items-center p-3 rounded-lg border cursor-pointer transition-all ${selectedUrgency === level
+                        ? `border-2 ${level === 'Critical' ? 'border-red-500 bg-red-50' : level === 'High' ? 'border-orange-500 bg-orange-50' : level === 'Medium' ? 'border-yellow-500 bg-yellow-50' : 'border-green-500 bg-green-50'}`
+                        : 'border-gray-300 hover:bg-gray-50'
+                        }`}
+                    >
+                      <input
+                        type="radio"
+                        name="urgency"
+                        value={level}
+                        checked={selectedUrgency === level}
+                        onChange={(e) => setSelectedUrgency(e.target.value)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                      />
+                      <div className="ml-3 flex items-center gap-2">
+                        <span className={`urgency-badge ${getUrgencyClasses(level)}`}>
+                          {level}
                         </span>
-                        <button
-                          onClick={() => {
-                            setShowModal(false);
-                            handleUrgencyChange(selectedRequest);
-                          }}
-                          className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
-                        >
-                          <Edit2 size={14} />
-                          Change
-                        </button>
+                        <span className="text-sm text-gray-600">
+                          {level === 'Critical' && 'Immediate life-threatening situation'}
+                          {level === 'High' && 'Serious condition requiring urgent attention'}
+                          {level === 'Medium' && 'Needs attention within 24-48 hours'}
+                          {level === 'Low' && 'Non-urgent, can wait several days'}
+                        </span>
                       </div>
-                    </div>
-                    <div className="modal-field">
-                      <label className="modal-field-label">Current Status</label>
-                      <span className={`status-badge ${getStatusClasses(selectedRequest.status)}`} style={{ padding: '6px 14px' }}>
-                        {selectedRequest.status.charAt(0).toUpperCase() + selectedRequest.status.slice(1).toLowerCase()}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="modal-section">
-                    <div className="modal-field">
-                      <label className="modal-field-label">Requester Name</label>
-                      <p className="modal-field-value">{selectedRequest.requesterName}</p>
-                    </div>
-                    <div className="modal-field">
-                      <label className="modal-field-label">Contact Email</label>
-                      <p className="modal-field-value">{selectedRequest.userEmail}</p>
-                    </div>
-                    <div className="modal-field">
-                      <label className="modal-field-label">Contact Number</label>
-                      <p className="modal-field-value">{selectedRequest.contactNumber}</p>
-                    </div>
-                    <div className="modal-field">
-                      <label className="modal-field-label">Patient Location</label>
-                      <p className="modal-field-value-location">
-                        <MapPin className="modal-location-icon" />
-                        <span style={{ fontWeight: 500 }}>{selectedRequest.location}</span>
-                      </p>
-                    </div>
-                    <div className="modal-field">
-                      <label className="modal-field-label">Request Date</label>
-                      <p className="modal-field-value-date">
-                        <Calendar className="modal-clock-icon" />
-                        <span style={{ fontWeight: 600 }}>{selectedRequest.requestDate}</span>
-                      </p>
-                    </div>
-                  </div>
+                    </label>
+                  ))}
                 </div>
+              </div>
 
-                <div className="modal-reason-section">
-                  <label className="modal-reason-label">Reason for Blood Request</label>
-                  <div className="modal-reason-content">
-                    <p className="modal-reason-text">{selectedRequest.reason}</p>
-                  </div>
-                </div>
-
-                {selectedRequest.rejectionReason && (
-                  <div className="modal-reason-section" style={{ backgroundColor: '#FEF2F2', border: '1px solid #FECACA' }}>
-                    <label className="modal-reason-label" style={{ color: '#DC2626' }}>Rejection Reason</label>
-                    <div className="modal-reason-content">
-                      <p className="modal-reason-text" style={{ color: '#991B1B' }}>{selectedRequest.rejectionReason}</p>
-                    </div>
-                  </div>
-                )}
-
-                {selectedRequest.status.toLowerCase() === 'pending' && (
-                  <div className="modal-actions">
-                    <button
-                      onClick={() => handleStatusChange(selectedRequest.id, 'Rejected')}
-                      className="modal-button modal-button-reject"
-                      disabled={updatingId === selectedRequest.id}
-                    >
-                      {updatingId === selectedRequest.id ? (
-                        <>
-                          <Loader2 className="animate-spin mr-2" size={16} />
-                          Updating...
-                        </>
-                      ) : 'Reject Request'}
-                    </button>
-                    <button
-                      onClick={() => handleStatusChange(selectedRequest.id, 'Approved')}
-                      className="modal-button modal-button-approve"
-                      disabled={updatingId === selectedRequest.id}
-                    >
-                      {updatingId === selectedRequest.id ? (
-                        <>
-                          <Loader2 className="animate-spin mr-2" size={16} />
-                          Updating...
-                        </>
-                      ) : 'Approve Request'}
-                    </button>
-                  </div>
-                )}
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setShowUrgencyModal(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium"
+                  disabled={updatingId === selectedRequest.id}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => updateRequestUrgency(selectedRequest.id, selectedUrgency)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  disabled={updatingId === selectedRequest.id || selectedUrgency === selectedRequest.urgency}
+                >
+                  {updatingId === selectedRequest.id ? (
+                    <>
+                      <Loader2 className="animate-spin" size={16} />
+                      Updating...
+                    </>
+                  ) : (
+                    <>
+                      <Check size={16} />
+                      Update to {selectedUrgency}
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </div>
-        )}
-
-        {/* Reject Reason Modal */}
-        {showRejectModal && selectedRequest && (
-          <div className="modal-overlay">
-            <div className="modal-container" style={{ maxWidth: '28rem' }}>
-              <div className="modal-header">
-                <div className="modal-header-content">
-                  <h2 className="modal-title">Reject Request</h2>
-                  <button
-                    onClick={() => {
-                      setShowRejectModal(false);
-                      setRejectReason('');
-                    }}
-                    className="modal-close"
-                  >
-                    <X className="modal-close-icon" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="modal-body">
-                <div className="mb-4">
-                  <p className="text-gray-600 mb-2">
-                    You are about to reject request <strong>{selectedRequest.requestId}</strong>.
-                  </p>
-                  <p className="text-gray-600">
-                    Please provide a reason for rejection. This will be sent to the requester.
-                  </p>
-                </div>
-
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Rejection Reason *
-                  </label>
-                  <textarea
-                    value={rejectReason}
-                    onChange={(e) => setRejectReason(e.target.value)}
-                    placeholder="Enter reason for rejection (minimum 10 characters)..."
-                    className="w-full h-32 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                    required
-                  />
-                  <p className="text-sm text-gray-500 mt-1">
-                    {rejectReason.length}/10 characters (minimum 10 required)
-                  </p>
-                </div>
-
-                <div className="flex justify-end gap-3">
-                  <button
-                    onClick={() => {
-                      setShowRejectModal(false);
-                      setRejectReason('');
-                    }}
-                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium"
-                    disabled={updatingId === selectedRequest.id}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleRejectWithReason}
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={updatingId === selectedRequest.id || rejectReason.trim().length < 10}
-                  >
-                    {updatingId === selectedRequest.id ? (
-                      <>
-                        <Loader2 className="animate-spin mr-2 inline" size={16} />
-                        Rejecting...
-                      </>
-                    ) : 'Confirm Reject'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Urgency Update Modal */}
-        {showUrgencyModal && selectedRequest && (
-          <div className="modal-overlay">
-            <div className="modal-container" style={{ maxWidth: '28rem' }}>
-              <div className="modal-header">
-                <div className="modal-header-content">
-                  <h2 className="modal-title">Update Urgency Level</h2>
-                  <button
-                    onClick={() => setShowUrgencyModal(false)}
-                    className="modal-close"
-                  >
-                    <X className="modal-close-icon" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="modal-body">
-                <div className="mb-4">
-                  <p className="text-gray-600 mb-2">
-                    Update urgency level for request <strong>{selectedRequest.requestId}</strong>.
-                  </p>
-                  <p className="text-gray-600">
-                    Patient: <strong>{selectedRequest.patientName}</strong> ({selectedRequest.bloodType})
-                  </p>
-                  <p className="text-gray-600">
-                    Current urgency: <span className={`font-semibold ${getUrgencyClasses(selectedRequest.urgency)}`}>
-                      {selectedRequest.urgency}
-                    </span>
-                  </p>
-                </div>
-
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Select New Urgency Level *
-                  </label>
-                  <div className="space-y-2">
-                    {['Critical', 'High', 'Medium', 'Low'].map((level) => (
-                      <label
-                        key={level}
-                        className={`flex items-center p-3 rounded-lg border cursor-pointer transition-all ${selectedUrgency === level
-                          ? `border-2 ${level === 'Critical' ? 'border-red-500 bg-red-50' : level === 'High' ? 'border-orange-500 bg-orange-50' : level === 'Medium' ? 'border-yellow-500 bg-yellow-50' : 'border-green-500 bg-green-50'}`
-                          : 'border-gray-300 hover:bg-gray-50'
-                          }`}
-                      >
-                        <input
-                          type="radio"
-                          name="urgency"
-                          value={level}
-                          checked={selectedUrgency === level}
-                          onChange={(e) => setSelectedUrgency(e.target.value)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500"
-                        />
-                        <div className="ml-3 flex items-center gap-2">
-                          <span className={`urgency-badge ${getUrgencyClasses(level)}`}>
-                            {level}
-                          </span>
-                          <span className="text-sm text-gray-600">
-                            {level === 'Critical' && 'Immediate life-threatening situation'}
-                            {level === 'High' && 'Serious condition requiring urgent attention'}
-                            {level === 'Medium' && 'Needs attention within 24-48 hours'}
-                            {level === 'Low' && 'Non-urgent, can wait several days'}
-                          </span>
-                        </div>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex justify-end gap-3">
-                  <button
-                    onClick={() => setShowUrgencyModal(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium"
-                    disabled={updatingId === selectedRequest.id}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => updateRequestUrgency(selectedRequest.id, selectedUrgency)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                    disabled={updatingId === selectedRequest.id || selectedUrgency === selectedRequest.urgency}
-                  >
-                    {updatingId === selectedRequest.id ? (
-                      <>
-                        <Loader2 className="animate-spin" size={16} />
-                        Updating...
-                      </>
-                    ) : (
-                      <>
-                        <Check size={16} />
-                        Update to {selectedUrgency}
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </Layout>
+        </div>
+      )}
+    </>
   );
 };
 

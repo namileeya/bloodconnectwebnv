@@ -994,1142 +994,1142 @@ const ManageEventsSlots = ({ onNavigate }) => {
   const summary = calculateSummary();
 
   return (
-    <Layout onNavigate={onNavigate} currentPage="manage-events-slots">
-      <div className="manage-events-slots-wrapper">
-        {/* Header */}
-        <div className="header-container">
-          <h1 className="header-title">Manage Events & Slots</h1>
-        </div>
-
-        {/* Calendar Section */}
-        <div className="event-calendar-section">
-          <div className="calendar-controls">
-            <div className="calendar-button-group">
-              <button className="today-button" onClick={goToToday}>
-                Today
-              </button>
-              <button className="add-event-button" onClick={() => setShowAddModal(true)}>
-                <Plus className="w-5 h-5" />
-                Add Event
-              </button>
-            </div>
-            <div className="calendar-navigation">
-              <button className="nav-button" onClick={previousPeriod}>
-                <ChevronLeft className="nav-icon" />
-              </button>
-              <h2 className="calendar-month-year">
-                {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-              </h2>
-              <button className="nav-button" onClick={nextPeriod}>
-                <ChevronRight className="nav-icon" />
-              </button>
-            </div>
-            <div className="view-mode-buttons">
-              <button
-                className={`view-button ${viewMode === 'day' ? 'view-button-active' : ''}`}
-                onClick={() => setViewMode('day')}
-              >
-                Day
-              </button>
-              <button
-                className={`view-button ${viewMode === 'week' ? 'view-button-active' : ''}`}
-                onClick={() => setViewMode('week')}
-              >
-                Week
-              </button>
-              <button
-                className={`view-button ${viewMode === 'month' ? 'view-button-active' : ''}`}
-                onClick={() => setViewMode('month')}
-              >
-                Month
-              </button>
-            </div>
+    <>
+      <Layout onNavigate={onNavigate} currentPage="manage-events-slots">
+        <div className="manage-events-slots-wrapper">
+          {/* Header */}
+          <div className="header-container">
+            <h1 className="header-title">Manage Events & Slots</h1>
           </div>
 
-          <div className="calendar-container">
-            {viewMode === 'month' && (
-              <>
-                <div className="calendar-header">
-                  {['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map((day) => (
-                    <div key={day} className="calendar-header-cell">{day}</div>
-                  ))}
-                </div>
-                <div className="calendar-body">
-                  {renderMonthView()}
-                </div>
-              </>
-            )}
-            {viewMode === 'week' && renderWeekView()}
-            {viewMode === 'day' && renderDayView()}
-          </div>
+          {/* Calendar Section */}
+          <div className="event-calendar-section">
+            <div className="calendar-controls">
+              <div className="calendar-button-group">
+                <button className="today-button" onClick={goToToday}>
+                  Today
+                </button>
+                <button className="add-event-button" onClick={() => setShowAddModal(true)}>
+                  <Plus className="w-5 h-5" />
+                  Add Event
+                </button>
+              </div>
+              <div className="calendar-navigation">
+                <button className="nav-button" onClick={previousPeriod}>
+                  <ChevronLeft className="nav-icon" />
+                </button>
+                <h2 className="calendar-month-year">
+                  {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                </h2>
+                <button className="nav-button" onClick={nextPeriod}>
+                  <ChevronRight className="nav-icon" />
+                </button>
+              </div>
+              <div className="view-mode-buttons">
+                <button
+                  className={`view-button ${viewMode === 'day' ? 'view-button-active' : ''}`}
+                  onClick={() => setViewMode('day')}
+                >
+                  Day
+                </button>
+                <button
+                  className={`view-button ${viewMode === 'week' ? 'view-button-active' : ''}`}
+                  onClick={() => setViewMode('week')}
+                >
+                  Week
+                </button>
+                <button
+                  className={`view-button ${viewMode === 'month' ? 'view-button-active' : ''}`}
+                  onClick={() => setViewMode('month')}
+                >
+                  Month
+                </button>
+              </div>
+            </div>
 
-          {/* Events for Selected Date */}
-          {selectedDate && viewMode === 'month' && (
-            <div className="date-info-panel">
-              <h3 className="date-info-title">
-                <Calendar className="w-5 h-5" />
-                Events on {selectedDate.toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  month: 'long',
-                  day: 'numeric',
-                  year: 'numeric'
-                })}
-              </h3>
-              {getEventsForDate(selectedDate).length > 0 ? (
-                <div className="space-y-2">
-                  {getEventsForDate(selectedDate).map(event => (
-                    <div
-                      key={event.id}
-                      className="p-3 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
-                      onClick={() => {
-                        setSelectedEvent(event);
-                        setShowEventDetails(true);
-                      }}
-                    >
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <div className="font-semibold text-gray-900">{event.title}</div>
-                          <div className="text-sm text-gray-600">
-                            {event.startTime} - {event.endTime} • {event.location}
-                          </div>
-                          {event.assignedHospitalName && (
-                            <div className="text-sm text-blue-600 font-medium mt-1 flex items-center">
-                              <Building className="w-3 h-3 mr-1" />
-                              Destination: {event.assignedHospitalName}
-                            </div>
-                          )}
-                          <div className="text-sm text-gray-500 mt-1">
-                            Registered: {event.currentParticipants || 0}/{event.expectedCapacity} •
-                            Slot Capacity: {event.slotCapacity || 0}
-                          </div>
-                        </div>
-                        <button
-                          className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleOpenSlotsModal(event);
-                          }}
-                        >
-                          View Slots
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="date-info-empty">No events scheduled for this date.</p>
+            <div className="calendar-container">
+              {viewMode === 'month' && (
+                <>
+                  <div className="calendar-header">
+                    {['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map((day) => (
+                      <div key={day} className="calendar-header-cell">{day}</div>
+                    ))}
+                  </div>
+                  <div className="calendar-body">
+                    {renderMonthView()}
+                  </div>
+                </>
               )}
+              {viewMode === 'week' && renderWeekView()}
+              {viewMode === 'day' && renderDayView()}
             </div>
-          )}
-        </div>
 
-        {/* Add Event Modal */}
-        {showAddModal && (
-          <div className="event-modal-overlay" onClick={() => { setShowAddModal(false); resetForm(); }}>
-            <div className="event-modal-container" onClick={e => e.stopPropagation()}>
-              <div className="event-modal-header">
-                <h2 className="event-modal-title">Add New Blood Drive Event</h2>
-                <button className="event-modal-close" onClick={() => { setShowAddModal(false); resetForm(); }}>
-                  <X className="close-icon" />
-                </button>
-              </div>
-
-              <div className="event-modal-body">
-                <div className="event-form">
-                  <div className="form-group">
-                    <label className="form-label required">Event Title *</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="Blood Donation Drive"
-                      value={formData.title}
-                      onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group-inline">
-                    <div className="form-group-small">
-                      <label className="form-label required">Start Date *</label>
-                      <input
-                        type="date"
-                        className="form-input"
-                        value={formData.startDate}
-                        onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
-                        required
-                      />
-                    </div>
-                    <div className="form-group-small">
-                      <label className="form-label required">Start Time *</label>
-                      <input
-                        type="time"
-                        className="form-input"
-                        value={formData.startTime}
-                        onChange={(e) => setFormData(prev => ({ ...prev, startTime: e.target.value }))}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-group-inline">
-                    <div className="form-group-small">
-                      <label className="form-label required">End Date *</label>
-                      <input
-                        type="date"
-                        className="form-input"
-                        value={formData.endDate}
-                        onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
-                        required
-                      />
-                    </div>
-                    <div className="form-group-small">
-                      <label className="form-label required">End Time *</label>
-                      <input
-                        type="time"
-                        className="form-input"
-                        value={formData.endTime}
-                        onChange={(e) => setFormData(prev => ({ ...prev, endTime: e.target.value }))}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  {/* DESTINATION HOSPITAL (Compulsary) */}
-                  <div className="form-group" ref={destinationDropdownRef}>
-                    <label className="form-label required">Destination Hospital *</label>
-                    <div className="hospital-search-container">
-                      <div className="hospital-search-input-wrapper">
-                        <Search className="hospital-search-icon" />
-                        <input
-                          type="text"
-                          className="hospital-search-input"
-                          placeholder="Search and select destination hospital..."
-                          value={destinationSearch}
-                          onChange={(e) => {
-                            setDestinationSearch(e.target.value);
-                            filterDestinationHospitals(e.target.value);
-                            setShowDestinationDropdown(true);
-                          }}
-                          onFocus={() => setShowDestinationDropdown(true)}
-                          required
-                        />
-                        {destinationSearch && (
-                          <button
-                            className="hospital-clear-button"
-                            onClick={handleClearDestinationHospital}
-                            type="button"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        )}
-                        <button
-                          className="hospital-dropdown-button"
-                          onClick={() => setShowDestinationDropdown(!showDestinationDropdown)}
-                          type="button"
-                        >
-                          <ChevronDown className="w-4 h-4" />
-                        </button>
-                      </div>
-
-                      {showDestinationDropdown && filteredHospitals.length > 0 && (
-                        <div className="hospital-dropdown">
-                          <div className="hospital-dropdown-header">
-                            <span className="hospital-dropdown-title">Select Destination Hospital</span>
-                            <span className="hospital-dropdown-count">
-                              {filteredHospitals.length} hospital{filteredHospitals.length !== 1 ? 's' : ''}
-                            </span>
-                          </div>
-                          <div className="hospital-dropdown-list">
-                            {filteredHospitals.map((hospital) => (
-                              <div
-                                key={hospital.id}
-                                className={`hospital-dropdown-item ${formData.assignedHospitalId === hospital.id ? 'hospital-dropdown-item-selected' : ''}`}
-                                onClick={() => handleDestinationHospitalSelect(hospital)}
-                              >
-                                <div className="hospital-item-main">
-                                  <Building className="hospital-item-icon" />
-                                  <div className="hospital-item-details">
-                                    <span className="hospital-item-name">{hospital.name}</span>
-                                    <span className="hospital-item-location">
-                                      {hospital.city}, {hospital.state}
-                                    </span>
-                                  </div>
-                                </div>
-                                {formData.assignedHospitalId === hospital.id && (
-                                  <div className="hospital-item-check">
-                                    ✓
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                          {destinationSearch && filteredHospitals.length === 0 && (
-                            <div className="hospital-no-results">
-                              No hospitals found for "{destinationSearch}"
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    <p className="capacity-info">
-                      Blood collected at this event will be sent to this hospital
-                    </p>
-                  </div>
-
-                  {/* EVENT LOCATION (Optional with hospital search) */}
-                  <div className="form-group" ref={locationDropdownRef}>
-                    <label className="form-label">Event Location</label>
-
-                    {/* Location Type Toggle */}
-                    <div className="flex gap-2 mb-3">
-                      <button
-                        type="button"
-                        className={`flex-1 px-4 py-2 rounded-lg font-medium text-sm transition-colors ${isEventAtHospital ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
-                        onClick={() => handleLocationTypeChange('hospital')}
+            {/* Events for Selected Date */}
+            {selectedDate && viewMode === 'month' && (
+              <div className="date-info-panel">
+                <h3 className="date-info-title">
+                  <Calendar className="w-5 h-5" />
+                  Events on {selectedDate.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
+                </h3>
+                {getEventsForDate(selectedDate).length > 0 ? (
+                  <div className="space-y-2">
+                    {getEventsForDate(selectedDate).map(event => (
+                      <div
+                        key={event.id}
+                        className="p-3 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+                        onClick={() => {
+                          setSelectedEvent(event);
+                          setShowEventDetails(true);
+                        }}
                       >
-                        <Building className="inline w-4 h-4 mr-2" />
-                        Hospital Venue
-                      </button>
-                      <button
-                        type="button"
-                        className={`flex-1 px-4 py-2 rounded-lg font-medium text-sm transition-colors ${!isEventAtHospital ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
-                        onClick={() => handleLocationTypeChange('other')}
-                      >
-                        <MapPin className="inline w-4 h-4 mr-2" />
-                        Other Venue
-                      </button>
-                    </div>
-
-                    {/* Location Input with Hospital Search */}
-                    {isEventAtHospital ? (
-                      <div className="hospital-search-container">
-                        <div className="hospital-search-input-wrapper">
-                          <Search className="hospital-search-icon" />
-                          <input
-                            type="text"
-                            className="hospital-search-input"
-                            placeholder="Search for hospital venue (type 'hospital', 'clinic', etc.)..."
-                            value={locationSearch}
-                            onChange={(e) => {
-                              setLocationSearch(e.target.value);
-                              filterLocationHospitals(e.target.value);
-                              setShowLocationDropdown(true);
-                              handleLocationInputChange(e.target.value);
-                            }}
-                            onFocus={() => {
-                              if (locationSearch) {
-                                setShowLocationDropdown(true);
-                              }
-                            }}
-                          />
-                          {locationSearch && (
-                            <button
-                              className="hospital-clear-button"
-                              onClick={handleClearLocationHospital}
-                              type="button"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          )}
-                          <button
-                            className="hospital-dropdown-button"
-                            onClick={() => setShowLocationDropdown(!showLocationDropdown)}
-                            type="button"
-                          >
-                            <ChevronDown className="w-4 h-4" />
-                          </button>
-                        </div>
-
-                        {showLocationDropdown && filteredLocationHospitals.length > 0 && (
-                          <div className="hospital-dropdown">
-                            <div className="hospital-dropdown-header">
-                              <span className="hospital-dropdown-title">Select Hospital Venue</span>
-                              <span className="hospital-dropdown-count">
-                                {filteredLocationHospitals.length} hospital{filteredLocationHospitals.length !== 1 ? 's' : ''}
-                              </span>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="font-semibold text-gray-900">{event.title}</div>
+                            <div className="text-sm text-gray-600">
+                              {event.startTime} - {event.endTime} • {event.location}
                             </div>
-                            <div className="hospital-dropdown-list">
-                              {filteredLocationHospitals.map((hospital) => (
-                                <div
-                                  key={hospital.id}
-                                  className={`hospital-dropdown-item ${formData.locationHospitalId === hospital.id ? 'hospital-dropdown-item-selected' : ''}`}
-                                  onClick={() => handleLocationHospitalSelect(hospital)}
-                                >
-                                  <div className="hospital-item-main">
-                                    <Building className="hospital-item-icon" />
-                                    <div className="hospital-item-details">
-                                      <span className="hospital-item-name">{hospital.name}</span>
-                                      <span className="hospital-item-location">
-                                        {hospital.address}, {hospital.city}
-                                      </span>
-                                    </div>
-                                  </div>
-                                  {formData.locationHospitalId === hospital.id && (
-                                    <div className="hospital-item-check">
-                                      ✓
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                            {locationSearch && filteredLocationHospitals.length === 0 && (
-                              <div className="hospital-no-results">
-                                No hospitals found for "{locationSearch}"
+                            {event.assignedHospitalName && (
+                              <div className="text-sm text-blue-600 font-medium mt-1 flex items-center">
+                                <Building className="w-3 h-3 mr-1" />
+                                Destination: {event.assignedHospitalName}
                               </div>
                             )}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <input
-                        type="text"
-                        className="form-input"
-                        placeholder="Enter venue address (e.g., University Hall, Shopping Mall, Community Center...)"
-                        value={formData.location}
-                        onChange={(e) => handleLocationInputChange(e.target.value)}
-                      />
-                    )}
-                    <p className="capacity-info">
-                      {isEventAtHospital
-                        ? "Select a hospital if event is held at a hospital/clinic"
-                        : "Enter venue details for non-hospital locations"}
-                    </p>
-                  </div>
-
-                  {/* Slot Capacity */}
-                  <div className="form-group">
-                    <label className="form-label required">Max Donors per 30-min Slot *</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      placeholder="10"
-                      value={formData.slotCapacity}
-                      onChange={(e) => setFormData(prev => ({ ...prev, slotCapacity: e.target.value }))}
-                      min="1"
-                      required
-                    />
-                    <p className="capacity-info">
-                      Maximum number of donors allowed in each 30-minute time slot
-                    </p>
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Total Expected Capacity</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      placeholder="100"
-                      value={formData.expectedCapacity}
-                      onChange={(e) => setFormData(prev => ({ ...prev, expectedCapacity: e.target.value }))}
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Organizer Name</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="BloodConnect Team, University Club, Hospital Staff, etc."
-                      value={formData.organizerName}
-                      onChange={(e) => setFormData(prev => ({ ...prev, organizerName: e.target.value }))}
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Description</label>
-                    <textarea
-                      className="form-input"
-                      rows="3"
-                      placeholder="Event description, special instructions, target donors, etc."
-                      value={formData.description}
-                      onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    />
-                  </div>
-                </div>
-
-                <div className="event-modal-actions">
-                  <button
-                    className="modal-button cancel-button"
-                    onClick={() => { setShowAddModal(false); resetForm(); }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    className="modal-button save-button"
-                    onClick={handleAddEvent}
-                  >
-                    Create Event
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Edit Event Modal */}
-        {showEditModal && selectedEvent && (
-          <div className="event-modal-overlay" onClick={() => setShowEditModal(false)}>
-            <div className="event-modal-container" onClick={e => e.stopPropagation()}>
-              <div className="event-modal-header">
-                <h2 className="event-modal-title">Edit Event</h2>
-                <button className="event-modal-close" onClick={() => setShowEditModal(false)}>
-                  <X className="close-icon" />
-                </button>
-              </div>
-
-              <div className="event-modal-body">
-                <div className="event-form">
-                  <div className="form-group">
-                    <label className="form-label required">Event Title *</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={formData.title}
-                      onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group-inline">
-                    <div className="form-group-small">
-                      <label className="form-label required">Start Date *</label>
-                      <input
-                        type="date"
-                        className="form-input"
-                        value={formData.startDate}
-                        onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
-                        required
-                      />
-                    </div>
-                    <div className="form-group-small">
-                      <label className="form-label required">Start Time *</label>
-                      <input
-                        type="time"
-                        className="form-input"
-                        value={formData.startTime}
-                        onChange={(e) => setFormData(prev => ({ ...prev, startTime: e.target.value }))}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-group-inline">
-                    <div className="form-group-small">
-                      <label className="form-label required">End Date *</label>
-                      <input
-                        type="date"
-                        className="form-input"
-                        value={formData.endDate}
-                        onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
-                        required
-                      />
-                    </div>
-                    <div className="form-group-small">
-                      <label className="form-label required">End Time *</label>
-                      <input
-                        type="time"
-                        className="form-input"
-                        value={formData.endTime}
-                        onChange={(e) => setFormData(prev => ({ ...prev, endTime: e.target.value }))}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  {/* DESTINATION HOSPITAL in Edit Modal */}
-                  <div className="form-group" ref={destinationDropdownRef}>
-                    <label className="form-label required">Destination Hospital *</label>
-                    <div className="hospital-search-container">
-                      <div className="hospital-search-input-wrapper">
-                        <Search className="hospital-search-icon" />
-                        <input
-                          type="text"
-                          className="hospital-search-input"
-                          placeholder="Search and select destination hospital..."
-                          value={destinationSearch}
-                          onChange={(e) => {
-                            setDestinationSearch(e.target.value);
-                            filterDestinationHospitals(e.target.value);
-                            setShowDestinationDropdown(true);
-                          }}
-                          onFocus={() => setShowDestinationDropdown(true)}
-                          required
-                        />
-                        {destinationSearch && (
-                          <button
-                            className="hospital-clear-button"
-                            onClick={handleClearDestinationHospital}
-                            type="button"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        )}
-                        <button
-                          className="hospital-dropdown-button"
-                          onClick={() => setShowDestinationDropdown(!showDestinationDropdown)}
-                          type="button"
-                        >
-                          <ChevronDown className="w-4 h-4" />
-                        </button>
-                      </div>
-
-                      {showDestinationDropdown && filteredHospitals.length > 0 && (
-                        <div className="hospital-dropdown">
-                          <div className="hospital-dropdown-header">
-                            <span className="hospital-dropdown-title">Select Destination Hospital</span>
-                            <span className="hospital-dropdown-count">
-                              {filteredHospitals.length} hospital{filteredHospitals.length !== 1 ? 's' : ''}
-                            </span>
-                          </div>
-                          <div className="hospital-dropdown-list">
-                            {filteredHospitals.map((hospital) => (
-                              <div
-                                key={hospital.id}
-                                className={`hospital-dropdown-item ${formData.assignedHospitalId === hospital.id ? 'hospital-dropdown-item-selected' : ''}`}
-                                onClick={() => handleDestinationHospitalSelect(hospital)}
-                              >
-                                <div className="hospital-item-main">
-                                  <Building className="hospital-item-icon" />
-                                  <div className="hospital-item-details">
-                                    <span className="hospital-item-name">{hospital.name}</span>
-                                    <span className="hospital-item-location">
-                                      {hospital.city}, {hospital.state}
-                                    </span>
-                                  </div>
-                                </div>
-                                {formData.assignedHospitalId === hospital.id && (
-                                  <div className="hospital-item-check">
-                                    ✓
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* EVENT LOCATION in Edit Modal */}
-                  <div className="form-group" ref={locationDropdownRef}>
-                    <label className="form-label">Event Location</label>
-
-                    <div className="flex gap-2 mb-3">
-                      <button
-                        type="button"
-                        className={`flex-1 px-4 py-2 rounded-lg font-medium text-sm transition-colors ${isEventAtHospital ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
-                        onClick={() => handleLocationTypeChange('hospital')}
-                      >
-                        <Building className="inline w-4 h-4 mr-2" />
-                        Hospital Venue
-                      </button>
-                      <button
-                        type="button"
-                        className={`flex-1 px-4 py-2 rounded-lg font-medium text-sm transition-colors ${!isEventAtHospital ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
-                        onClick={() => handleLocationTypeChange('other')}
-                      >
-                        <MapPin className="inline w-4 h-4 mr-2" />
-                        Other Venue
-                      </button>
-                    </div>
-
-                    {isEventAtHospital ? (
-                      <div className="hospital-search-container">
-                        <div className="hospital-search-input-wrapper">
-                          <Search className="hospital-search-icon" />
-                          <input
-                            type="text"
-                            className="hospital-search-input"
-                            placeholder="Search for hospital venue..."
-                            value={locationSearch}
-                            onChange={(e) => {
-                              setLocationSearch(e.target.value);
-                              filterLocationHospitals(e.target.value);
-                              setShowLocationDropdown(true);
-                              handleLocationInputChange(e.target.value);
-                            }}
-                            onFocus={() => {
-                              if (locationSearch) {
-                                setShowLocationDropdown(true);
-                              }
-                            }}
-                          />
-                          {locationSearch && (
-                            <button
-                              className="hospital-clear-button"
-                              onClick={handleClearLocationHospital}
-                              type="button"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          )}
-                          <button
-                            className="hospital-dropdown-button"
-                            onClick={() => setShowLocationDropdown(!showLocationDropdown)}
-                            type="button"
-                          >
-                            <ChevronDown className="w-4 h-4" />
-                          </button>
-                        </div>
-
-                        {showLocationDropdown && filteredLocationHospitals.length > 0 && (
-                          <div className="hospital-dropdown">
-                            <div className="hospital-dropdown-list">
-                              {filteredLocationHospitals.map((hospital) => (
-                                <div
-                                  key={hospital.id}
-                                  className={`hospital-dropdown-item ${formData.locationHospitalId === hospital.id ? 'hospital-dropdown-item-selected' : ''}`}
-                                  onClick={() => handleLocationHospitalSelect(hospital)}
-                                >
-                                  <div className="hospital-item-main">
-                                    <Building className="hospital-item-icon" />
-                                    <div className="hospital-item-details">
-                                      <span className="hospital-item-name">{hospital.name}</span>
-                                      <span className="hospital-item-location">
-                                        {hospital.address}, {hospital.city}
-                                      </span>
-                                    </div>
-                                  </div>
-                                  {formData.locationHospitalId === hospital.id && (
-                                    <div className="hospital-item-check">
-                                      ✓
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
+                            <div className="text-sm text-gray-500 mt-1">
+                              Registered: {event.currentParticipants || 0}/{event.expectedCapacity} •
+                              Slot Capacity: {event.slotCapacity || 0}
                             </div>
                           </div>
-                        )}
+                          <button
+                            className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenSlotsModal(event);
+                            }}
+                          >
+                            View Slots
+                          </button>
+                        </div>
                       </div>
-                    ) : (
-                      <input
-                        type="text"
-                        className="form-input"
-                        placeholder="Enter venue address..."
-                        value={formData.location}
-                        onChange={(e) => handleLocationInputChange(e.target.value)}
-                      />
-                    )}
+                    ))}
                   </div>
-
-                  <div className="form-group">
-                    <label className="form-label required">Max Donors per 30-min Slot *</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={formData.slotCapacity}
-                      onChange={(e) => setFormData(prev => ({ ...prev, slotCapacity: e.target.value }))}
-                      min="1"
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Total Expected Capacity</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={formData.expectedCapacity}
-                      onChange={(e) => setFormData(prev => ({ ...prev, expectedCapacity: e.target.value }))}
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Organizer Name</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={formData.organizerName}
-                      onChange={(e) => setFormData(prev => ({ ...prev, organizerName: e.target.value }))}
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Description</label>
-                    <textarea
-                      className="form-input"
-                      rows="3"
-                      value={formData.description}
-                      onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Status</label>
-                    <select
-                      className="form-select"
-                      value={formData.status}
-                      onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value }))}
-                    >
-                      <option value="active">Active</option>
-                      <option value="cancelled">Cancelled</option>
-                      <option value="completed">Completed</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="event-modal-actions">
-                  <button
-                    className="modal-button cancel-button"
-                    onClick={() => setShowEditModal(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    className="modal-button save-button"
-                    onClick={handleSaveEdit}
-                  >
-                    Save Changes
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Event Details Modal */}
-        {showEventDetails && selectedEvent && (
-          <div className="event-modal-overlay" onClick={() => setShowEventDetails(false)}>
-            <div className="event-modal-container event-details-modal" onClick={e => e.stopPropagation()}>
-              <div className="event-modal-header">
-                <h2 className="event-modal-title">{selectedEvent.title}</h2>
-                <button className="event-modal-close" onClick={() => setShowEventDetails(false)}>
-                  <X className="close-icon" />
-                </button>
-              </div>
-              <div className="event-modal-body">
-                <div className="event-details">
-                  <div className="event-detail-item">
-                    <Calendar className="detail-icon" />
-                    <div>
-                      <p className="font-semibold">Date</p>
-                      <p className="text-sm text-gray-600">
-                        {selectedEvent.startDate} {selectedEvent.startDate !== selectedEvent.endDate ? `to ${selectedEvent.endDate}` : ''}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="event-detail-item">
-                    <Clock className="detail-icon" />
-                    <div>
-                      <p className="font-semibold">Time</p>
-                      <p className="text-sm text-gray-600">
-                        {selectedEvent.startTime} - {selectedEvent.endTime}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="event-detail-item">
-                    <MapPin className="detail-icon" />
-                    <div>
-                      <p className="font-semibold">Location</p>
-                      <p className="text-sm text-gray-600">{selectedEvent.location}</p>
-                    </div>
-                  </div>
-
-                  {selectedEvent.assignedHospitalName && (
-                    <div className="event-detail-item">
-                      <div className="detail-icon bg-blue-100 text-blue-600 rounded-full p-2">
-                        <Building className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="font-semibold">Destination Hospital</p>
-                        <p className="text-sm text-gray-600">{selectedEvent.assignedHospitalName}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {selectedEvent.locationType === 'hospital' && selectedEvent.locationHospitalName && (
-                    <div className="event-detail-item">
-                      <div className="detail-icon bg-green-100 text-green-600 rounded-full p-2">
-                        <MapPin className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="font-semibold">Venue Hospital</p>
-                        <p className="text-sm text-gray-600">{selectedEvent.locationHospitalName}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="event-detail-item">
-                    <User className="detail-icon" />
-                    <div>
-                      <p className="font-semibold">Organizer</p>
-                      <p className="text-sm text-gray-600">{selectedEvent.organizerName}</p>
-                    </div>
-                  </div>
-
-                  <div className="event-detail-item">
-                    <Users className="detail-icon" />
-                    <div>
-                      <p className="font-semibold">Capacity</p>
-                      <p className="text-sm text-gray-600">
-                        Registered: {selectedEvent.currentParticipants || 0} / {selectedEvent.expectedCapacity}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Per Slot: {selectedEvent.slotCapacity || 0} donors per 30 minutes
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {selectedEvent.description && (
-                  <div className="event-description mt-4">
-                    <h3 className="font-semibold text-gray-800 mb-2">Description</h3>
-                    <p className="text-gray-700">{selectedEvent.description}</p>
-                  </div>
+                ) : (
+                  <p className="date-info-empty">No events scheduled for this date.</p>
                 )}
+              </div>
+            )}
+          </div>
+        </div>
+      </Layout>
 
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <button
-                    className="w-full py-3 px-6 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold flex items-center justify-center gap-2"
-                    onClick={() => handleOpenSlotsModal(selectedEvent)}
-                  >
-                    <Clock className="w-5 h-5" />
-                    View Time Slots & Bookings
-                  </button>
+      {/* Add Event Modal */}
+      {showAddModal && (
+        <div className="event-modal-overlay" onClick={() => { setShowAddModal(false); resetForm(); }}>
+          <div className="event-modal-container" onClick={e => e.stopPropagation()}>
+            <div className="event-modal-header">
+              <h2 className="event-modal-title">Add New Blood Drive Event</h2>
+              <button className="event-modal-close" onClick={() => { setShowAddModal(false); resetForm(); }}>
+                <X className="close-icon" />
+              </button>
+            </div>
+
+            <div className="event-modal-body">
+              <div className="event-form">
+                <div className="form-group">
+                  <label className="form-label required">Event Title *</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Blood Donation Drive"
+                    value={formData.title}
+                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                    required
+                  />
                 </div>
 
-                <div className="event-modal-actions mt-4">
-                  <button
-                    className="modal-button cancel-button"
-                    onClick={() => {
-                      setShowDeleteConfirm(true);
-                      setShowEventDetails(false);
-                    }}
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete Event
-                  </button>
-                  <button
-                    className="modal-button save-button"
-                    onClick={() => handleEditEvent(selectedEvent)}
-                  >
-                    <Edit3 className="w-4 h-4 mr-2" />
-                    Edit Event
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Delete Confirmation Modal */}
-        {showDeleteConfirm && (
-          <div className="event-modal-overlay" onClick={() => setShowDeleteConfirm(false)}>
-            <div className="event-modal-container delete-modal" onClick={e => e.stopPropagation()}>
-              <div className="donation-confirm-icon-container">
-                <AlertCircle className="donation-confirm-icon" />
-              </div>
-              <h3 className="donation-confirm-title">Delete Event</h3>
-              <p className="donation-confirm-message">
-                Are you sure you want to delete "{selectedEvent?.title}"? This action cannot be undone.
-              </p>
-              <div className="donation-confirm-actions">
-                <button className="donation-confirm-button donation-confirm-cancel" onClick={() => setShowDeleteConfirm(false)}>
-                  Cancel
-                </button>
-                <button className="donation-confirm-button donation-confirm-delete" onClick={handleDeleteEvent}>
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Slots Management Modal */}
-        {showSlotsModal && selectedEventForSlots && (
-          <div className="event-modal-overlay" onClick={() => setShowSlotsModal(false)}>
-            <div className="event-modal-container slots-modal" onClick={e => e.stopPropagation()}>
-              <div className="event-modal-header">
-                <h2 className="event-modal-title">Time Slots Management</h2>
-                <button className="event-modal-close" onClick={() => setShowSlotsModal(false)}>
-                  <X className="close-icon" />
-                </button>
-              </div>
-              <div className="event-modal-body">
-                {/* Event Info */}
-                <div className="slots-event-info">
-                  <h3 className="text-lg font-bold text-gray-800 mb-2">{selectedEventForSlots.title}</h3>
-                  <div className="space-y-1 text-sm text-gray-600">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
-                      <span>{selectedEventForSlots.startDate} {selectedEventForSlots.startDate !== selectedEventForSlots.endDate ? `to ${selectedEventForSlots.endDate}` : ''}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4" />
-                      <span>{selectedEventForSlots.startTime} - {selectedEventForSlots.endTime}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4" />
-                      <span>{selectedEventForSlots.location}</span>
-                    </div>
-                    {selectedEventForSlots.assignedHospitalName && (
-                      <div className="flex items-center gap-2 text-blue-600">
-                        <Building className="w-4 h-4" />
-                        <span>Destination: {selectedEventForSlots.assignedHospitalName}</span>
-                      </div>
-                    )}
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4" />
-                      <span>Slot Capacity: {selectedEventForSlots.slotCapacity} donors per 30 minutes</span>
-                    </div>
+                <div className="form-group-inline">
+                  <div className="form-group-small">
+                    <label className="form-label required">Start Date *</label>
+                    <input
+                      type="date"
+                      className="form-input"
+                      value={formData.startDate}
+                      onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                      required
+                    />
+                  </div>
+                  <div className="form-group-small">
+                    <label className="form-label required">Start Time *</label>
+                    <input
+                      type="time"
+                      className="form-input"
+                      value={formData.startTime}
+                      onChange={(e) => setFormData(prev => ({ ...prev, startTime: e.target.value }))}
+                      required
+                    />
                   </div>
                 </div>
 
-                {/* Slots List */}
-                <div className="slots-list-section mt-6">
-                  <h3 className="slots-list-title">30-Minute Time Slots</h3>
-                  <p className="text-sm text-gray-500 mb-4">
-                    Auto-generated slots within event duration. Each slot allows maximum {selectedEventForSlots.slotCapacity} donors.
-                  </p>
-
-                  {timeSlots.length === 0 ? (
-                    <div className="no-slots">
-                      <Clock className="no-slots-icon" />
-                      <p>No time slots available or event times not set.</p>
-                    </div>
-                  ) : (
-                    <div className="slots-grid">
-                      {timeSlots.map((slot, index) => (
-                        <div key={index} className={`slot-card ${slot.isFull ? 'slot-full' : 'slot-available'}`}>
-                          <div className="slot-header">
-                            <div className="slot-time">
-                              <Clock className="slot-time-icon" />
-                              <span className="slot-time-text">{slot.displayTime}</span>
-                            </div>
-                            <span className={`slot-status-badge ${slot.isFull ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
-                              {slot.isFull ? 'FULL' : 'AVAILABLE'}
-                            </span>
-                          </div>
-
-                          <div className="slot-details">
-                            <div className="slot-capacity">
-                              <Users className="slot-detail-icon" />
-                              <span>Booked: {slot.bookedCount} / {slot.capacity}</span>
-                            </div>
-                            <div className="text-xs text-gray-600 mt-1">
-                              Available: {slot.availableSlots} slots
-                            </div>
-
-                            {slot.bookedCount > 0 && (
-                              <button
-                                className="view-donors-button"
-                                onClick={() => {
-                                  setSelectedSlot(slot);
-                                }}
-                              >
-                                View {slot.bookedCount} Donor{slot.bookedCount !== 1 ? 's' : ''}
-                              </button>
-                            )}
-                          </div>
-
-                          <div className="slot-progress">
-                            <div
-                              className="slot-progress-bar"
-                              style={{
-                                width: `${Math.min((slot.bookedCount / slot.capacity) * 100, 100)}%`,
-                                backgroundColor: slot.isFull ? '#ef4444' : '#3b82f6'
-                              }}
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                <div className="form-group-inline">
+                  <div className="form-group-small">
+                    <label className="form-label required">End Date *</label>
+                    <input
+                      type="date"
+                      className="form-input"
+                      value={formData.endDate}
+                      onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
+                      required
+                    />
+                  </div>
+                  <div className="form-group-small">
+                    <label className="form-label required">End Time *</label>
+                    <input
+                      type="time"
+                      className="form-input"
+                      value={formData.endTime}
+                      onChange={(e) => setFormData(prev => ({ ...prev, endTime: e.target.value }))}
+                      required
+                    />
+                  </div>
                 </div>
 
-                {/* Donor Details for Selected Slot */}
-                {selectedSlot && (
-                  <div className="slot-details-expanded">
-                    <h4 className="font-semibold text-gray-800 mb-3">Donors for {selectedSlot.displayTime}</h4>
-                    <div className="booking-list">
-                      {selectedSlot.bookings.length === 0 ? (
-                        <p className="text-gray-500 text-center py-4">No bookings for this slot</p>
-                      ) : (
-                        selectedSlot.bookings.map(booking => {
-                          const donor = donorDetails[booking.userId];
-                          return (
-                            <div key={booking.id} className="booking-item">
-                              <div className="donor-avatar">
-                                {donor?.donor?.full_name?.charAt(0) || '?'}
-                              </div>
-                              <div className="booking-info">
-                                <div className="donor-name">
-                                  {donor?.donor?.full_name || 'Unknown Donor'}
-                                </div>
-                                <div className="donor-details">
-                                  <span>Blood Type: {donor?.donor?.blood_group || 'Unknown'}</span>
-                                  <span>•</span>
-                                  <span>Status: {booking.bookingStatus}</span>
-                                </div>
-                              </div>
-                              <span className={`booking-status ${booking.bookingStatus === 'confirmed' ? 'booking-status-confirmed' : 'booking-status-pending'}`}>
-                                {booking.bookingStatus}
-                              </span>
-                            </div>
-                          );
-                        })
+                {/* DESTINATION HOSPITAL (Compulsary) */}
+                <div className="form-group" ref={destinationDropdownRef}>
+                  <label className="form-label required">Destination Hospital *</label>
+                  <div className="hospital-search-container">
+                    <div className="hospital-search-input-wrapper">
+                      <Search className="hospital-search-icon" />
+                      <input
+                        type="text"
+                        className="hospital-search-input"
+                        placeholder="Search and select destination hospital..."
+                        value={destinationSearch}
+                        onChange={(e) => {
+                          setDestinationSearch(e.target.value);
+                          filterDestinationHospitals(e.target.value);
+                          setShowDestinationDropdown(true);
+                        }}
+                        onFocus={() => setShowDestinationDropdown(true)}
+                        required
+                      />
+                      {destinationSearch && (
+                        <button
+                          className="hospital-clear-button"
+                          onClick={handleClearDestinationHospital}
+                          type="button"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
                       )}
+                      <button
+                        className="hospital-dropdown-button"
+                        onClick={() => setShowDestinationDropdown(!showDestinationDropdown)}
+                        type="button"
+                      >
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
                     </div>
+
+                    {showDestinationDropdown && filteredHospitals.length > 0 && (
+                      <div className="hospital-dropdown">
+                        <div className="hospital-dropdown-header">
+                          <span className="hospital-dropdown-title">Select Destination Hospital</span>
+                          <span className="hospital-dropdown-count">
+                            {filteredHospitals.length} hospital{filteredHospitals.length !== 1 ? 's' : ''}
+                          </span>
+                        </div>
+                        <div className="hospital-dropdown-list">
+                          {filteredHospitals.map((hospital) => (
+                            <div
+                              key={hospital.id}
+                              className={`hospital-dropdown-item ${formData.assignedHospitalId === hospital.id ? 'hospital-dropdown-item-selected' : ''}`}
+                              onClick={() => handleDestinationHospitalSelect(hospital)}
+                            >
+                              <div className="hospital-item-main">
+                                <Building className="hospital-item-icon" />
+                                <div className="hospital-item-details">
+                                  <span className="hospital-item-name">{hospital.name}</span>
+                                  <span className="hospital-item-location">
+                                    {hospital.city}, {hospital.state}
+                                  </span>
+                                </div>
+                              </div>
+                              {formData.assignedHospitalId === hospital.id && (
+                                <div className="hospital-item-check">
+                                  ✓
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                        {destinationSearch && filteredHospitals.length === 0 && (
+                          <div className="hospital-no-results">
+                            No hospitals found for "{destinationSearch}"
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <p className="capacity-info">
+                    Blood collected at this event will be sent to this hospital
+                  </p>
+                </div>
+
+                {/* EVENT LOCATION (Optional with hospital search) */}
+                <div className="form-group" ref={locationDropdownRef}>
+                  <label className="form-label">Event Location</label>
+
+                  {/* Location Type Toggle */}
+                  <div className="flex gap-2 mb-3">
                     <button
-                      className="w-full mt-3 py-2 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
-                      onClick={() => setSelectedSlot(null)}
+                      type="button"
+                      className={`flex-1 px-4 py-2 rounded-lg font-medium text-sm transition-colors ${isEventAtHospital ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+                      onClick={() => handleLocationTypeChange('hospital')}
                     >
-                      Close
+                      <Building className="inline w-4 h-4 mr-2" />
+                      Hospital Venue
+                    </button>
+                    <button
+                      type="button"
+                      className={`flex-1 px-4 py-2 rounded-lg font-medium text-sm transition-colors ${!isEventAtHospital ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+                      onClick={() => handleLocationTypeChange('other')}
+                    >
+                      <MapPin className="inline w-4 h-4 mr-2" />
+                      Other Venue
                     </button>
                   </div>
-                )}
 
-                {/* Summary */}
-                <div className="slots-summary mt-6 p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-semibold text-gray-800 mb-2">Summary</h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="text-gray-600">Total Slots:</p>
-                      <p className="font-semibold">{summary.totalSlots}</p>
+                  {/* Location Input with Hospital Search */}
+                  {isEventAtHospital ? (
+                    <div className="hospital-search-container">
+                      <div className="hospital-search-input-wrapper">
+                        <Search className="hospital-search-icon" />
+                        <input
+                          type="text"
+                          className="hospital-search-input"
+                          placeholder="Search for hospital venue (type 'hospital', 'clinic', etc.)..."
+                          value={locationSearch}
+                          onChange={(e) => {
+                            setLocationSearch(e.target.value);
+                            filterLocationHospitals(e.target.value);
+                            setShowLocationDropdown(true);
+                            handleLocationInputChange(e.target.value);
+                          }}
+                          onFocus={() => {
+                            if (locationSearch) {
+                              setShowLocationDropdown(true);
+                            }
+                          }}
+                        />
+                        {locationSearch && (
+                          <button
+                            className="hospital-clear-button"
+                            onClick={handleClearLocationHospital}
+                            type="button"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                        <button
+                          className="hospital-dropdown-button"
+                          onClick={() => setShowLocationDropdown(!showLocationDropdown)}
+                          type="button"
+                        >
+                          <ChevronDown className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      {showLocationDropdown && filteredLocationHospitals.length > 0 && (
+                        <div className="hospital-dropdown">
+                          <div className="hospital-dropdown-header">
+                            <span className="hospital-dropdown-title">Select Hospital Venue</span>
+                            <span className="hospital-dropdown-count">
+                              {filteredLocationHospitals.length} hospital{filteredLocationHospitals.length !== 1 ? 's' : ''}
+                            </span>
+                          </div>
+                          <div className="hospital-dropdown-list">
+                            {filteredLocationHospitals.map((hospital) => (
+                              <div
+                                key={hospital.id}
+                                className={`hospital-dropdown-item ${formData.locationHospitalId === hospital.id ? 'hospital-dropdown-item-selected' : ''}`}
+                                onClick={() => handleLocationHospitalSelect(hospital)}
+                              >
+                                <div className="hospital-item-main">
+                                  <Building className="hospital-item-icon" />
+                                  <div className="hospital-item-details">
+                                    <span className="hospital-item-name">{hospital.name}</span>
+                                    <span className="hospital-item-location">
+                                      {hospital.address}, {hospital.city}
+                                    </span>
+                                  </div>
+                                </div>
+                                {formData.locationHospitalId === hospital.id && (
+                                  <div className="hospital-item-check">
+                                    ✓
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                          {locationSearch && filteredLocationHospitals.length === 0 && (
+                            <div className="hospital-no-results">
+                              No hospitals found for "{locationSearch}"
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <p className="text-gray-600">Available Slots:</p>
-                      <p className="font-semibold text-green-600">
-                        {summary.availableSlots}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-gray-600">Full Slots:</p>
-                      <p className="font-semibold text-red-600">
-                        {summary.fullSlots}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-gray-600">Total Bookings:</p>
-                      <p className="font-semibold">
-                        {summary.totalBookings}
-                      </p>
-                    </div>
+                  ) : (
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="Enter venue address (e.g., University Hall, Shopping Mall, Community Center...)"
+                      value={formData.location}
+                      onChange={(e) => handleLocationInputChange(e.target.value)}
+                    />
+                  )}
+                  <p className="capacity-info">
+                    {isEventAtHospital
+                      ? "Select a hospital if event is held at a hospital/clinic"
+                      : "Enter venue details for non-hospital locations"}
+                  </p>
+                </div>
+
+                {/* Slot Capacity */}
+                <div className="form-group">
+                  <label className="form-label required">Max Donors per 30-min Slot *</label>
+                  <input
+                    type="number"
+                    className="form-input"
+                    placeholder="10"
+                    value={formData.slotCapacity}
+                    onChange={(e) => setFormData(prev => ({ ...prev, slotCapacity: e.target.value }))}
+                    min="1"
+                    required
+                  />
+                  <p className="capacity-info">
+                    Maximum number of donors allowed in each 30-minute time slot
+                  </p>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Total Expected Capacity</label>
+                  <input
+                    type="number"
+                    className="form-input"
+                    placeholder="100"
+                    value={formData.expectedCapacity}
+                    onChange={(e) => setFormData(prev => ({ ...prev, expectedCapacity: e.target.value }))}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Organizer Name</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="BloodConnect Team, University Club, Hospital Staff, etc."
+                    value={formData.organizerName}
+                    onChange={(e) => setFormData(prev => ({ ...prev, organizerName: e.target.value }))}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Description</label>
+                  <textarea
+                    className="form-input"
+                    rows="3"
+                    placeholder="Event description, special instructions, target donors, etc."
+                    value={formData.description}
+                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div className="event-modal-actions">
+                <button
+                  className="modal-button cancel-button"
+                  onClick={() => { setShowAddModal(false); resetForm(); }}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="modal-button save-button"
+                  onClick={handleAddEvent}
+                >
+                  Create Event
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Event Modal */}
+      {showEditModal && selectedEvent && (
+        <div className="event-modal-overlay" onClick={() => setShowEditModal(false)}>
+          <div className="event-modal-container" onClick={e => e.stopPropagation()}>
+            <div className="event-modal-header">
+              <h2 className="event-modal-title">Edit Event</h2>
+              <button className="event-modal-close" onClick={() => setShowEditModal(false)}>
+                <X className="close-icon" />
+              </button>
+            </div>
+
+            <div className="event-modal-body">
+              <div className="event-form">
+                <div className="form-group">
+                  <label className="form-label required">Event Title *</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={formData.title}
+                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                    required
+                  />
+                </div>
+
+                <div className="form-group-inline">
+                  <div className="form-group-small">
+                    <label className="form-label required">Start Date *</label>
+                    <input
+                      type="date"
+                      className="form-input"
+                      value={formData.startDate}
+                      onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                      required
+                    />
                   </div>
-                  {summary.totalBookings !== summary.totalBookedInSlots && (
-                    <div className="mt-2 p-2 bg-yellow-50 text-yellow-700 text-xs rounded">
-                      <AlertCircle className="inline w-3 h-3 mr-1" />
-                      Note: Some bookings ({summary.totalBookings - summary.totalBookedInSlots}) don't match slot times
+                  <div className="form-group-small">
+                    <label className="form-label required">Start Time *</label>
+                    <input
+                      type="time"
+                      className="form-input"
+                      value={formData.startTime}
+                      onChange={(e) => setFormData(prev => ({ ...prev, startTime: e.target.value }))}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group-inline">
+                  <div className="form-group-small">
+                    <label className="form-label required">End Date *</label>
+                    <input
+                      type="date"
+                      className="form-input"
+                      value={formData.endDate}
+                      onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
+                      required
+                    />
+                  </div>
+                  <div className="form-group-small">
+                    <label className="form-label required">End Time *</label>
+                    <input
+                      type="time"
+                      className="form-input"
+                      value={formData.endTime}
+                      onChange={(e) => setFormData(prev => ({ ...prev, endTime: e.target.value }))}
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* DESTINATION HOSPITAL in Edit Modal */}
+                <div className="form-group" ref={destinationDropdownRef}>
+                  <label className="form-label required">Destination Hospital *</label>
+                  <div className="hospital-search-container">
+                    <div className="hospital-search-input-wrapper">
+                      <Search className="hospital-search-icon" />
+                      <input
+                        type="text"
+                        className="hospital-search-input"
+                        placeholder="Search and select destination hospital..."
+                        value={destinationSearch}
+                        onChange={(e) => {
+                          setDestinationSearch(e.target.value);
+                          filterDestinationHospitals(e.target.value);
+                          setShowDestinationDropdown(true);
+                        }}
+                        onFocus={() => setShowDestinationDropdown(true)}
+                        required
+                      />
+                      {destinationSearch && (
+                        <button
+                          className="hospital-clear-button"
+                          onClick={handleClearDestinationHospital}
+                          type="button"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                      <button
+                        className="hospital-dropdown-button"
+                        onClick={() => setShowDestinationDropdown(!showDestinationDropdown)}
+                        type="button"
+                      >
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
                     </div>
+
+                    {showDestinationDropdown && filteredHospitals.length > 0 && (
+                      <div className="hospital-dropdown">
+                        <div className="hospital-dropdown-header">
+                          <span className="hospital-dropdown-title">Select Destination Hospital</span>
+                          <span className="hospital-dropdown-count">
+                            {filteredHospitals.length} hospital{filteredHospitals.length !== 1 ? 's' : ''}
+                          </span>
+                        </div>
+                        <div className="hospital-dropdown-list">
+                          {filteredHospitals.map((hospital) => (
+                            <div
+                              key={hospital.id}
+                              className={`hospital-dropdown-item ${formData.assignedHospitalId === hospital.id ? 'hospital-dropdown-item-selected' : ''}`}
+                              onClick={() => handleDestinationHospitalSelect(hospital)}
+                            >
+                              <div className="hospital-item-main">
+                                <Building className="hospital-item-icon" />
+                                <div className="hospital-item-details">
+                                  <span className="hospital-item-name">{hospital.name}</span>
+                                  <span className="hospital-item-location">
+                                    {hospital.city}, {hospital.state}
+                                  </span>
+                                </div>
+                              </div>
+                              {formData.assignedHospitalId === hospital.id && (
+                                <div className="hospital-item-check">
+                                  ✓
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* EVENT LOCATION in Edit Modal */}
+                <div className="form-group" ref={locationDropdownRef}>
+                  <label className="form-label">Event Location</label>
+
+                  <div className="flex gap-2 mb-3">
+                    <button
+                      type="button"
+                      className={`flex-1 px-4 py-2 rounded-lg font-medium text-sm transition-colors ${isEventAtHospital ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+                      onClick={() => handleLocationTypeChange('hospital')}
+                    >
+                      <Building className="inline w-4 h-4 mr-2" />
+                      Hospital Venue
+                    </button>
+                    <button
+                      type="button"
+                      className={`flex-1 px-4 py-2 rounded-lg font-medium text-sm transition-colors ${!isEventAtHospital ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+                      onClick={() => handleLocationTypeChange('other')}
+                    >
+                      <MapPin className="inline w-4 h-4 mr-2" />
+                      Other Venue
+                    </button>
+                  </div>
+
+                  {isEventAtHospital ? (
+                    <div className="hospital-search-container">
+                      <div className="hospital-search-input-wrapper">
+                        <Search className="hospital-search-icon" />
+                        <input
+                          type="text"
+                          className="hospital-search-input"
+                          placeholder="Search for hospital venue..."
+                          value={locationSearch}
+                          onChange={(e) => {
+                            setLocationSearch(e.target.value);
+                            filterLocationHospitals(e.target.value);
+                            setShowLocationDropdown(true);
+                            handleLocationInputChange(e.target.value);
+                          }}
+                          onFocus={() => {
+                            if (locationSearch) {
+                              setShowLocationDropdown(true);
+                            }
+                          }}
+                        />
+                        {locationSearch && (
+                          <button
+                            className="hospital-clear-button"
+                            onClick={handleClearLocationHospital}
+                            type="button"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                        <button
+                          className="hospital-dropdown-button"
+                          onClick={() => setShowLocationDropdown(!showLocationDropdown)}
+                          type="button"
+                        >
+                          <ChevronDown className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      {showLocationDropdown && filteredLocationHospitals.length > 0 && (
+                        <div className="hospital-dropdown">
+                          <div className="hospital-dropdown-list">
+                            {filteredLocationHospitals.map((hospital) => (
+                              <div
+                                key={hospital.id}
+                                className={`hospital-dropdown-item ${formData.locationHospitalId === hospital.id ? 'hospital-dropdown-item-selected' : ''}`}
+                                onClick={() => handleLocationHospitalSelect(hospital)}
+                              >
+                                <div className="hospital-item-main">
+                                  <Building className="hospital-item-icon" />
+                                  <div className="hospital-item-details">
+                                    <span className="hospital-item-name">{hospital.name}</span>
+                                    <span className="hospital-item-location">
+                                      {hospital.address}, {hospital.city}
+                                    </span>
+                                  </div>
+                                </div>
+                                {formData.locationHospitalId === hospital.id && (
+                                  <div className="hospital-item-check">
+                                    ✓
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="Enter venue address..."
+                      value={formData.location}
+                      onChange={(e) => handleLocationInputChange(e.target.value)}
+                    />
                   )}
                 </div>
 
-                <div className="event-modal-actions mt-6">
+                <div className="form-group">
+                  <label className="form-label required">Max Donors per 30-min Slot *</label>
+                  <input
+                    type="number"
+                    className="form-input"
+                    value={formData.slotCapacity}
+                    onChange={(e) => setFormData(prev => ({ ...prev, slotCapacity: e.target.value }))}
+                    min="1"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Total Expected Capacity</label>
+                  <input
+                    type="number"
+                    className="form-input"
+                    value={formData.expectedCapacity}
+                    onChange={(e) => setFormData(prev => ({ ...prev, expectedCapacity: e.target.value }))}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Organizer Name</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={formData.organizerName}
+                    onChange={(e) => setFormData(prev => ({ ...prev, organizerName: e.target.value }))}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Description</label>
+                  <textarea
+                    className="form-input"
+                    rows="3"
+                    value={formData.description}
+                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Status</label>
+                  <select
+                    className="form-select"
+                    value={formData.status}
+                    onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value }))}
+                  >
+                    <option value="active">Active</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="completed">Completed</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="event-modal-actions">
+                <button
+                  className="modal-button cancel-button"
+                  onClick={() => setShowEditModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="modal-button save-button"
+                  onClick={handleSaveEdit}
+                >
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Event Details Modal */}
+      {showEventDetails && selectedEvent && (
+        <div className="event-modal-overlay" onClick={() => setShowEventDetails(false)}>
+          <div className="event-modal-container event-details-modal" onClick={e => e.stopPropagation()}>
+            <div className="event-modal-header">
+              <h2 className="event-modal-title">{selectedEvent.title}</h2>
+              <button className="event-modal-close" onClick={() => setShowEventDetails(false)}>
+                <X className="close-icon" />
+              </button>
+            </div>
+            <div className="event-modal-body">
+              <div className="event-details">
+                <div className="event-detail-item">
+                  <Calendar className="detail-icon" />
+                  <div>
+                    <p className="font-semibold">Date</p>
+                    <p className="text-sm text-gray-600">
+                      {selectedEvent.startDate} {selectedEvent.startDate !== selectedEvent.endDate ? `to ${selectedEvent.endDate}` : ''}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="event-detail-item">
+                  <Clock className="detail-icon" />
+                  <div>
+                    <p className="font-semibold">Time</p>
+                    <p className="text-sm text-gray-600">
+                      {selectedEvent.startTime} - {selectedEvent.endTime}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="event-detail-item">
+                  <MapPin className="detail-icon" />
+                  <div>
+                    <p className="font-semibold">Location</p>
+                    <p className="text-sm text-gray-600">{selectedEvent.location}</p>
+                  </div>
+                </div>
+
+                {selectedEvent.assignedHospitalName && (
+                  <div className="event-detail-item">
+                    <Building className="detail-icon" />
+                    <div>
+                      <p className="font-semibold">Destination Hospital</p>
+                      <p className="text-sm text-gray-600">{selectedEvent.assignedHospitalName}</p>
+                    </div>
+                  </div>
+                )}
+
+                {selectedEvent.locationType === 'hospital' && selectedEvent.locationHospitalName && (
+                  <div className="event-detail-item">
+                    <div className="detail-icon bg-green-100 text-green-600 rounded-full p-2">
+                      <MapPin className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="font-semibold">Venue Hospital</p>
+                      <p className="text-sm text-gray-600">{selectedEvent.locationHospitalName}</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="event-detail-item">
+                  <User className="detail-icon" />
+                  <div>
+                    <p className="font-semibold">Organizer</p>
+                    <p className="text-sm text-gray-600">{selectedEvent.organizerName}</p>
+                  </div>
+                </div>
+
+                <div className="event-detail-item">
+                  <Users className="detail-icon" />
+                  <div>
+                    <p className="font-semibold">Capacity</p>
+                    <p className="text-sm text-gray-600">
+                      Registered: {selectedEvent.currentParticipants || 0} / {selectedEvent.expectedCapacity}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Per Slot: {selectedEvent.slotCapacity || 0} donors per 30 minutes
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {selectedEvent.description && (
+                <div className="event-description mt-4">
+                  <h3 className="font-semibold text-gray-800 mb-2">Description</h3>
+                  <p className="text-gray-700">{selectedEvent.description}</p>
+                </div>
+              )}
+
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <button
+                  className="w-full py-3 px-6 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold flex items-center justify-center gap-2"
+                  onClick={() => handleOpenSlotsModal(selectedEvent)}
+                >
+                  <Clock className="w-5 h-5" />
+                  View Time Slots & Bookings
+                </button>
+              </div>
+
+              <div className="event-modal-actions mt-4">
+                <button
+                  className="modal-button cancel-button"
+                  onClick={() => {
+                    setShowDeleteConfirm(true);
+                    setShowEventDetails(false);
+                  }}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Event
+                </button>
+                <button
+                  className="modal-button save-button"
+                  onClick={() => handleEditEvent(selectedEvent)}
+                >
+                  <Edit3 className="w-4 h-4 mr-2" />
+                  Edit Event
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="event-modal-overlay" onClick={() => setShowDeleteConfirm(false)}>
+          <div className="event-modal-container delete-modal" onClick={e => e.stopPropagation()}>
+            <div className="donation-confirm-icon-container">
+              <AlertCircle className="donation-confirm-icon" />
+            </div>
+            <h3 className="donation-confirm-title">Delete Event</h3>
+            <p className="donation-confirm-message">
+              Are you sure you want to delete "{selectedEvent?.title}"? This action cannot be undone.
+            </p>
+            <div className="donation-confirm-actions">
+              <button className="donation-confirm-button donation-confirm-cancel" onClick={() => setShowDeleteConfirm(false)}>
+                Cancel
+              </button>
+              <button className="donation-confirm-button donation-confirm-delete" onClick={handleDeleteEvent}>
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Slots Management Modal */}
+      {showSlotsModal && selectedEventForSlots && (
+        <div className="event-modal-overlay" onClick={() => setShowSlotsModal(false)}>
+          <div className="event-modal-container slots-modal" onClick={e => e.stopPropagation()}>
+            <div className="event-modal-header">
+              <h2 className="event-modal-title">Time Slots Management</h2>
+              <button className="event-modal-close" onClick={() => setShowSlotsModal(false)}>
+                <X className="close-icon" />
+              </button>
+            </div>
+            <div className="event-modal-body">
+              {/* Event Info */}
+              <div className="slots-event-info">
+                <h3 className="text-lg font-bold text-gray-800 mb-2">{selectedEventForSlots.title}</h3>
+                <div className="space-y-1 text-sm text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    <span>{selectedEventForSlots.startDate} {selectedEventForSlots.startDate !== selectedEventForSlots.endDate ? `to ${selectedEventForSlots.endDate}` : ''}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    <span>{selectedEventForSlots.startTime} - {selectedEventForSlots.endTime}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    <span>{selectedEventForSlots.location}</span>
+                  </div>
+                  {selectedEventForSlots.assignedHospitalName && (
+                    <div className="flex items-center gap-2 text-blue-600">
+                      <Building className="w-4 h-4" />
+                      <span>Destination: {selectedEventForSlots.assignedHospitalName}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    <span>Slot Capacity: {selectedEventForSlots.slotCapacity} donors per 30 minutes</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Slots List */}
+              <div className="slots-list-section mt-6">
+                <h3 className="slots-list-title">30-Minute Time Slots</h3>
+                <p className="text-sm text-gray-500 mb-4">
+                  Auto-generated slots within event duration. Each slot allows maximum {selectedEventForSlots.slotCapacity} donors.
+                </p>
+
+                {timeSlots.length === 0 ? (
+                  <div className="no-slots">
+                    <Clock className="no-slots-icon" />
+                    <p>No time slots available or event times not set.</p>
+                  </div>
+                ) : (
+                  <div className="slots-grid">
+                    {timeSlots.map((slot, index) => (
+                      <div key={index} className={`slot-card ${slot.isFull ? 'slot-full' : 'slot-available'}`}>
+                        <div className="slot-header">
+                          <div className="slot-time">
+                            <Clock className="slot-time-icon" />
+                            <span className="slot-time-text">{slot.displayTime}</span>
+                          </div>
+                          <span className={`slot-status-badge ${slot.isFull ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+                            {slot.isFull ? 'FULL' : 'AVAILABLE'}
+                          </span>
+                        </div>
+
+                        <div className="slot-details">
+                          <div className="slot-capacity">
+                            <Users className="slot-detail-icon" />
+                            <span>Booked: {slot.bookedCount} / {slot.capacity}</span>
+                          </div>
+                          <div className="text-xs text-gray-600 mt-1">
+                            Available: {slot.availableSlots} slots
+                          </div>
+
+                          {slot.bookedCount > 0 && (
+                            <button
+                              className="view-donors-button"
+                              onClick={() => {
+                                setSelectedSlot(slot);
+                              }}
+                            >
+                              View {slot.bookedCount} Donor{slot.bookedCount !== 1 ? 's' : ''}
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="slot-progress">
+                          <div
+                            className="slot-progress-bar"
+                            style={{
+                              width: `${Math.min((slot.bookedCount / slot.capacity) * 100, 100)}%`,
+                              backgroundColor: slot.isFull ? '#ef4444' : '#3b82f6'
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Donor Details for Selected Slot */}
+              {selectedSlot && (
+                <div className="slot-details-expanded">
+                  <h4 className="font-semibold text-gray-800 mb-3">Donors for {selectedSlot.displayTime}</h4>
+                  <div className="booking-list">
+                    {selectedSlot.bookings.length === 0 ? (
+                      <p className="text-gray-500 text-center py-4">No bookings for this slot</p>
+                    ) : (
+                      selectedSlot.bookings.map(booking => {
+                        const donor = donorDetails[booking.userId];
+                        return (
+                          <div key={booking.id} className="booking-item">
+                            <div className="donor-avatar">
+                              {donor?.donor?.full_name?.charAt(0) || '?'}
+                            </div>
+                            <div className="booking-info">
+                              <div className="donor-name">
+                                {donor?.donor?.full_name || 'Unknown Donor'}
+                              </div>
+                              <div className="donor-details">
+                                <span>Blood Type: {donor?.donor?.blood_group || 'Unknown'}</span>
+                                <span>•</span>
+                                <span>Status: {booking.bookingStatus}</span>
+                              </div>
+                            </div>
+                            <span className={`booking-status ${booking.bookingStatus === 'confirmed' ? 'booking-status-confirmed' : 'booking-status-pending'}`}>
+                              {booking.bookingStatus}
+                            </span>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
                   <button
-                    className="modal-button save-button"
-                    onClick={() => setShowSlotsModal(false)}
+                    className="w-full mt-3 py-2 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+                    onClick={() => setSelectedSlot(null)}
                   >
                     Close
                   </button>
                 </div>
+              )}
+
+              {/* Summary */}
+              <div className="slots-summary mt-6 p-4 bg-gray-50 rounded-lg">
+                <h4 className="font-semibold text-gray-800 mb-2">Summary</h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-600">Total Slots:</p>
+                    <p className="font-semibold">{summary.totalSlots}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Available Slots:</p>
+                    <p className="font-semibold text-green-600">
+                      {summary.availableSlots}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Full Slots:</p>
+                    <p className="font-semibold text-red-600">
+                      {summary.fullSlots}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Total Bookings:</p>
+                    <p className="font-semibold">
+                      {summary.totalBookings}
+                    </p>
+                  </div>
+                </div>
+                {summary.totalBookings !== summary.totalBookedInSlots && (
+                  <div className="mt-2 p-2 bg-yellow-50 text-yellow-700 text-xs rounded">
+                    <AlertCircle className="inline w-3 h-3 mr-1" />
+                    Note: Some bookings ({summary.totalBookings - summary.totalBookedInSlots}) don't match slot times
+                  </div>
+                )}
+              </div>
+
+              <div className="event-modal-actions mt-6">
+                <button
+                  className="modal-button save-button"
+                  onClick={() => setShowSlotsModal(false)}
+                >
+                  Close
+                </button>
               </div>
             </div>
           </div>
-        )}
-      </div>
-    </Layout>
+        </div>
+      )}
+    </>
   );
 };
 

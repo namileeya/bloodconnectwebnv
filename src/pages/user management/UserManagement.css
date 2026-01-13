@@ -42,9 +42,13 @@
   @apply px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm bg-white min-w-40;
 }
 
-.add-member-btn,
 .add-record-button {
-  @apply px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-semibold;
+  @apply px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-semibold;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.5rem;
 }
 
 /* Users Grid */
@@ -115,40 +119,79 @@
 }
 
 .user-name {
-  @apply text-lg font-semibold text-gray-800 mb-1;
+  @apply text-lg font-semibold text-gray-800 mb-2;
+  line-height: 1.4;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .user-status {
-  @apply flex items-center justify-center gap-2 mb-2;
+  @apply flex items-center justify-center gap-2 mb-3;
+  line-height: 1.5 !important;
+  align-items: baseline !important;
 }
 
 .blood-type {
   @apply text-sm font-medium text-red-600;
+  line-height: 1.5 !important;
+  display: inline-flex !important;
+  align-items: baseline !important;
+  vertical-align: baseline !important;
 }
 
 .separator {
   @apply text-gray-400;
+  line-height: 1.5 !important;
+  display: inline-flex !important;
+  align-items: baseline !important;
+  vertical-align: baseline !important;
 }
 
 .donor-status {
   @apply text-sm text-gray-500;
+  line-height: 1.5 !important;
+  display: inline-flex !important;
+  align-items: baseline !important;
+  vertical-align: baseline !important;
 }
 
 .user-email {
-  @apply text-sm text-gray-600 mb-4 break-all;
+  @apply text-sm text-gray-600 mb-2;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.5;
+}
+
+.user-id {
+  @apply text-xs text-gray-500 mb-4;
+  line-height: 1.5;
 }
 
 .view-details-btn {
   @apply w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors;
+  margin-top: auto;
 }
 
 /* Modal */
 .modal-overlay {
-  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  overflow-y: auto;
 }
 
 .modal-container {
-  @apply bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl;
+  @apply bg-white rounded-2xl max-w-4xl w-full max-h-[70vh] overflow-y-auto shadow-2xl;
 }
 
 .modal-header {
@@ -171,6 +214,7 @@
   @apply p-6 space-y-6;
 }
 
+/* Profile Header */
 .profile-header {
   @apply flex items-center gap-4 pb-6 border-b border-gray-200;
 }
@@ -199,6 +243,7 @@
   @apply px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium;
 }
 
+/* Info Grid */
 .info-grid {
   @apply grid md:grid-cols-2 gap-6;
 }
@@ -227,6 +272,7 @@
   @apply text-base font-medium text-gray-800;
 }
 
+/* Donation Stats */
 .donation-stats {
   @apply mt-6 pt-6 border-t border-gray-200;
 }
@@ -251,30 +297,32 @@
   @apply text-xs text-gray-600 mt-1;
 }
 
+/* Modal Actions */
 .modal-actions {
   @apply flex justify-end gap-4 pt-6 border-t border-gray-200;
+  flex-wrap: nowrap;
+  align-items: center;
 }
 
 .close-btn {
-  @apply px-6 py-2.5 rounded-lg font-semibold text-sm transition-all bg-gray-100 text-gray-700 hover:bg-gray-200;
+  @apply px-8 py-3 rounded-lg font-semibold text-base transition-all bg-gray-100 text-gray-700 hover:bg-gray-200;
 }
 
-/* Edit Modal - FIXED: Added missing dot */
+/* Edit Modal */
 .edit-modal-container {
-  @apply bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-2xl;
+  @apply bg-white rounded-2xl max-w-3xl w-full max-h-[80vh] overflow-y-auto shadow-2xl;
 }
 
 .edit-modal-content {
   @apply p-6;
 }
 
-/* Reuse existing grid and form styles, but ensure consistency */
 .edit-form-grid {
-  @apply grid md:grid-cols-2 gap-8 mb-8;
+  @apply grid md:grid-cols-2 gap-6 mb-6;
 }
 
 .edit-form-section {
-  @apply space-y-5;
+  @apply space-y-4;
 }
 
 .edit-modal-section-title {
@@ -303,16 +351,32 @@
   @apply bg-white;
 }
 
-.user-id-input {
-  @apply bg-gray-100 cursor-not-allowed;
-}
+/* Buttons */
 
 .cancel-btn {
-  @apply px-6 py-2.5 rounded-lg font-semibold text-sm transition-all bg-gray-100 text-gray-700 hover:bg-gray-200;
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200 px-6 rounded-lg font-semibold text-sm transition-all;
+  height: 42px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  vertical-align: middle !important;
 }
 
 .save-btn {
-  @apply px-6 py-2.5 rounded-lg font-semibold text-sm transition-all bg-red-600 text-white hover:bg-red-700;
+  @apply bg-red-600 text-white hover:bg-red-700 px-6 rounded-lg font-semibold text-sm transition-all;
+  height: 42px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  vertical-align: middle !important;
 }
 
 /* Delete Confirmation Modal */
@@ -336,12 +400,58 @@
   @apply text-gray-600 mb-6;
 }
 
+.delete-details {
+  @apply bg-gray-50 p-4 rounded-lg mb-8 text-left;
+}
+
+.delete-details p {
+  @apply text-sm text-gray-700 mb-2;
+}
+
+.delete-details p:last-child {
+  @apply mb-0;
+}
+
 .delete-actions {
   @apply flex gap-3 justify-center;
 }
 
 .delete-btn {
   @apply px-6 py-2.5 rounded-lg font-semibold text-sm transition-all bg-red-600 text-white hover:bg-red-700;
+}
+
+/* Password Display */
+.password-display {
+  @apply mb-6 bg-gray-50 p-4 rounded-lg;
+}
+
+.password-label {
+  @apply text-sm text-gray-600 mb-2;
+}
+
+.password-value {
+  @apply text-2xl font-bold text-gray-800 mb-2 font-mono bg-white p-3 rounded border border-gray-300;
+}
+
+.password-warning {
+  @apply text-xs text-gray-500 mt-2;
+}
+
+/* Loading */
+.loading-container {
+  @apply flex items-center justify-center min-h-96;
+}
+
+.loading-content {
+  @apply text-center;
+}
+
+.loading-spinner {
+  @apply animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4;
+}
+
+.loading-text {
+  @apply text-gray-600;
 }
 
 /* Pagination */
@@ -354,7 +464,7 @@
 }
 
 .items-per-page-select {
-  @apply border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  @apply border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent;
 }
 
 .pagination-range {
@@ -413,24 +523,7 @@
   }
 }
 
-/* Custom scrollbar for better UX */
-.user-management-content::-webkit-scrollbar {
-  @apply w-2;
-}
-
-.user-management-content::-webkit-scrollbar-track {
-  @apply bg-gray-100;
-}
-
-.user-management-content::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 rounded-full;
-}
-
-.user-management-content::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400;
-}
-
-/* Loading states and animations */
+/* Animations */
 .user-card-wrapper {
   animation: fadeIn 0.3s ease-in-out;
 }
@@ -448,7 +541,6 @@
 }
 
 /* Focus states for accessibility */
-.add-member-btn:focus,
 .add-record-button:focus,
 .user-action-button:focus,
 .pagination-btn:focus,
@@ -463,22 +555,4 @@
 .modal-close-btn:focus,
 .view-details-btn:focus {
   @apply outline-none ring-2 ring-red-500 ring-offset-2;
-}
-
-/* Print styles */
-@media print {
-  .user-card-actions,
-  .pagination,
-  .add-member-btn,
-  .add-record-button {
-    @apply hidden;
-  }
-
-  .users-grid {
-    @apply grid-cols-2;
-  }
-
-  .user-management-content {
-    @apply p-0 bg-white;
-  }
 }

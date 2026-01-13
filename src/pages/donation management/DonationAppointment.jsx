@@ -542,457 +542,455 @@ const DonationAppointment = ({ onNavigate }) => {
   }
 
   return (
-    <Layout onNavigate={onNavigate} currentPage="donation-appointments">
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="appointment-header-container">
-          <h1 className="appointment-header-title">Donation Appointments</h1>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="error-container">
-            <AlertCircle className="error-icon" />
-            <p className="error-text">{error}</p>
-            <button onClick={() => setError('')} className="error-close">
-              <X className="error-close-icon" />
-            </button>
-          </div>
-        )}
-
-        {/* Stats Cards */}
-        <div className="appointment-stats-grid">
-          <div className="appointment-stat-card stat-card-total">
-            <Calendar className="stat-icon text-blue-600" />
-            <div>
-              <h3 className="stat-number-blue">{stats.total}</h3>
-              <p className="stat-label">Total Appointments</p>
-            </div>
-          </div>
-          <div className="appointment-stat-card stat-card-pending">
-            <Clock className="stat-icon text-purple-600" />
-            <div>
-              <h3 className="stat-number-purple">{stats.pending}</h3>
-              <p className="stat-label">Pending Review</p>
-            </div>
-          </div>
-          <div className="appointment-stat-card stat-card-confirmed">
-            <CheckCircle className="stat-icon text-green-600" />
-            <div>
-              <h3 className="stat-number-green">{stats.confirmed}</h3>
-              <p className="stat-label">Confirmed</p>
-            </div>
-          </div>
-          <div className="appointment-stat-card stat-card-rescheduled">
-            <Edit2 className="stat-icon text-orange-600" />
-            <div>
-              <h3 className="stat-number-orange">{stats.rescheduled}</h3>
-              <p className="stat-label">Rescheduled</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Filters */}
-        <div className="appointment-filters-container">
-          <div className="appointment-filters-row">
-            <div className="appointment-search-input-container">
-              <Search className="appointment-search-icon" />
-              <input
-                type="text"
-                placeholder="Search by name, ID, phone, or location..."
-                className="appointment-search-input"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <select
-              className="appointment-status-filter"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="All">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="rescheduled">Rescheduled</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-            <select
-              className="appointment-location-filter"
-              value={locationFilter}
-              onChange={(e) => setLocationFilter(e.target.value)}
-            >
-              <option value="All">All Locations</option>
-              {locations.map(loc => (
-                <option key={loc} value={loc}>{loc}</option>
-              ))}
-            </select>
-            <select
-              className="appointment-date-filter"
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-            >
-              <option value="All">All Dates</option>
-              <option value="Today">Today</option>
-              <option value="Tomorrow">Tomorrow</option>
-              <option value="This Week">This Week</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Appointments Table */}
-        <div className="appointment-table-container">
-          <div className="appointment-table-wrapper">
-            <table className="appointment-table">
-              <thead className="appointment-table-header">
-                <tr>
-                  <th className="appointment-table-header-cell">ID</th>
-                  <th className="appointment-table-header-cell">DONOR</th>
-                  <th className="appointment-table-header-cell">LOCATION</th>
-                  <th className="appointment-table-header-cell">DATE & TIME</th>
-                  <th className="appointment-table-header-cell">BLOOD TYPE</th>
-                  <th className="appointment-table-header-cell">STATUS</th>
-                  <th className="appointment-table-header-cell">ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody className="appointment-table-body">
-                {paginatedAppointments.map((appointment) => {
-                  const appointmentWithUser = getAppointmentWithUserData(appointment);
-                  return (
-                    <tr key={appointment.firebaseId} className="appointment-table-row">
-                      <td className="appointment-table-cell appointment-id-cell">
-                        {appointment.displayId}
-                      </td>
-                      <td className="appointment-table-cell">
-                        <div className="donor-info">
-                          <span className="donor-name">{appointmentWithUser.donorName}</span>
-                          <span className="donor-phone">{appointmentWithUser.phone}</span>
-                        </div>
-                      </td>
-                      <td className="appointment-table-cell">
-                        <div className="location-info">
-                          <span className="location-name">{appointment.location}</span>
-                          <span className="location-address">{appointment.address}</span>
-                        </div>
-                      </td>
-                      <td className="appointment-table-cell">
-                        <div className="datetime-info">
-                          <span className="date-text">
-                            {appointment.date ? formatFirebaseDate(appointment.date) : 'N/A'}
-                          </span>
-                          <span className="time-text">
-                            {formatTimeForDisplay(appointment.time)}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="appointment-table-cell">
-                        <span className="blood-type-badge">{appointmentWithUser.bloodType}</span>
-                      </td>
-                      <td className="appointment-table-cell">
-                        <span className={`appointment-status-badge ${getStatusClasses(appointment.status)}`}>
-                          {capitalizeStatus(appointment.status)}
-                        </span>
-                      </td>
-                      <td className="appointment-table-cell">
-                        <div className="appointment-actions-container">
-                          <button
-                            onClick={() => handleViewDetails(appointment)}
-                            className="appointment-action-button view-button"
-                            title="View Details"
-                          >
-                            <User className="appointment-action-icon" />
-                          </button>
-                          {appointment.status === 'pending' && (
-                            <>
-                              <button
-                                onClick={() => handleConfirmClick(appointment)}
-                                className="appointment-action-button confirm-button"
-                                title="Confirm"
-                              >
-                                <CheckCircle className="appointment-action-icon" />
-                              </button>
-                              <button
-                                onClick={() => handleRescheduleClick(appointment)}
-                                className="appointment-action-button reschedule-button"
-                                title="Reschedule"
-                              >
-                                <Edit2 className="appointment-action-icon" />
-                              </button>
-                            </>
-                          )}
-                          {(appointment.status === 'pending' || appointment.status === 'confirmed') && (
-                            <button
-                              onClick={() => handleCancelClick(appointment)}
-                              className="appointment-action-button cancel-button"
-                              title="Cancel"
-                            >
-                              <XCircle className="appointment-action-icon" />
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+    <>
+      <Layout onNavigate={onNavigate} currentPage="donation-appointments">
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="appointment-header-container">
+            <h1 className="appointment-header-title">Donation Appointments</h1>
           </div>
 
-          {filteredAppointments.length === 0 && !loading && (
-            <div className="appointment-empty-state">
-              <div className="appointment-empty-state-icon">
-                <Calendar />
+          {/* Error Message */}
+          {error && (
+            <div className="error-container">
+              <AlertCircle className="error-icon" />
+              <p className="error-text">{error}</p>
+              <button onClick={() => setError('')} className="error-close">
+                <X className="error-close-icon" />
+              </button>
+            </div>
+          )}
+
+          {/* Stats Cards */}
+          <div className="appointment-stats-grid">
+            <div className="appointment-stat-card stat-card-total">
+              <div>
+                <h3 className="stat-number-blue">{stats.total}</h3>
+                <p className="stat-label">Total Appointments</p>
               </div>
-              <h3 className="appointment-empty-state-title">No appointments found</h3>
-              <p className="appointment-empty-state-description">
-                Try adjusting your search filters
-              </p>
+            </div>
+            <div className="appointment-stat-card stat-card-pending">
+              <div>
+                <h3 className="stat-number-purple">{stats.pending}</h3>
+                <p className="stat-label">Pending Review</p>
+              </div>
+            </div>
+            <div className="appointment-stat-card stat-card-confirmed">
+              <div>
+                <h3 className="stat-number-green">{stats.confirmed}</h3>
+                <p className="stat-label">Confirmed</p>
+              </div>
+            </div>
+            <div className="appointment-stat-card stat-card-rescheduled">
+              <div>
+                <h3 className="stat-number-orange">{stats.rescheduled}</h3>
+                <p className="stat-label">Rescheduled</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Filters */}
+          <div className="appointment-filters-container">
+            <div className="appointment-filters-row">
+              <div className="appointment-search-input-container">
+                <Search className="appointment-search-icon" />
+                <input
+                  type="text"
+                  placeholder="Search by name, ID, phone, or location..."
+                  className="appointment-search-input"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <select
+                className="appointment-status-filter"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="All">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="rescheduled">Rescheduled</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <select
+                className="appointment-location-filter"
+                value={locationFilter}
+                onChange={(e) => setLocationFilter(e.target.value)}
+              >
+                <option value="All">All Locations</option>
+                {locations.map(loc => (
+                  <option key={loc} value={loc}>{loc}</option>
+                ))}
+              </select>
+              <select
+                className="appointment-date-filter"
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+              >
+                <option value="All">All Dates</option>
+                <option value="Today">Today</option>
+                <option value="Tomorrow">Tomorrow</option>
+                <option value="This Week">This Week</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Appointments Table */}
+          <div className="appointment-table-container">
+            <div className="appointment-table-wrapper">
+              <table className="appointment-table">
+                <thead className="appointment-table-header">
+                  <tr>
+                    <th className="appointment-table-header-cell">ID</th>
+                    <th className="appointment-table-header-cell">DONOR</th>
+                    <th className="appointment-table-header-cell">LOCATION</th>
+                    <th className="appointment-table-header-cell">DATE & TIME</th>
+                    <th className="appointment-table-header-cell">BLOOD TYPE</th>
+                    <th className="appointment-table-header-cell">STATUS</th>
+                    <th className="appointment-table-header-cell">ACTIONS</th>
+                  </tr>
+                </thead>
+                <tbody className="appointment-table-body">
+                  {paginatedAppointments.map((appointment) => {
+                    const appointmentWithUser = getAppointmentWithUserData(appointment);
+                    return (
+                      <tr key={appointment.firebaseId} className="appointment-table-row">
+                        <td className="appointment-table-cell appointment-id-cell">
+                          {appointment.displayId}
+                        </td>
+                        <td className="appointment-table-cell">
+                          <div className="donor-info">
+                            <span className="donor-name">{appointmentWithUser.donorName}</span>
+                            <span className="donor-phone">{appointmentWithUser.phone}</span>
+                          </div>
+                        </td>
+                        <td className="appointment-table-cell">
+                          <div className="location-info">
+                            <span className="location-name">{appointment.location}</span>
+                            <span className="location-address">{appointment.address}</span>
+                          </div>
+                        </td>
+                        <td className="appointment-table-cell">
+                          <div className="datetime-info">
+                            <span className="date-text">
+                              {appointment.date ? formatFirebaseDate(appointment.date) : 'N/A'}
+                            </span>
+                            <span className="time-text">
+                              {formatTimeForDisplay(appointment.time)}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="appointment-table-cell">
+                          <span className="blood-type-badge">{appointmentWithUser.bloodType}</span>
+                        </td>
+                        <td className="appointment-table-cell">
+                          <span className={`appointment-status-badge ${getStatusClasses(appointment.status)}`}>
+                            {capitalizeStatus(appointment.status)}
+                          </span>
+                        </td>
+                        <td className="appointment-table-cell">
+                          <div className="appointment-actions-container">
+                            <button
+                              onClick={() => handleViewDetails(appointment)}
+                              className="appointment-action-button view-button"
+                              title="View Details"
+                            >
+                              <User className="appointment-action-icon" />
+                            </button>
+                            {appointment.status === 'pending' && (
+                              <>
+                                <button
+                                  onClick={() => handleConfirmClick(appointment)}
+                                  className="appointment-action-button confirm-button"
+                                  title="Confirm"
+                                >
+                                  <CheckCircle className="appointment-action-icon" />
+                                </button>
+                                <button
+                                  onClick={() => handleRescheduleClick(appointment)}
+                                  className="appointment-action-button reschedule-button"
+                                  title="Reschedule"
+                                >
+                                  <Edit2 className="appointment-action-icon" />
+                                </button>
+                              </>
+                            )}
+                            {(appointment.status === 'pending' || appointment.status === 'confirmed') && (
+                              <button
+                                onClick={() => handleCancelClick(appointment)}
+                                className="appointment-action-button cancel-button"
+                                title="Cancel"
+                              >
+                                <XCircle className="appointment-action-icon" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {filteredAppointments.length === 0 && !loading && (
+              <div className="appointment-empty-state">
+                <div className="appointment-empty-state-icon">
+                  <Calendar />
+                </div>
+                <h3 className="appointment-empty-state-title">No appointments found</h3>
+                <p className="appointment-empty-state-description">
+                  Try adjusting your search filters
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Pagination */}
+          {filteredAppointments.length > 0 && (
+            <div className="appointment-pagination">
+              <div className="appointment-pagination-info">
+                <span>Items per page:</span>
+                <select
+                  value={itemsPerPage}
+                  onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                  className="appointment-items-per-page-select"
+                >
+                  <option value={6}>6</option>
+                  <option value={8}>8</option>
+                  <option value={12}>12</option>
+                  <option value={16}>16</option>
+                </select>
+                <span className="appointment-pagination-range">
+                  {startIndex + 1}-{Math.min(endIndex, filteredAppointments.length)} of {filteredAppointments.length}
+                </span>
+              </div>
+
+              <div className="appointment-pagination-controls">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="appointment-pagination-btn"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="appointment-pagination-btn"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
             </div>
           )}
         </div>
+      </Layout>
 
-        {/* Pagination */}
-        {filteredAppointments.length > 0 && (
-          <div className="appointment-pagination">
-            <div className="appointment-pagination-info">
-              <span>Items per page:</span>
-              <select
-                value={itemsPerPage}
-                onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                className="appointment-items-per-page-select"
-              >
-                <option value={6}>6</option>
-                <option value={8}>8</option>
-                <option value={12}>12</option>
-                <option value={16}>16</option>
-              </select>
-              <span className="appointment-pagination-range">
-                {startIndex + 1}-{Math.min(endIndex, filteredAppointments.length)} of {filteredAppointments.length}
-              </span>
-            </div>
-
-            <div className="appointment-pagination-controls">
+      {/* Detail Modal */}
+      {showDetailModal && selectedAppointment && (
+        <div className="appointment-modal-overlay">
+          <div className="appointment-modal-container">
+            <div className="appointment-modal-header">
+              <h2 className="appointment-modal-title">Appointment Details</h2>
               <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="appointment-pagination-btn"
+                onClick={() => setShowDetailModal(false)}
+                className="appointment-modal-close"
               >
-                <ChevronLeft size={16} />
-              </button>
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="appointment-pagination-btn"
-              >
-                <ChevronRight size={16} />
+                <X className="appointment-modal-close-icon" />
               </button>
             </div>
-          </div>
-        )}
-
-        {/* Detail Modal */}
-        {showDetailModal && selectedAppointment && (
-          <div className="appointment-modal-overlay">
-            <div className="appointment-modal-container">
-              <div className="appointment-modal-header">
-                <h2 className="appointment-modal-title">Appointment Details</h2>
-                <button
-                  onClick={() => setShowDetailModal(false)}
-                  className="appointment-modal-close"
-                >
-                  <X className="appointment-modal-close-icon" />
-                </button>
-              </div>
-              <div className="appointment-modal-body">
-                <div className="detail-grid">
-                  <div className="detail-item">
-                    <label className="detail-label">Appointment ID</label>
-                    <p className="detail-value">{selectedAppointment.displayId}</p>
-                  </div>
-                  <div className="detail-item">
-                    <label className="detail-label">Status</label>
-                    <span className={`appointment-status-badge ${getStatusClasses(selectedAppointment.status)}`}>
-                      {capitalizeStatus(selectedAppointment.status)}
-                    </span>
-                  </div>
-
-                  {/* Donor Information */}
-                  <div className="detail-item">
-                    <label className="detail-label">Donor Name</label>
-                    <p className="detail-value">
-                      {getAppointmentWithUserData(selectedAppointment).donorName}
-                    </p>
-                  </div>
-                  <div className="detail-item">
-                    <label className="detail-label">Phone Number</label>
-                    <p className="detail-value">
-                      {getAppointmentWithUserData(selectedAppointment).phone}
-                    </p>
-                  </div>
-
-                  {/* Blood Information */}
-                  <div className="detail-item">
-                    <label className="detail-label">Blood Type</label>
-                    <p className="detail-value">
-                      <span className="blood-type-badge">
-                        {getAppointmentWithUserData(selectedAppointment).bloodType}
-                      </span>
-                    </p>
-                  </div>
-
-                  {/* Appointment Information */}
-                  <div className="detail-item">
-                    <label className="detail-label">Booking Date</label>
-                    <p className="detail-value">
-                      {selectedAppointment.bookingDate ? formatFirebaseDate(selectedAppointment.bookingDate) : 'N/A'}
-                    </p>
-                  </div>
-                  <div className="detail-item full-width">
-                    <label className="detail-label">Location</label>
-                    <p className="detail-value">{selectedAppointment.location}</p>
-                    <p className="detail-subvalue">{selectedAppointment.address}</p>
-                  </div>
-                  <div className="detail-item">
-                    <label className="detail-label">Appointment Date</label>
-                    <p className="detail-value">
-                      {selectedAppointment.date ? formatFirebaseDate(selectedAppointment.date) : 'N/A'}
-                    </p>
-                  </div>
-                  <div className="detail-item">
-                    <label className="detail-label">Appointment Time</label>
-                    <p className="detail-value">{formatTimeForDisplay(selectedAppointment.time)}</p>
-                  </div>
-
-                  {selectedAppointment.notes && (
-                    <div className="detail-item full-width">
-                      <label className="detail-label">Notes</label>
-                      <p className="detail-value">{selectedAppointment.notes}</p>
-                    </div>
-                  )}
+            <div className="appointment-modal-body">
+              <div className="detail-grid">
+                <div className="detail-item">
+                  <label className="detail-label">Appointment ID</label>
+                  <p className="detail-value">{selectedAppointment.displayId}</p>
                 </div>
-                <div className="appointment-modal-actions">
-                  <button
-                    onClick={() => setShowDetailModal(false)}
-                    className="appointment-modal-button appointment-close-button"
-                  >
-                    Close
-                  </button>
+                <div className="detail-item">
+                  <label className="detail-label">Status</label>
+                  <span className={`appointment-status-badge ${getStatusClasses(selectedAppointment.status)}`}>
+                    {capitalizeStatus(selectedAppointment.status)}
+                  </span>
                 </div>
-              </div>
-            </div>
-          </div>
-        )}
 
-        {/* Reschedule Modal */}
-        {showRescheduleModal && selectedAppointment && (
-          <div className="appointment-modal-overlay">
-            <div className="appointment-modal-container">
-              <div className="appointment-modal-header">
-                <h2 className="appointment-modal-title">Reschedule Appointment</h2>
-                <button
-                  onClick={() => setShowRescheduleModal(false)}
-                  className="appointment-modal-close"
-                >
-                  <X className="appointment-modal-close-icon" />
-                </button>
-              </div>
-              <div className="appointment-modal-body">
-                <div className="reschedule-info">
-                  <p className="reschedule-donor">Donor: <strong>
+                {/* Donor Information */}
+                <div className="detail-item">
+                  <label className="detail-label">Donor Name</label>
+                  <p className="detail-value">
                     {getAppointmentWithUserData(selectedAppointment).donorName}
-                  </strong></p>
-                  <p className="reschedule-current">
-                    Current: {selectedAppointment.date ? formatFirebaseDate(selectedAppointment.date) : 'N/A'} at {formatTimeForDisplay(selectedAppointment.time)}
                   </p>
                 </div>
-                <div className="appointment-modal-form">
-                  <div className="appointment-form-group">
-                    <label className="appointment-form-label">New Date</label>
-                    <input
-                      type="date"
-                      className="appointment-form-input"
-                      value={rescheduleData.date}
-                      onChange={(e) => setRescheduleData({ ...rescheduleData, date: e.target.value })}
-                      min={new Date().toISOString().split('T')[0]}
-                    />
-                  </div>
-                  <div className="appointment-form-group">
-                    <label className="appointment-form-label">New Time</label>
-                    <select
-                      className="appointment-form-select"
-                      value={rescheduleData.time}
-                      onChange={(e) => setRescheduleData({ ...rescheduleData, time: e.target.value })}
-                    >
-                      <option value="">Select time</option>
-                      {timeSlots.map(slot => (
-                        <option key={slot} value={slot}>{slot}</option>
-                      ))}
-                    </select>
-                  </div>
+                <div className="detail-item">
+                  <label className="detail-label">Phone Number</label>
+                  <p className="detail-value">
+                    {getAppointmentWithUserData(selectedAppointment).phone}
+                  </p>
                 </div>
-                <div className="appointment-modal-actions">
-                  <button
-                    onClick={() => setShowRescheduleModal(false)}
-                    className="appointment-modal-button appointment-cancel-button"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleRescheduleSubmit}
-                    disabled={!rescheduleData.date || !rescheduleData.time}
-                    className="appointment-modal-button appointment-save-button"
-                  >
-                    Reschedule
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
-        {/* Confirm Action Modal */}
-        {showConfirmModal && selectedAppointment && (
-          <div className="appointment-modal-overlay">
-            <div className="appointment-confirm-modal">
-              <div className="appointment-confirm-icon-container">
-                {actionType === 'confirm' ? (
-                  <CheckCircle className="appointment-confirm-icon confirm-icon" />
-                ) : (
-                  <XCircle className="appointment-confirm-icon cancel-icon" />
+                {/* Blood Information */}
+                <div className="detail-item">
+                  <label className="detail-label">Blood Type</label>
+                  <p className="detail-value">
+                    <span className="blood-type-badge">
+                      {getAppointmentWithUserData(selectedAppointment).bloodType}
+                    </span>
+                  </p>
+                </div>
+
+                {/* Appointment Information */}
+                <div className="detail-item">
+                  <label className="detail-label">Booking Date</label>
+                  <p className="detail-value">
+                    {selectedAppointment.bookingDate ? formatFirebaseDate(selectedAppointment.bookingDate) : 'N/A'}
+                  </p>
+                </div>
+                <div className="detail-item full-width">
+                  <label className="detail-label">Location</label>
+                  <p className="detail-value">{selectedAppointment.location}</p>
+                  <p className="detail-subvalue">{selectedAppointment.address}</p>
+                </div>
+                <div className="detail-item">
+                  <label className="detail-label">Appointment Date</label>
+                  <p className="detail-value">
+                    {selectedAppointment.date ? formatFirebaseDate(selectedAppointment.date) : 'N/A'}
+                  </p>
+                </div>
+                <div className="detail-item">
+                  <label className="detail-label">Appointment Time</label>
+                  <p className="detail-value">{formatTimeForDisplay(selectedAppointment.time)}</p>
+                </div>
+
+                {selectedAppointment.notes && (
+                  <div className="detail-item full-width">
+                    <label className="detail-label">Notes</label>
+                    <p className="detail-value">{selectedAppointment.notes}</p>
+                  </div>
                 )}
               </div>
-              <h3 className="appointment-confirm-title">
-                {actionType === 'confirm' ? 'Confirm Appointment' : 'Cancel Appointment'}
-              </h3>
-              <p className="appointment-confirm-message">
-                {actionType === 'confirm'
-                  ? `Are you sure you want to confirm this appointment for ${getAppointmentWithUserData(selectedAppointment).donorName}?`
-                  : `Are you sure you want to cancel this appointment for ${getAppointmentWithUserData(selectedAppointment).donorName}?`
-                }
-              </p>
-              <div className="appointment-confirm-details">
-                <p><strong>Date:</strong> {selectedAppointment.date ? formatFirebaseDate(selectedAppointment.date) : 'N/A'}</p>
-                <p><strong>Time:</strong> {formatTimeForDisplay(selectedAppointment.time)}</p>
-                <p><strong>Location:</strong> {selectedAppointment.location}</p>
-              </div>
-              <div className="appointment-confirm-actions">
+              <div className="appointment-modal-actions">
                 <button
-                  onClick={() => setShowConfirmModal(false)}
-                  className="appointment-confirm-button appointment-confirm-cancel"
+                  onClick={() => setShowDetailModal(false)}
+                  className="appointment-modal-button appointment-close-button"
                 >
-                  Back
-                </button>
-                <button
-                  onClick={handleConfirmAction}
-                  className={`appointment-confirm-button ${actionType === 'confirm' ? 'appointment-confirm-confirm' : 'appointment-confirm-delete'}`}
-                >
-                  {actionType === 'confirm' ? 'Confirm' : 'Cancel Appointment'}
+                  Close
                 </button>
               </div>
             </div>
           </div>
-        )}
-      </div>
-    </Layout>
+        </div>
+      )}
+
+      {/* Reschedule Modal */}
+      {showRescheduleModal && selectedAppointment && (
+        <div className="appointment-modal-overlay">
+          <div className="appointment-modal-container">
+            <div className="appointment-modal-header">
+              <h2 className="appointment-modal-title">Reschedule Appointment</h2>
+              <button
+                onClick={() => setShowRescheduleModal(false)}
+                className="appointment-modal-close"
+              >
+                <X className="appointment-modal-close-icon" />
+              </button>
+            </div>
+            <div className="appointment-modal-body">
+              <div className="reschedule-info">
+                <p className="reschedule-donor">Donor: <strong>
+                  {getAppointmentWithUserData(selectedAppointment).donorName}
+                </strong></p>
+                <p className="reschedule-current">
+                  Current: {selectedAppointment.date ? formatFirebaseDate(selectedAppointment.date) : 'N/A'} at {formatTimeForDisplay(selectedAppointment.time)}
+                </p>
+              </div>
+              <div className="appointment-modal-form">
+                <div className="appointment-form-group">
+                  <label className="appointment-form-label">New Date</label>
+                  <input
+                    type="date"
+                    className="appointment-form-input"
+                    value={rescheduleData.date}
+                    onChange={(e) => setRescheduleData({ ...rescheduleData, date: e.target.value })}
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+                <div className="appointment-form-group">
+                  <label className="appointment-form-label">New Time</label>
+                  <select
+                    className="appointment-form-select"
+                    value={rescheduleData.time}
+                    onChange={(e) => setRescheduleData({ ...rescheduleData, time: e.target.value })}
+                  >
+                    <option value="">Select time</option>
+                    {timeSlots.map(slot => (
+                      <option key={slot} value={slot}>{slot}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="appointment-modal-actions">
+                <button
+                  onClick={() => setShowRescheduleModal(false)}
+                  className="appointment-modal-button appointment-cancel-button"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleRescheduleSubmit}
+                  disabled={!rescheduleData.date || !rescheduleData.time}
+                  className="appointment-modal-button appointment-save-button"
+                >
+                  Reschedule
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirm Action Modal */}
+      {showConfirmModal && selectedAppointment && (
+        <div className="appointment-modal-overlay">
+          <div className="appointment-confirm-modal">
+            <div className="appointment-confirm-icon-container">
+              {actionType === 'confirm' ? (
+                <CheckCircle className="appointment-confirm-icon confirm-icon" />
+              ) : (
+                <XCircle className="appointment-confirm-icon cancel-icon" />
+              )}
+            </div>
+            <h3 className="appointment-confirm-title">
+              {actionType === 'confirm' ? 'Confirm Appointment' : 'Cancel Appointment'}
+            </h3>
+            <p className="appointment-confirm-message">
+              {actionType === 'confirm'
+                ? `Are you sure you want to confirm this appointment for ${getAppointmentWithUserData(selectedAppointment).donorName}?`
+                : `Are you sure you want to cancel this appointment for ${getAppointmentWithUserData(selectedAppointment).donorName}?`
+              }
+            </p>
+            <div className="appointment-confirm-details">
+              <p><strong>Date:</strong> {selectedAppointment.date ? formatFirebaseDate(selectedAppointment.date) : 'N/A'}</p>
+              <p><strong>Time:</strong> {formatTimeForDisplay(selectedAppointment.time)}</p>
+              <p><strong>Location:</strong> {selectedAppointment.location}</p>
+            </div>
+            <div className="appointment-confirm-actions">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="appointment-confirm-button appointment-confirm-cancel"
+              >
+                Back
+              </button>
+              <button
+                onClick={handleConfirmAction}
+                className={`appointment-confirm-button ${actionType === 'confirm' ? 'appointment-confirm-confirm' : 'appointment-confirm-delete'}`}
+              >
+                {actionType === 'confirm' ? 'Confirm' : 'Cancel Appointment'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

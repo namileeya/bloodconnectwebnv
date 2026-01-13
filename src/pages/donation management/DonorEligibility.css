@@ -10,11 +10,19 @@
 
 /* Loading */
 .loading-container {
-  @apply flex flex-col items-center justify-center min-h-96 text-gray-600;
+  @apply flex items-center justify-center min-h-96;
+}
+
+.loading-content {
+  @apply text-center;
 }
 
 .loading-spinner {
-  @apply animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mb-4;
+  @apply animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4;
+}
+
+.loading-text {
+  @apply text-gray-600;
 }
 
 /* Header */
@@ -294,7 +302,7 @@
 
 /* Modal */
 .eligibility-modal-overlay {
-  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4 backdrop-blur-sm;
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4;
 }
 
 .eligibility-modal,

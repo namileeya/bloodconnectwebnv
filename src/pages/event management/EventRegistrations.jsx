@@ -1193,744 +1193,744 @@ const EventRegistrations = ({ onNavigate }) => {
     };
 
     return (
-        <Layout onNavigate={onNavigate} currentPage="event-registrations">
-            <div className="space-y-6">
-                {/* Header */}
-                <div className="registration-header-container">
-                    <h1 className="registration-header-title">Event Registrations</h1>
-                    <button className="export-button">
-                        Export Data
-                    </button>
-                </div>
-
-                {/* Error/Success Messages */}
-                {error && (
-                    <div className="error-container">
-                        <AlertCircle className="error-icon" />
-                        <p className="error-text">{error}</p>
-                        <button onClick={() => setError('')} className="error-close">
-                            <X className="error-close-icon" />
-                        </button>
+        <>
+            <Layout onNavigate={onNavigate} currentPage="event-registrations">
+                <div className="space-y-6">
+                    {/* Header */}
+                    <div className="registration-header-container">
+                        <h1 className="registration-header-title">Event Registrations</h1>
                     </div>
-                )}
 
-                {success && (
-                    <div className="error-container success-alert">
-                        <CheckCircle className="error-icon" />
-                        <p className="error-text">{success}</p>
-                        <button onClick={() => setSuccess('')} className="error-close">
-                            <X className="error-close-icon" />
-                        </button>
-                    </div>
-                )}
+                    {/* Error/Success Messages */}
+                    {error && (
+                        <div className="error-container">
+                            <AlertCircle className="error-icon" />
+                            <p className="error-text">{error}</p>
+                            <button onClick={() => setError('')} className="error-close">
+                                <X className="error-close-icon" />
+                            </button>
+                        </div>
+                    )}
 
-                {/* Stats Cards */}
-                <div className="registration-stats-grid">
-                    <div className="registration-stat-card stat-card-total">
-                        <Users className="stat-icon text-blue-600" />
-                        <div>
-                            <h3 className="stat-number-blue">{stats.total}</h3>
-                            <p className="stat-label">Total Registrations</p>
+                    {success && (
+                        <div className="error-container success-alert">
+                            <CheckCircle className="error-icon" />
+                            <p className="error-text">{success}</p>
+                            <button onClick={() => setSuccess('')} className="error-close">
+                                <X className="error-close-icon" />
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Stats Cards */}
+                    <div className="registration-stats-grid">
+                        <div className="registration-stat-card stat-card-total">
+                            <Users className="stat-icon text-blue-600" />
+                            <div>
+                                <h3 className="stat-number-blue">{stats.total}</h3>
+                                <p className="stat-label">Total Registrations</p>
+                            </div>
+                        </div>
+                        <div className="registration-stat-card stat-card-pending">
+                            <Clock className="stat-icon text-purple-600" />
+                            <div>
+                                <h3 className="stat-number-purple">{stats.pending}</h3>
+                                <p className="stat-label">Pending Review</p>
+                            </div>
+                        </div>
+                        <div className="registration-stat-card stat-card-approved">
+                            <CheckCircle className="stat-icon text-green-600" />
+                            <div>
+                                <h3 className="stat-number-green">{stats.approved}</h3>
+                                <p className="stat-label">Approved</p>
+                            </div>
+                        </div>
+                        <div className="registration-stat-card stat-card-checkedin">
+                            <MapPin className="stat-icon text-orange-600" />
+                            <div>
+                                <h3 className="stat-number-orange">{stats.checkedIn}</h3>
+                                <p className="stat-label">Checked-In</p>
+                            </div>
                         </div>
                     </div>
-                    <div className="registration-stat-card stat-card-pending">
-                        <Clock className="stat-icon text-purple-600" />
-                        <div>
-                            <h3 className="stat-number-purple">{stats.pending}</h3>
-                            <p className="stat-label">Pending Review</p>
+
+                    {/* Filters */}
+                    <div className="registration-filters-container">
+                        <div className="registration-filters-row">
+                            <div className="registration-search-input-container">
+                                <Search className="registration-search-icon" />
+                                <input
+                                    type="text"
+                                    placeholder="Search by name, phone, email, or IC..."
+                                    className="registration-search-input"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+                            <select
+                                className="registration-event-filter"
+                                value={selectedEventId}
+                                onChange={(e) => setSelectedEventId(e.target.value)}
+                            >
+                                <option value="All">All Events</option>
+                                {events.map(evt => (
+                                    <option key={evt.id} value={evt.id}>
+                                        {evt.title} - {formatDate(evt.date)}
+                                    </option>
+                                ))}
+                            </select>
+                            <select
+                                className="registration-status-filter"
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                            >
+                                <option value="All">All Status</option>
+                                <option value="Registered">Registered</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Approved">Approved</option>
+                                <option value="Checked-In">Checked-In</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Rejected">Rejected</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </select>
+                            <select
+                                className="registration-bloodtype-filter"
+                                value={bloodTypeFilter}
+                                onChange={(e) => setBloodTypeFilter(e.target.value)}
+                            >
+                                <option value="All">All Blood Types</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                            </select>
                         </div>
                     </div>
-                    <div className="registration-stat-card stat-card-approved">
-                        <CheckCircle className="stat-icon text-green-600" />
-                        <div>
-                            <h3 className="stat-number-green">{stats.approved}</h3>
-                            <p className="stat-label">Approved</p>
-                        </div>
-                    </div>
-                    <div className="registration-stat-card stat-card-checkedin">
-                        <MapPin className="stat-icon text-orange-600" />
-                        <div>
-                            <h3 className="stat-number-orange">{stats.checkedIn}</h3>
-                            <p className="stat-label">Checked-In</p>
-                        </div>
-                    </div>
-                </div>
 
-                {/* Filters */}
-                <div className="registration-filters-container">
-                    <div className="registration-filters-row">
-                        <div className="registration-search-input-container">
-                            <Search className="registration-search-icon" />
-                            <input
-                                type="text"
-                                placeholder="Search by name, phone, email, or IC..."
-                                className="registration-search-input"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                        </div>
-                        <select
-                            className="registration-event-filter"
-                            value={selectedEventId}
-                            onChange={(e) => setSelectedEventId(e.target.value)}
-                        >
-                            <option value="All">All Events</option>
-                            {events.map(evt => (
-                                <option key={evt.id} value={evt.id}>
-                                    {evt.title} - {formatDate(evt.date)}
-                                </option>
-                            ))}
-                        </select>
-                        <select
-                            className="registration-status-filter"
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                        >
-                            <option value="All">All Status</option>
-                            <option value="Registered">Registered</option>
-                            <option value="Pending">Pending</option>
-                            <option value="Approved">Approved</option>
-                            <option value="Checked-In">Checked-In</option>
-                            <option value="Completed">Completed</option>
-                            <option value="Rejected">Rejected</option>
-                            <option value="Cancelled">Cancelled</option>
-                        </select>
-                        <select
-                            className="registration-bloodtype-filter"
-                            value={bloodTypeFilter}
-                            onChange={(e) => setBloodTypeFilter(e.target.value)}
-                        >
-                            <option value="All">All Blood Types</option>
-                            <option value="A+">A+</option>
-                            <option value="A-">A-</option>
-                            <option value="B+">B+</option>
-                            <option value="B-">B-</option>
-                            <option value="AB+">AB+</option>
-                            <option value="AB-">AB-</option>
-                            <option value="O+">O+</option>
-                            <option value="O-">O-</option>
-                        </select>
-                    </div>
-                </div>
+                    {/* List View */}
+                    <div className="registration-table-container">
+                        <div className="registration-table-wrapper">
+                            <table className="registration-table">
+                                <thead className="registration-table-header">
+                                    <tr>
+                                        <th className="registration-table-header-cell">NAME</th>
+                                        <th className="registration-table-header-cell">CONTACT</th>
+                                        <th className="registration-table-header-cell">EVENT</th>
+                                        <th className="registration-table-header-cell">SLOT</th>
+                                        <th className="registration-table-header-cell">BLOOD TYPE</th>
+                                        <th className="registration-table-header-cell">STATUS</th>
+                                        <th className="registration-table-header-cell">ACTIONS</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="registration-table-body">
+                                    {paginatedRegs.map(reg => {
+                                        const event = getEventById(reg.eventId);
+                                        const venue = getVenueById(reg.venueId);
+                                        const canBeUsed = canMarkAsUsed(reg);
+                                        const isCompleted = reg.status === 'Completed';
+                                        const isUsed = reg.donationDetails?.used;
 
-                {/* List View */}
-                <div className="registration-table-container">
-                    <div className="registration-table-wrapper">
-                        <table className="registration-table">
-                            <thead className="registration-table-header">
-                                <tr>
-                                    <th className="registration-table-header-cell">NAME</th>
-                                    <th className="registration-table-header-cell">CONTACT</th>
-                                    <th className="registration-table-header-cell">EVENT</th>
-                                    <th className="registration-table-header-cell">SLOT</th>
-                                    <th className="registration-table-header-cell">BLOOD TYPE</th>
-                                    <th className="registration-table-header-cell">STATUS</th>
-                                    <th className="registration-table-header-cell">ACTIONS</th>
-                                </tr>
-                            </thead>
-                            <tbody className="registration-table-body">
-                                {paginatedRegs.map(reg => {
-                                    const event = getEventById(reg.eventId);
-                                    const venue = getVenueById(reg.venueId);
-                                    const canBeUsed = canMarkAsUsed(reg);
-                                    const isCompleted = reg.status === 'Completed';
-                                    const isUsed = reg.donationDetails?.used;
-
-                                    return (
-                                        <tr key={reg.id} className="registration-table-row">
-                                            <td className="registration-table-cell">
-                                                <div className="donor-info">
-                                                    <span className="donor-name">{reg.userName}</span>
-                                                    <span className="donor-ic">{reg.userIC || 'N/A'}</span>
-                                                </div>
-                                            </td>
-                                            <td className="registration-table-cell">
-                                                <div className="contact-info">
-                                                    <span className="contact-phone">{reg.userPhone || 'No phone'}</span>
-                                                    <span className="contact-email">{reg.userEmail || 'No email'}</span>
-                                                </div>
-                                            </td>
-                                            <td className="registration-table-cell">
-                                                <div className="event-info">
-                                                    <span className="event-name">{event?.title || 'Unknown Event'}</span>
-                                                    <span className="event-date">{event ? formatDate(event.date) : '-'}</span>
-                                                </div>
-                                            </td>
-                                            <td className="registration-table-cell">
-                                                <div className="slot-info">
-                                                    <span className="slot-time">{reg.selectedTime}</span>
-                                                    <span className="slot-venue">{venue?.name || event?.location || 'Unknown'}</span>
-                                                </div>
-                                            </td>
-                                            <td className="registration-table-cell">
-                                                <span className="blood-type-badge">{reg.bloodType}</span>
-                                            </td>
-                                            <td className="registration-table-cell">
-                                                <span className={`registration-status-badge ${getStatusClasses(reg.status)}`}>
-                                                    {reg.status}
-                                                </span>
-                                            </td>
-                                            <td className="registration-table-cell">
-                                                <div className="registration-actions-container">
-                                                    <button
-                                                        onClick={() => handleViewDetails(reg)}
-                                                        className="registration-action-button view-button"
-                                                        title="View Details"
-                                                    >
-                                                        <User className="registration-action-icon" />
-                                                    </button>
-
-                                                    {isCompleted && (
+                                        return (
+                                            <tr key={reg.id} className="registration-table-row">
+                                                <td className="registration-table-cell">
+                                                    <div className="donor-info">
+                                                        <span className="donor-name">{reg.userName}</span>
+                                                        <span className="donor-ic">{reg.userIC || 'N/A'}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="registration-table-cell">
+                                                    <div className="contact-info">
+                                                        <span className="contact-phone">{reg.userPhone || 'No phone'}</span>
+                                                        <span className="contact-email">{reg.userEmail || 'No email'}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="registration-table-cell">
+                                                    <div className="event-info">
+                                                        <span className="event-name">{event?.title || 'Unknown Event'}</span>
+                                                        <span className="event-date">{event ? formatDate(event.date) : '-'}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="registration-table-cell">
+                                                    <div className="slot-info">
+                                                        <span className="slot-time">{reg.selectedTime}</span>
+                                                        <span className="slot-venue">{venue?.name || event?.location || 'Unknown'}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="registration-table-cell">
+                                                    <span className="blood-type-badge">{reg.bloodType}</span>
+                                                </td>
+                                                <td className="registration-table-cell">
+                                                    <span className={`registration-status-badge ${getStatusClasses(reg.status)}`}>
+                                                        {reg.status}
+                                                    </span>
+                                                </td>
+                                                <td className="registration-table-cell">
+                                                    <div className="registration-actions-container">
                                                         <button
-                                                            onClick={() => handleMarkAsUsedClick(reg)}
-                                                            className={`registration-action-button ${isUsed ? 'used-completed' : 'used-button'}`}
-                                                            title={isUsed ? "Already Used" : "Mark as Used"}
-                                                            disabled={isUsed || !canBeUsed}
+                                                            onClick={() => handleViewDetails(reg)}
+                                                            className="registration-action-button view-button"
+                                                            title="View Details"
                                                         >
-                                                            {isUsed ? (
-                                                                <Heart className="registration-action-icon text-green-600" fill="#10b981" />
-                                                            ) : (
-                                                                <Heart className="registration-action-icon" />
-                                                            )}
+                                                            <User className="registration-action-icon" />
                                                         </button>
-                                                    )}
 
-                                                    {reg.status === 'Pending' && (
-                                                        <>
+                                                        {isCompleted && (
                                                             <button
-                                                                onClick={() => handleApproveClick(reg)}
-                                                                className="registration-action-button approve-button"
-                                                                title="Approve"
+                                                                onClick={() => handleMarkAsUsedClick(reg)}
+                                                                className={`registration-action-button ${isUsed ? 'used-completed' : 'used-button'}`}
+                                                                title={isUsed ? "Already Used" : "Mark as Used"}
+                                                                disabled={isUsed || !canBeUsed}
                                                             >
-                                                                <CheckCircle className="registration-action-icon" />
+                                                                {isUsed ? (
+                                                                    <Heart className="registration-action-icon text-green-600" fill="#10b981" />
+                                                                ) : (
+                                                                    <Heart className="registration-action-icon" />
+                                                                )}
                                                             </button>
+                                                        )}
+
+                                                        {reg.status === 'Pending' && (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => handleApproveClick(reg)}
+                                                                    className="registration-action-button approve-button"
+                                                                    title="Approve"
+                                                                >
+                                                                    <CheckCircle className="registration-action-icon" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleRejectClick(reg)}
+                                                                    className="registration-action-button reject-button"
+                                                                    title="Reject"
+                                                                >
+                                                                    <XCircle className="registration-action-icon" />
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                        {reg.status === 'Approved' && (
                                                             <button
-                                                                onClick={() => handleRejectClick(reg)}
-                                                                className="registration-action-button reject-button"
-                                                                title="Reject"
+                                                                onClick={() => handleCheckInClick(reg)}
+                                                                className="registration-action-button checkin-button"
+                                                                title="Check-in"
+                                                            >
+                                                                <MapPin className="registration-action-icon" />
+                                                            </button>
+                                                        )}
+                                                        {reg.status === 'Checked-In' && (
+                                                            <button
+                                                                onClick={() => handleCompleteClick(reg)}
+                                                                className="registration-action-button complete-button"
+                                                                title="Complete Donation"
+                                                            >
+                                                                <Award className="registration-action-icon" />
+                                                            </button>
+                                                        )}
+                                                        {(reg.status === 'Pending' || reg.status === 'Approved') && (
+                                                            <button
+                                                                onClick={() => handleCancelClick(reg)}
+                                                                className="registration-action-button cancel-button"
+                                                                title="Cancel"
                                                             >
                                                                 <XCircle className="registration-action-icon" />
                                                             </button>
-                                                        </>
-                                                    )}
-                                                    {reg.status === 'Approved' && (
-                                                        <button
-                                                            onClick={() => handleCheckInClick(reg)}
-                                                            className="registration-action-button checkin-button"
-                                                            title="Check-in"
-                                                        >
-                                                            <MapPin className="registration-action-icon" />
-                                                        </button>
-                                                    )}
-                                                    {reg.status === 'Checked-In' && (
-                                                        <button
-                                                            onClick={() => handleCompleteClick(reg)}
-                                                            className="registration-action-button complete-button"
-                                                            title="Complete Donation"
-                                                        >
-                                                            <Award className="registration-action-icon" />
-                                                        </button>
-                                                    )}
-                                                    {(reg.status === 'Pending' || reg.status === 'Approved') && (
-                                                        <button
-                                                            onClick={() => handleCancelClick(reg)}
-                                                            className="registration-action-button cancel-button"
-                                                            title="Cancel"
-                                                        >
-                                                            <XCircle className="registration-action-icon" />
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {filteredRegs.length === 0 && !loading && (
+                            <div className="registration-empty-state">
+                                <Calendar className="registration-empty-icon" />
+                                <h3 className="registration-empty-title">No registrations found</h3>
+                                <p className="registration-empty-description">
+                                    Try adjusting your search filters
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Pagination */}
+                        {filteredRegs.length > 0 && (
+                            <div className="registration-pagination">
+                                <div className="registration-pagination-info">
+                                    <span>Items per page:</span>
+                                    <select
+                                        value={itemsPerPage}
+                                        onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                                        className="registration-items-per-page-select"
+                                    >
+                                        <option value={10}>10</option>
+                                        <option value={20}>20</option>
+                                        <option value={50}>50</option>
+                                        <option value={100}>100</option>
+                                    </select>
+                                    <span className="registration-pagination-range">
+                                        {startIndex + 1}-{Math.min(endIndex, filteredRegs.length)} of {filteredRegs.length}
+                                    </span>
+                                </div>
+
+                                <div className="registration-pagination-controls">
+                                    <button
+                                        onClick={() => handlePageChange(currentPage - 1)}
+                                        disabled={currentPage === 1}
+                                        className="registration-pagination-btn prev-btn"
+                                    >
+                                        <ChevronLeft size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => handlePageChange(currentPage + 1)}
+                                        disabled={currentPage === totalPages}
+                                        className="registration-pagination-btn next-btn"
+                                    >
+                                        <ChevronRight size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
-
-                    {filteredRegs.length === 0 && !loading && (
-                        <div className="registration-empty-state">
-                            <Calendar className="registration-empty-icon" />
-                            <h3 className="registration-empty-title">No registrations found</h3>
-                            <p className="registration-empty-description">
-                                Try adjusting your search filters
-                            </p>
-                        </div>
-                    )}
-
-                    {/* Pagination */}
-                    {filteredRegs.length > 0 && (
-                        <div className="registration-pagination">
-                            <div className="registration-pagination-info">
-                                <span>Items per page:</span>
-                                <select
-                                    value={itemsPerPage}
-                                    onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                                    className="registration-items-per-page-select"
-                                >
-                                    <option value={10}>10</option>
-                                    <option value={20}>20</option>
-                                    <option value={50}>50</option>
-                                    <option value={100}>100</option>
-                                </select>
-                                <span className="registration-pagination-range">
-                                    {startIndex + 1}-{Math.min(endIndex, filteredRegs.length)} of {filteredRegs.length}
-                                </span>
-                            </div>
-
-                            <div className="registration-pagination-controls">
-                                <button
-                                    onClick={() => handlePageChange(currentPage - 1)}
-                                    disabled={currentPage === 1}
-                                    className="registration-pagination-btn prev-btn"
-                                >
-                                    <ChevronLeft size={16} />
-                                </button>
-                                <button
-                                    onClick={() => handlePageChange(currentPage + 1)}
-                                    disabled={currentPage === totalPages}
-                                    className="registration-pagination-btn next-btn"
-                                >
-                                    <ChevronRight size={16} />
-                                </button>
-                            </div>
-                        </div>
-                    )}
                 </div>
+            </Layout>
 
-                {/* Detail Modal */}
-                {showDetailModal && selectedRegistration && (
-                    <div className="registration-modal-overlay">
-                        <div className="registration-modal-container">
-                            <div className="registration-modal-header">
-                                <h2 className="registration-modal-title">Registration Details</h2>
-                                <button
-                                    onClick={() => setShowDetailModal(false)}
-                                    className="registration-modal-close"
-                                >
-                                    <X className="registration-modal-close-icon" />
-                                </button>
+            {/* Detail Modal */}
+            {showDetailModal && selectedRegistration && (
+                <div className="registration-modal-overlay">
+                    <div className="registration-modal-container">
+                        <div className="registration-modal-header">
+                            <h2 className="registration-modal-title">Registration Details</h2>
+                            <button
+                                onClick={() => setShowDetailModal(false)}
+                                className="registration-modal-close"
+                            >
+                                <X className="registration-modal-close-icon" />
+                            </button>
+                        </div>
+
+                        <div className="registration-modal-body">
+                            <div className="mb-8">
+                                <h3 className="text-lg font-semibold text-gray-800 mb-4">Donor Information</h3>
+                                <div className="detail-grid">
+                                    <div className="detail-item">
+                                        <span className="detail-label">Full Name:</span>
+                                        <span className="detail-value">{selectedRegistration.userName}</span>
+                                    </div>
+                                    <div className="detail-item">
+                                        <span className="detail-label">IC Number:</span>
+                                        <span className="detail-value">{selectedRegistration.userIC || 'N/A'}</span>
+                                    </div>
+                                    <div className="detail-item">
+                                        <span className="detail-label">Email:</span>
+                                        <span className="detail-value">{selectedRegistration.userEmail}</span>
+                                    </div>
+                                    <div className="detail-item">
+                                        <span className="detail-label">Phone:</span>
+                                        <span className="detail-value">{selectedRegistration.userPhone}</span>
+                                    </div>
+                                    <div className="detail-item">
+                                        <span className="detail-label">Blood Type:</span>
+                                        <span className="detail-value">
+                                            <span className={`blood-type-badge ${selectedRegistration.bloodType}`}>
+                                                {selectedRegistration.bloodType}
+                                            </span>
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div className="registration-modal-body">
-                                <div className="mb-8">
-                                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Donor Information</h3>
-                                    <div className="detail-grid">
-                                        <div className="detail-item">
-                                            <span className="detail-label">Full Name:</span>
-                                            <span className="detail-value">{selectedRegistration.userName}</span>
-                                        </div>
-                                        <div className="detail-item">
-                                            <span className="detail-label">IC Number:</span>
-                                            <span className="detail-value">{selectedRegistration.userIC || 'N/A'}</span>
-                                        </div>
-                                        <div className="detail-item">
-                                            <span className="detail-label">Email:</span>
-                                            <span className="detail-value">{selectedRegistration.userEmail}</span>
-                                        </div>
-                                        <div className="detail-item">
-                                            <span className="detail-label">Phone:</span>
-                                            <span className="detail-value">{selectedRegistration.userPhone}</span>
-                                        </div>
-                                        <div className="detail-item">
-                                            <span className="detail-label">Blood Type:</span>
-                                            <span className="detail-value">
-                                                <span className={`blood-type-badge ${selectedRegistration.bloodType}`}>
-                                                    {selectedRegistration.bloodType}
-                                                </span>
-                                            </span>
-                                        </div>
+                            <div className="mb-8">
+                                <h3 className="text-lg font-semibold text-gray-800 mb-4">Event Information</h3>
+                                <div className="detail-grid">
+                                    <div className="detail-item">
+                                        <span className="detail-label">Event:</span>
+                                        <span className="detail-value">
+                                            {getEventById(selectedRegistration.eventId)?.title || 'Unknown Event'}
+                                        </span>
+                                    </div>
+                                    <div className="detail-item">
+                                        <span className="detail-label">Date:</span>
+                                        <span className="detail-value">
+                                            {formatDate(getEventById(selectedRegistration.eventId)?.date)}
+                                        </span>
+                                    </div>
+                                    <div className="detail-item">
+                                        <span className="detail-label">Time Slot:</span>
+                                        <span className="detail-value">{selectedRegistration.selectedTime}</span>
+                                    </div>
+                                    <div className="detail-item">
+                                        <span className="detail-label">Venue:</span>
+                                        <span className="detail-value">
+                                            {getVenueById(selectedRegistration.venueId)?.name ||
+                                                getEventById(selectedRegistration.eventId)?.location ||
+                                                'Unknown Venue'}
+                                        </span>
+                                    </div>
+                                    <div className="detail-item">
+                                        <span className="detail-label">Registration Date:</span>
+                                        <span className="detail-value">
+                                            {formatDateTime(selectedRegistration.registrationDate)}
+                                        </span>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div className="mb-8">
-                                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Event Information</h3>
-                                    <div className="detail-grid">
-                                        <div className="detail-item">
-                                            <span className="detail-label">Event:</span>
-                                            <span className="detail-value">
-                                                {getEventById(selectedRegistration.eventId)?.title || 'Unknown Event'}
+                            <div className="mb-8">
+                                <h3 className="text-lg font-semibold text-gray-800 mb-4">Status Information</h3>
+                                <div className="detail-grid">
+                                    <div className="detail-item">
+                                        <span className="detail-label">Status:</span>
+                                        <span className="detail-value">
+                                            <span className={`registration-status-badge ${getStatusClasses(selectedRegistration.status)}`}>
+                                                {selectedRegistration.status}
                                             </span>
-                                        </div>
-                                        <div className="detail-item">
-                                            <span className="detail-label">Date:</span>
-                                            <span className="detail-value">
-                                                {formatDate(getEventById(selectedRegistration.eventId)?.date)}
-                                            </span>
-                                        </div>
-                                        <div className="detail-item">
-                                            <span className="detail-label">Time Slot:</span>
-                                            <span className="detail-value">{selectedRegistration.selectedTime}</span>
-                                        </div>
-                                        <div className="detail-item">
-                                            <span className="detail-label">Venue:</span>
-                                            <span className="detail-value">
-                                                {getVenueById(selectedRegistration.venueId)?.name ||
-                                                    getEventById(selectedRegistration.eventId)?.location ||
-                                                    'Unknown Venue'}
-                                            </span>
-                                        </div>
-                                        <div className="detail-item">
-                                            <span className="detail-label">Registration Date:</span>
-                                            <span className="detail-value">
-                                                {formatDateTime(selectedRegistration.registrationDate)}
-                                            </span>
-                                        </div>
+                                        </span>
                                     </div>
-                                </div>
-
-                                <div className="mb-8">
-                                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Status Information</h3>
-                                    <div className="detail-grid">
+                                    {selectedRegistration.hospitalName && (
                                         <div className="detail-item">
-                                            <span className="detail-label">Status:</span>
-                                            <span className="detail-value">
-                                                <span className={`registration-status-badge ${getStatusClasses(selectedRegistration.status)}`}>
-                                                    {selectedRegistration.status}
-                                                </span>
-                                            </span>
+                                            <span className="detail-label">Assigned Hospital:</span>
+                                            <span className="detail-value">{selectedRegistration.hospitalName}</span>
                                         </div>
-                                        {selectedRegistration.hospitalName && (
-                                            <div className="detail-item">
-                                                <span className="detail-label">Assigned Hospital:</span>
-                                                <span className="detail-value">{selectedRegistration.hospitalName}</span>
+                                    )}
+                                </div>
+                            </div>
+
+                            {selectedRegistration.donationDetails && (
+                                <div className="mb-8">
+                                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Donation Details</h3>
+                                    <div className="donation-details-grid">
+                                        {selectedRegistration.donationDetails.serialNumber && (
+                                            <div className="donation-detail-item">
+                                                <span className="donation-detail-label">Serial Number:</span>
+                                                <span className="donation-detail-value">{selectedRegistration.donationDetails.serialNumber}</span>
                                             </div>
                                         )}
-                                    </div>
-                                </div>
-
-                                {selectedRegistration.donationDetails && (
-                                    <div className="mb-8">
-                                        <h3 className="text-lg font-semibold text-gray-800 mb-4">Donation Details</h3>
-                                        <div className="donation-details-grid">
-                                            {selectedRegistration.donationDetails.serialNumber && (
-                                                <div className="donation-detail-item">
-                                                    <span className="donation-detail-label">Serial Number:</span>
-                                                    <span className="donation-detail-value">{selectedRegistration.donationDetails.serialNumber}</span>
-                                                </div>
-                                            )}
-                                            {selectedRegistration.donationDetails.amountDonated && (
-                                                <div className="donation-detail-item">
-                                                    <span className="donation-detail-label">Amount Donated:</span>
-                                                    <span className="donation-detail-value">{selectedRegistration.donationDetails.amountDonated} ml</span>
-                                                </div>
-                                            )}
-                                            {selectedRegistration.donationDetails.completedDate && (
-                                                <div className="donation-detail-item">
-                                                    <span className="donation-detail-label">Donation Date:</span>
-                                                    <span className="donation-detail-value">{selectedRegistration.donationDetails.completedDate}</span>
-                                                </div>
-                                            )}
-                                            {selectedRegistration.donationDetails.expiryDate && (
-                                                <div className="donation-detail-item">
-                                                    <span className="donation-detail-label">Expiry Date:</span>
-                                                    <span className="donation-detail-value">{selectedRegistration.donationDetails.expiryDate}</span>
-                                                </div>
-                                            )}
+                                        {selectedRegistration.donationDetails.amountDonated && (
                                             <div className="donation-detail-item">
-                                                <span className="donation-detail-label">Blood Type:</span>
-                                                <span className="donation-detail-value">
-                                                    {selectedRegistration.donationDetails.bloodType || selectedRegistration.bloodType}
-                                                </span>
+                                                <span className="donation-detail-label">Amount Donated:</span>
+                                                <span className="donation-detail-value">{selectedRegistration.donationDetails.amountDonated} ml</span>
                                             </div>
+                                        )}
+                                        {selectedRegistration.donationDetails.completedDate && (
                                             <div className="donation-detail-item">
-                                                <span className="donation-detail-label">Used:</span>
-                                                <span className="donation-detail-value">
-                                                    {selectedRegistration.donationDetails.used ? (
-                                                        <span className="inline-flex items-center gap-1 text-green-600 font-semibold">
-                                                            <Heart className="w-3 h-3" fill="#10b981" />
-                                                            Yes {selectedRegistration.donationDetails.usedAt && `(on ${selectedRegistration.donationDetails.usedAt})`}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="text-gray-600">No</span>
-                                                    )}
-                                                </span>
+                                                <span className="donation-detail-label">Donation Date:</span>
+                                                <span className="donation-detail-value">{selectedRegistration.donationDetails.completedDate}</span>
                                             </div>
+                                        )}
+                                        {selectedRegistration.donationDetails.expiryDate && (
                                             <div className="donation-detail-item">
-                                                <span className="donation-detail-label">Status:</span>
-                                                <span className="donation-detail-value">
-                                                    {selectedRegistration.donationDetails.status || 'stored'}
-                                                </span>
+                                                <span className="donation-detail-label">Expiry Date:</span>
+                                                <span className="donation-detail-value">{selectedRegistration.donationDetails.expiryDate}</span>
                                             </div>
+                                        )}
+                                        <div className="donation-detail-item">
+                                            <span className="donation-detail-label">Blood Type:</span>
+                                            <span className="donation-detail-value">
+                                                {selectedRegistration.donationDetails.bloodType || selectedRegistration.bloodType}
+                                            </span>
                                         </div>
-                                    </div>
-                                )}
-
-                                {selectedRegistration.healthScreening && (
-                                    <div className="mb-8">
-                                        <h3 className="text-lg font-semibold text-gray-800 mb-4">Health Screening</h3>
-                                        <div className="health-screening-grid">
-                                            <div className="health-item">
-                                                <span className="health-label">Feeling Healthy:</span>
-                                                <span className="detail-value">
-                                                    {selectedRegistration.healthScreening.feelingHealthy ? 'Yes' : 'No'}
-                                                </span>
-                                            </div>
-                                            <div className="health-item">
-                                                <span className="health-label">Taking Medications:</span>
-                                                <span className="detail-value">
-                                                    {selectedRegistration.healthScreening.takingMedications ? 'Yes' : 'No'}
-                                                </span>
-                                            </div>
-                                            <div className="health-item">
-                                                <span className="health-label">Recent Illness:</span>
-                                                <span className="detail-value">
-                                                    {selectedRegistration.healthScreening.recentIllness ? 'Yes' : 'No'}
-                                                </span>
-                                            </div>
-                                            {selectedRegistration.healthScreening.lastDonationDate && (
-                                                <div className="health-item">
-                                                    <span className="health-label">Last Donation Date:</span>
-                                                    <span className="detail-value">
-                                                        {formatDate(selectedRegistration.healthScreening.lastDonationDate)}
+                                        <div className="donation-detail-item">
+                                            <span className="donation-detail-label">Used:</span>
+                                            <span className="donation-detail-value">
+                                                {selectedRegistration.donationDetails.used ? (
+                                                    <span className="inline-flex items-center gap-1 text-green-600 font-semibold">
+                                                        <Heart className="w-3 h-3" fill="#10b981" />
+                                                        Yes {selectedRegistration.donationDetails.usedAt && `(on ${selectedRegistration.donationDetails.usedAt})`}
                                                     </span>
-                                                </div>
-                                            )}
+                                                ) : (
+                                                    <span className="text-gray-600">No</span>
+                                                )}
+                                            </span>
+                                        </div>
+                                        <div className="donation-detail-item">
+                                            <span className="donation-detail-label">Status:</span>
+                                            <span className="donation-detail-value">
+                                                {selectedRegistration.donationDetails.status || 'stored'}
+                                            </span>
                                         </div>
                                     </div>
-                                )}
-
-                                {selectedRegistration.specialNotes && (
-                                    <div className="mb-8">
-                                        <h3 className="text-lg font-semibold text-gray-800 mb-4">Special Notes</h3>
-                                        <p className="text-gray-700 bg-gray-50 p-4 rounded-lg">{selectedRegistration.specialNotes}</p>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="registration-modal-actions">
-                                <button
-                                    onClick={() => setShowDetailModal(false)}
-                                    className="registration-modal-button registration-close-button"
-                                >
-                                    Close
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Confirm Modal */}
-                {showConfirmModal && selectedRegistration && (
-                    <div className="registration-modal-overlay">
-                        <div className="registration-confirm-modal">
-                            <div className="registration-confirm-icon-container">
-                                {actionType === 'approve' && <CheckCircle className="registration-confirm-icon approve-icon" />}
-                                {actionType === 'reject' && <XCircle className="registration-confirm-icon reject-icon" />}
-                                {actionType === 'checkin' && <MapPin className="registration-confirm-icon checkin-icon" />}
-                                {actionType === 'cancel' && <XCircle className="registration-confirm-icon cancel-icon" />}
-                            </div>
-                            <h3 className="registration-confirm-title">
-                                {actionType === 'approve' && 'Approve Registration'}
-                                {actionType === 'reject' && 'Reject Registration'}
-                                {actionType === 'checkin' && 'Check-in Donor'}
-                                {actionType === 'cancel' && 'Cancel Registration'}
-                            </h3>
-                            <div className="registration-confirm-details">
-                                <p><strong>Donor:</strong> {selectedRegistration.userName}</p>
-                                <p><strong>Event:</strong> {getEventById(selectedRegistration.eventId)?.title}</p>
-                                <p><strong>Time Slot:</strong> {selectedRegistration.selectedTime}</p>
-                            </div>
-
-                            {actionType === 'reject' && (
-                                <div className="rejection-reason-container">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Rejection Reason (Optional)
-                                    </label>
-                                    <textarea
-                                        className="rejection-textarea"
-                                        rows="3"
-                                        placeholder="Enter reason for rejection..."
-                                        value={rejectionReason}
-                                        onChange={(e) => setRejectionReason(e.target.value)}
-                                    />
                                 </div>
                             )}
 
-                            <p className="registration-confirm-message">
-                                {actionType === 'approve' && 'Are you sure you want to approve this registration?'}
-                                {actionType === 'reject' && 'Are you sure you want to reject this registration?'}
-                                {actionType === 'checkin' && 'Mark this donor as checked-in for their appointment?'}
-                                {actionType === 'cancel' && 'Are you sure you want to cancel this registration?'}
-                            </p>
-                            <div className="registration-confirm-actions">
-                                <button
-                                    onClick={() => {
-                                        setShowConfirmModal(false);
-                                        setRejectionReason('');
-                                    }}
-                                    className="registration-confirm-button registration-confirm-cancel"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={handleConfirmAction}
-                                    className={`registration-confirm-button ${actionType === 'approve' ? 'registration-confirm-approve' :
-                                        actionType === 'reject' ? 'registration-confirm-reject' :
-                                            actionType === 'checkin' ? 'registration-confirm-checkin' :
-                                                'registration-confirm-delete'
-                                        }`}
-                                >
-                                    {actionType === 'approve' && 'Approve'}
-                                    {actionType === 'reject' && 'Reject'}
-                                    {actionType === 'checkin' && 'Check-in'}
-                                    {actionType === 'cancel' && 'Cancel'}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Completion Modal */}
-                {showCompletionModal && selectedRegistration && (
-                    <div className="registration-modal-overlay">
-                        <div className="registration-completion-modal">
-                            <div className="registration-modal-header">
-                                <h2 className="registration-modal-title">Complete Donation</h2>
-                                <button
-                                    onClick={() => setShowCompletionModal(false)}
-                                    className="registration-modal-close"
-                                >
-                                    <X className="registration-modal-close-icon" />
-                                </button>
-                            </div>
-
-                            <div className="registration-modal-body">
-                                <div className="completion-donor-info">
-                                    <div className="completion-donor-header">
-                                        <div>
-                                            <h3 className="completion-donor-name">{selectedRegistration.userName}</h3>
-                                            <p className="completion-donor-meta">
-                                                {selectedRegistration.bloodType} • {selectedRegistration.userIC || 'N/A'}
-                                            </p>
+                            {selectedRegistration.healthScreening && (
+                                <div className="mb-8">
+                                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Health Screening</h3>
+                                    <div className="health-screening-grid">
+                                        <div className="health-item">
+                                            <span className="health-label">Feeling Healthy:</span>
+                                            <span className="detail-value">
+                                                {selectedRegistration.healthScreening.feelingHealthy ? 'Yes' : 'No'}
+                                            </span>
                                         </div>
-                                    </div>
-                                    <div className="completion-event-info">
-                                        <p><strong>Event:</strong> {getEventById(selectedRegistration.eventId)?.title}</p>
-                                        <p><strong>Time Slot:</strong> {selectedRegistration.selectedTime}</p>
-                                    </div>
-                                </div>
-
-                                <div className="completion-form">
-                                    <div className="completion-form-group">
-                                        <label className="completion-form-label">Serial Number *</label>
-                                        <input
-                                            type="text"
-                                            className={`completion-form-input ${completionErrors.serialNumber ? 'input-error' : ''}`}
-                                            placeholder="Enter blood bag serial number"
-                                            value={completionData.serialNumber}
-                                            onChange={(e) => setCompletionData({ ...completionData, serialNumber: e.target.value })}
-                                        />
-                                        {completionErrors.serialNumber && (
-                                            <span className="completion-form-error">{completionErrors.serialNumber}</span>
-                                        )}
-                                    </div>
-
-                                    <div className="completion-form-group">
-                                        <label className="completion-form-label">Amount Donated (ml) *</label>
-                                        <input
-                                            type="number"
-                                            className={`completion-form-input ${completionErrors.amountDonated ? 'input-error' : ''}`}
-                                            placeholder="Enter amount in ml"
-                                            value={completionData.amountDonated}
-                                            onChange={(e) => setCompletionData({ ...completionData, amountDonated: e.target.value })}
-                                        />
-                                        {completionErrors.amountDonated && (
-                                            <span className="completion-form-error">{completionErrors.amountDonated}</span>
-                                        )}
-                                    </div>
-
-                                    <div className="completion-form-group">
-                                        <label className="completion-form-label">Expiry Date *</label>
-                                        <input
-                                            type="date"
-                                            className={`completion-form-input ${completionErrors.expiryDate ? 'input-error' : ''}`}
-                                            value={completionData.expiryDate}
-                                            onChange={(e) => setCompletionData({ ...completionData, expiryDate: e.target.value })}
-                                        />
-                                        {completionErrors.expiryDate && (
-                                            <span className="completion-form-error">{completionErrors.expiryDate}</span>
+                                        <div className="health-item">
+                                            <span className="health-label">Taking Medications:</span>
+                                            <span className="detail-value">
+                                                {selectedRegistration.healthScreening.takingMedications ? 'Yes' : 'No'}
+                                            </span>
+                                        </div>
+                                        <div className="health-item">
+                                            <span className="health-label">Recent Illness:</span>
+                                            <span className="detail-value">
+                                                {selectedRegistration.healthScreening.recentIllness ? 'Yes' : 'No'}
+                                            </span>
+                                        </div>
+                                        {selectedRegistration.healthScreening.lastDonationDate && (
+                                            <div className="health-item">
+                                                <span className="health-label">Last Donation Date:</span>
+                                                <span className="detail-value">
+                                                    {formatDate(selectedRegistration.healthScreening.lastDonationDate)}
+                                                </span>
+                                            </div>
                                         )}
                                     </div>
                                 </div>
-                            </div>
+                            )}
 
-                            <div className="completion-modal-actions">
-                                <button
-                                    onClick={() => setShowCompletionModal(false)}
-                                    className="registration-modal-button registration-close-button"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={handleCompletionSubmit}
-                                    className="registration-modal-button registration-complete-button"
-                                >
-                                    Complete Donation
-                                </button>
-                            </div>
+                            {selectedRegistration.specialNotes && (
+                                <div className="mb-8">
+                                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Special Notes</h3>
+                                    <p className="text-gray-700 bg-gray-50 p-4 rounded-lg">{selectedRegistration.specialNotes}</p>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="registration-modal-actions">
+                            <button
+                                onClick={() => setShowDetailModal(false)}
+                                className="registration-modal-button registration-close-button"
+                            >
+                                Close
+                            </button>
                         </div>
                     </div>
-                )}
+                </div>
+            )}
 
-                {/* Mark as Used Modal */}
-                {showUsedModal && usingRegistration && usingHospital && hospitalBloodStock && (
-                    <div className="registration-modal-overlay">
-                        <div className="registration-confirm-modal">
-                            <div className="registration-confirm-icon-container">
-                                <Heart className="registration-confirm-icon text-green-600" />
+            {/* Confirm Modal */}
+            {showConfirmModal && selectedRegistration && (
+                <div className="registration-modal-overlay">
+                    <div className="registration-confirm-modal">
+                        <div className="registration-confirm-icon-container">
+                            {actionType === 'approve' && <CheckCircle className="registration-confirm-icon approve-icon" />}
+                            {actionType === 'reject' && <XCircle className="registration-confirm-icon reject-icon" />}
+                            {actionType === 'checkin' && <MapPin className="registration-confirm-icon checkin-icon" />}
+                            {actionType === 'cancel' && <XCircle className="registration-confirm-icon cancel-icon" />}
+                        </div>
+                        <h3 className="registration-confirm-title">
+                            {actionType === 'approve' && 'Approve Registration'}
+                            {actionType === 'reject' && 'Reject Registration'}
+                            {actionType === 'checkin' && 'Check-in Donor'}
+                            {actionType === 'cancel' && 'Cancel Registration'}
+                        </h3>
+                        <div className="registration-confirm-details">
+                            <p><strong>Donor:</strong> {selectedRegistration.userName}</p>
+                            <p><strong>Event:</strong> {getEventById(selectedRegistration.eventId)?.title}</p>
+                            <p><strong>Time Slot:</strong> {selectedRegistration.selectedTime}</p>
+                        </div>
+
+                        {actionType === 'reject' && (
+                            <div className="rejection-reason-container">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Rejection Reason (Optional)
+                                </label>
+                                <textarea
+                                    className="rejection-textarea"
+                                    rows="3"
+                                    placeholder="Enter reason for rejection..."
+                                    value={rejectionReason}
+                                    onChange={(e) => setRejectionReason(e.target.value)}
+                                />
                             </div>
-                            <h3 className="registration-confirm-title">Mark Blood as Used</h3>
-                            <div className="registration-used-details">
-                                <div className="registration-used-detail-row">
-                                    <span className="registration-used-detail-label">Donor:</span>
-                                    <span className="registration-used-detail-value">{usingRegistration.userName}</span>
-                                </div>
-                                <div className="registration-used-detail-row">
-                                    <span className="registration-used-detail-label">Blood Type:</span>
-                                    <span className="registration-used-detail-value">{hospitalBloodStock.bloodType}</span>
-                                </div>
-                                <div className="registration-used-detail-row">
-                                    <span className="registration-used-detail-label">Hospital:</span>
-                                    <span className="registration-used-detail-value">{usingHospital.name}</span>
-                                </div>
-                                <div className="registration-used-detail-row">
-                                    <span className="registration-used-detail-label">Current Stock:</span>
-                                    <span className="registration-used-detail-value">{hospitalBloodStock.quantity} units</span>
-                                </div>
-                                <div className="registration-used-detail-row">
-                                    <span className="registration-used-detail-label">New Stock:</span>
-                                    <span className="registration-used-detail-value">{hospitalBloodStock.quantity - 1} units</span>
-                                </div>
-                            </div>
-                            <p className="registration-confirm-message">
-                                This action will mark this blood donation as used and deduct 1 unit from hospital inventory.
-                            </p>
-                            <div className="registration-confirm-actions">
-                                <button
-                                    onClick={() => {
-                                        setShowUsedModal(false);
-                                        setUsingRegistration(null);
-                                        setUsingHospital(null);
-                                        setHospitalBloodStock(null);
-                                    }}
-                                    className="registration-confirm-button registration-confirm-cancel"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={handleSubmitUsed}
-                                    className="registration-confirm-button registration-confirm-used"
-                                >
-                                    Mark as Used
-                                </button>
-                            </div>
+                        )}
+
+                        <p className="registration-confirm-message">
+                            {actionType === 'approve' && 'Are you sure you want to approve this registration?'}
+                            {actionType === 'reject' && 'Are you sure you want to reject this registration?'}
+                            {actionType === 'checkin' && 'Mark this donor as checked-in for their appointment?'}
+                            {actionType === 'cancel' && 'Are you sure you want to cancel this registration?'}
+                        </p>
+                        <div className="registration-confirm-actions">
+                            <button
+                                onClick={() => {
+                                    setShowConfirmModal(false);
+                                    setRejectionReason('');
+                                }}
+                                className="registration-confirm-button registration-confirm-cancel"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleConfirmAction}
+                                className={`registration-confirm-button ${actionType === 'approve' ? 'registration-confirm-approve' :
+                                    actionType === 'reject' ? 'registration-confirm-reject' :
+                                        actionType === 'checkin' ? 'registration-confirm-checkin' :
+                                            'registration-confirm-delete'
+                                    }`}
+                            >
+                                {actionType === 'approve' && 'Approve'}
+                                {actionType === 'reject' && 'Reject'}
+                                {actionType === 'checkin' && 'Check-in'}
+                                {actionType === 'cancel' && 'Cancel'}
+                            </button>
                         </div>
                     </div>
-                )}
-            </div>
-        </Layout>
+                </div>
+            )}
+
+            {/* Completion Modal */}
+            {showCompletionModal && selectedRegistration && (
+                <div className="registration-modal-overlay">
+                    <div className="registration-completion-modal">
+                        <div className="registration-modal-header">
+                            <h2 className="registration-modal-title">Complete Donation</h2>
+                            <button
+                                onClick={() => setShowCompletionModal(false)}
+                                className="registration-modal-close"
+                            >
+                                <X className="registration-modal-close-icon" />
+                            </button>
+                        </div>
+
+                        <div className="registration-modal-body">
+                            <div className="completion-donor-info">
+                                <div className="completion-donor-header">
+                                    <div>
+                                        <h3 className="completion-donor-name">{selectedRegistration.userName}</h3>
+                                        <p className="completion-donor-meta">
+                                            {selectedRegistration.bloodType} • {selectedRegistration.userIC || 'N/A'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="completion-event-info">
+                                    <p><strong>Event:</strong> {getEventById(selectedRegistration.eventId)?.title}</p>
+                                    <p><strong>Time Slot:</strong> {selectedRegistration.selectedTime}</p>
+                                </div>
+                            </div>
+
+                            <div className="completion-form">
+                                <div className="completion-form-group">
+                                    <label className="completion-form-label">Serial Number *</label>
+                                    <input
+                                        type="text"
+                                        className={`completion-form-input ${completionErrors.serialNumber ? 'input-error' : ''}`}
+                                        placeholder="Enter blood bag serial number"
+                                        value={completionData.serialNumber}
+                                        onChange={(e) => setCompletionData({ ...completionData, serialNumber: e.target.value })}
+                                    />
+                                    {completionErrors.serialNumber && (
+                                        <span className="completion-form-error">{completionErrors.serialNumber}</span>
+                                    )}
+                                </div>
+
+                                <div className="completion-form-group">
+                                    <label className="completion-form-label">Amount Donated (ml) *</label>
+                                    <input
+                                        type="number"
+                                        className={`completion-form-input ${completionErrors.amountDonated ? 'input-error' : ''}`}
+                                        placeholder="Enter amount in ml"
+                                        value={completionData.amountDonated}
+                                        onChange={(e) => setCompletionData({ ...completionData, amountDonated: e.target.value })}
+                                    />
+                                    {completionErrors.amountDonated && (
+                                        <span className="completion-form-error">{completionErrors.amountDonated}</span>
+                                    )}
+                                </div>
+
+                                <div className="completion-form-group">
+                                    <label className="completion-form-label">Expiry Date *</label>
+                                    <input
+                                        type="date"
+                                        className={`completion-form-input ${completionErrors.expiryDate ? 'input-error' : ''}`}
+                                        value={completionData.expiryDate}
+                                        onChange={(e) => setCompletionData({ ...completionData, expiryDate: e.target.value })}
+                                    />
+                                    {completionErrors.expiryDate && (
+                                        <span className="completion-form-error">{completionErrors.expiryDate}</span>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="completion-modal-actions">
+                            <button
+                                onClick={() => setShowCompletionModal(false)}
+                                className="registration-modal-button registration-close-button"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleCompletionSubmit}
+                                className="registration-modal-button registration-complete-button"
+                            >
+                                Complete Donation
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Mark as Used Modal */}
+            {showUsedModal && usingRegistration && usingHospital && hospitalBloodStock && (
+                <div className="registration-modal-overlay">
+                    <div className="registration-confirm-modal">
+                        <div className="registration-confirm-icon-container">
+                            <Heart className="registration-confirm-icon text-green-600" />
+                        </div>
+                        <h3 className="registration-confirm-title">Mark Blood as Used</h3>
+                        <div className="registration-used-details">
+                            <div className="registration-used-detail-row">
+                                <span className="registration-used-detail-label">Donor:</span>
+                                <span className="registration-used-detail-value">{usingRegistration.userName}</span>
+                            </div>
+                            <div className="registration-used-detail-row">
+                                <span className="registration-used-detail-label">Blood Type:</span>
+                                <span className="registration-used-detail-value">{hospitalBloodStock.bloodType}</span>
+                            </div>
+                            <div className="registration-used-detail-row">
+                                <span className="registration-used-detail-label">Hospital:</span>
+                                <span className="registration-used-detail-value">{usingHospital.name}</span>
+                            </div>
+                            <div className="registration-used-detail-row">
+                                <span className="registration-used-detail-label">Current Stock:</span>
+                                <span className="registration-used-detail-value">{hospitalBloodStock.quantity} units</span>
+                            </div>
+                            <div className="registration-used-detail-row">
+                                <span className="registration-used-detail-label">New Stock:</span>
+                                <span className="registration-used-detail-value">{hospitalBloodStock.quantity - 1} units</span>
+                            </div>
+                        </div>
+                        <p className="registration-confirm-message">
+                            This action will mark this blood donation as used and deduct 1 unit from hospital inventory.
+                        </p>
+                        <div className="registration-confirm-actions">
+                            <button
+                                onClick={() => {
+                                    setShowUsedModal(false);
+                                    setUsingRegistration(null);
+                                    setUsingHospital(null);
+                                    setHospitalBloodStock(null);
+                                }}
+                                className="registration-confirm-button registration-confirm-cancel"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSubmitUsed}
+                                className="registration-confirm-button registration-confirm-used"
+                            >
+                                Mark as Used
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
     );
 };
+
 export default EventRegistrations;

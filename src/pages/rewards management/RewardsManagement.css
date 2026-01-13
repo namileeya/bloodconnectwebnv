@@ -94,11 +94,11 @@
 }
 
 .rewards-table th {
-    @apply bg-gray-50 px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider;
+    @apply bg-gray-50 px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider;
 }
 
 .rewards-table td {
-    @apply px-6 py-4 border-t border-gray-100;
+    @apply px-6 py-4 border-t border-gray-100 text-center;
 }
 
 .reward-name {
@@ -256,11 +256,19 @@
 }
 
 .loading-container {
-    @apply flex flex-col items-center justify-center min-h-96;
+    @apply flex items-center justify-center min-h-96;
+}
+
+.loading-content {
+    @apply text-center;
 }
 
 .loading-spinner {
-    @apply animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mb-4;
+    @apply animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4;
+}
+
+.loading-text {
+    @apply text-gray-600;
 }
 
 /* Pagination */
@@ -292,11 +300,11 @@
     @apply text-gray-800 border-gray-400;
 }
 
-/* ===== NEW STYLES ADDED ===== */
 /* Days Remaining Column Styles */
 .days-remaining {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     color: #6b7280;
     font-size: 14px;

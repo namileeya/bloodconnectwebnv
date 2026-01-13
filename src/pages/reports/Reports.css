@@ -4,7 +4,7 @@
 
 /* Container */
 .reports-container {
-  @apply flex flex-col space-y-6 p-6 max-w-7xl mx-auto;
+  @apply flex flex-col space-y-4 p-6 max-w-7xl mx-auto -mt-11 -ml-6;
 }
 
 /* Title */
@@ -40,19 +40,40 @@
 
 /* Stats Grid */
 .stats-grid {
-  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6;
 }
 
-.stat-card {
-  @apply bg-gray-50 p-4 rounded-md text-center shadow-sm;
+/* Stats Cards */
+.records-stat-card {
+  @apply bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow;
 }
 
-.stat-card h3 {
-  @apply text-lg font-medium text-gray-600;
+.stat-card-total {
+  @apply border-l-4 border-blue-500;
 }
 
-.stat-card p {
-  @apply text-2xl font-bold text-blue-600;
+.stat-card-completed {
+  @apply border-l-4 border-green-500;
+}
+
+.stat-card-scheduled {
+  @apply border-l-4 border-orange-500;
+}
+
+.stat-number-blue {
+  @apply text-3xl font-bold text-blue-600 mb-2;
+}
+
+.stat-number-green {
+  @apply text-3xl font-bold text-green-600 mb-2;
+}
+
+.stat-number-orange {
+  @apply text-3xl font-bold text-orange-600 mb-2;
+}
+
+.stat-label {
+  @apply text-gray-600 text-sm font-medium;
 }
 
 /* Table Styles */

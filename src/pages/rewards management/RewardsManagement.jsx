@@ -346,316 +346,328 @@ const RewardsManagement = ({ onNavigate }) => {
         return (
             <Layout onNavigate={onNavigate} currentPage="rewards-management">
                 <div className="loading-container">
-                    <div className="loading-spinner"></div>
-                    <p>Connecting to Firebase...</p>
+                    <div className="loading-content">
+                        <div className="loading-spinner"></div>
+                        <p className="loading-text">Loading rewards...</p>
+                    </div>
                 </div>
             </Layout>
         );
     }
 
     return (
-        <Layout onNavigate={onNavigate} currentPage="rewards-management">
-            <div className="space-y-6">
-                {/* Header */}
-                <div className="rewards-header">
-                    <h1 className="rewards-title">Rewards Management</h1>
-                    <button onClick={handleAddNew} className="add-reward-btn">
-                        <Plus size={16} />
-                        Add Reward
-                    </button>
-                </div>
+        <>
+            <Layout onNavigate={onNavigate} currentPage="rewards-management">
+                <div className="space-y-6">
+                    {/* Header */}
+                    <div className="rewards-header">
+                        <h1 className="rewards-title">Rewards Management</h1>
+                        <button onClick={handleAddNew} className="add-reward-btn">
+                            <Plus size={16} />
+                            Add Reward
+                        </button>
+                    </div>
 
 
-                {/* Stat Cards */}
-                <div className="rewards-stats-grid">
-                    <div className="stat-card stat-card-total">
-                        <h3 className="stat-number-blue">{rewards.length}</h3>
-                        <p className="stat-label">Total Rewards</p>
+                    {/* Stat Cards */}
+                    <div className="rewards-stats-grid">
+                        <div className="records-stat-card stat-card-total">
+                            <div>
+                                <h3 className="stat-number-blue">{rewards.length}</h3>
+                                <p className="stat-label">Total Rewards</p>
+                            </div>
+                        </div>
+                        <div className="records-stat-card stat-card-vouchers">
+                            <div>
+                                <h3 className="stat-number-purple">{rewards.filter(r => r.type === 'voucher').length}</h3>
+                                <p className="stat-label">Vouchers</p>
+                            </div>
+                        </div>
+                        <div className="records-stat-card stat-card-products">
+                            <div>
+                                <h3 className="stat-number-green">{rewards.filter(r => r.type === 'product').length}</h3>
+                                <p className="stat-label">Physical Products</p>
+                            </div>
+                        </div>
+                        <div className="records-stat-card stat-card-active">
+                            <div>
+                                <h3 className="stat-number-teal">{rewards.filter(r => r.isActive).length}</h3>
+                                <p className="stat-label">Active Rewards</p>
+                            </div>
+                        </div>
                     </div>
-                    <div className="stat-card stat-card-vouchers">
-                        <h3 className="stat-number-purple">{rewards.filter(r => r.type === 'voucher').length}</h3>
-                        <p className="stat-label">Vouchers</p>
-                    </div>
-                    <div className="stat-card stat-card-products">
-                        <h3 className="stat-number-green">{rewards.filter(r => r.type === 'product').length}</h3>
-                        <p className="stat-label">Physical Products</p>
-                    </div>
-                    <div className="stat-card stat-card-active">
-                        <h3 className="stat-number-teal">{rewards.filter(r => r.isActive).length}</h3>
-                        <p className="stat-label">Active Rewards</p>
-                    </div>
-                </div>
 
-                {/* Filters */}
-                <div className="rewards-filters">
-                    <div className="search-box">
-                        <Search size={18} />
-                        <input
-                            type="text"
-                            placeholder="Search rewards..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
+                    {/* Filters */}
+                    <div className="rewards-filters">
+                        <div className="search-box">
+                            <Search size={18} />
+                            <input
+                                type="text"
+                                placeholder="Search rewards..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
+                            <option value="All">All Types</option>
+                            <option value="voucher">Vouchers</option>
+                            <option value="product">Products</option>
+                        </select>
+                        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                            <option value="All">All Status</option>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
                     </div>
-                    <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-                        <option value="All">All Types</option>
-                        <option value="voucher">Vouchers</option>
-                        <option value="product">Products</option>
-                    </select>
-                    <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                        <option value="All">All Status</option>
-                        <option value="Active">Active</option>
-                        <option value="Inactive">Inactive</option>
-                    </select>
-                </div>
 
-                {/* Rewards Table */}
-                <div className="rewards-table-container">
-                    <table className="rewards-table">
-                        <thead>
-                            <tr>
-                                <th>Reward Name</th>
-                                <th>Type</th>
-                                <th>Category</th>
-                                <th>Points Required</th>
-                                <th>Details</th>
-                                <th>Days Remaining</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {paginatedRewards.map((reward) => (
-                                <tr key={reward.id}>
-                                    <td className="reward-name">
-                                        <Gift size={18} className="reward-icon" />
-                                        {reward.name}
-                                    </td>
-                                    <td>
-                                        <span className={`type-badge ${reward.type}`}>
-                                            {getTypeIcon(reward.type)}
-                                            {reward.type === 'voucher' ? 'Voucher' : 'Product'}
-                                        </span>
-                                    </td>
-                                    <td>{reward.category}</td>
-                                    <td className="points">{reward.pointsRequired} pts</td>
-                                    <td>
-                                        {reward.type === 'voucher'
-                                            ? `${reward.discountValue}% OFF`
-                                            : reward.stock !== undefined ? `Stock: ${reward.stock}` : '-'
-                                        }
-                                    </td>
-                                    <td>
-                                        {getDaysRemainingDisplay(reward.expiryDate)}
-                                    </td>
-                                    <td>{getStatusToggle(reward)}</td>
-                                    <td>
-                                        <div className="records-actions-container">
-                                            <button
-                                                onClick={() => handleEdit(reward)}
-                                                className="records-action-button reschedule-button"
-                                                title="Edit Reward"
-                                            >
-                                                <Edit className="records-action-icon" />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDeleteClick(reward.id)}
-                                                className="records-action-button cancel-button"
-                                                title="Delete Reward"
-                                            >
-                                                <Trash2 className="records-action-icon" />
-                                            </button>
-                                        </div>
-                                    </td>
+                    {/* Rewards Table */}
+                    <div className="rewards-table-container">
+                        <table className="rewards-table">
+                            <thead>
+                                <tr>
+                                    <th>Reward Name</th>
+                                    <th>Type</th>
+                                    <th>Category</th>
+                                    <th>Points Required</th>
+                                    <th>Details</th>
+                                    <th>Days Remaining</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {paginatedRewards.map((reward) => (
+                                    <tr key={reward.id}>
+                                        <td className="reward-name">
+                                            <Gift size={18} className="reward-icon" />
+                                            {reward.name}
+                                        </td>
+                                        <td>
+                                            <span className={`type-badge ${reward.type}`}>
+                                                {getTypeIcon(reward.type)}
+                                                {reward.type === 'voucher' ? 'Voucher' : 'Product'}
+                                            </span>
+                                        </td>
+                                        <td>{reward.category}</td>
+                                        <td className="points">{reward.pointsRequired} pts</td>
+                                        <td>
+                                            {reward.type === 'voucher'
+                                                ? `${reward.discountValue}% OFF`
+                                                : reward.stock !== undefined ? `Stock: ${reward.stock}` : '-'
+                                            }
+                                        </td>
+                                        <td>
+                                            {getDaysRemainingDisplay(reward.expiryDate)}
+                                        </td>
+                                        <td>{getStatusToggle(reward)}</td>
+                                        <td>
+                                            <div className="records-actions-container">
+                                                <button
+                                                    onClick={() => handleEdit(reward)}
+                                                    className="records-action-button reschedule-button"
+                                                    title="Edit Reward"
+                                                >
+                                                    <Edit className="records-action-icon" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteClick(reward.id)}
+                                                    className="records-action-button cancel-button"
+                                                    title="Delete Reward"
+                                                >
+                                                    <Trash2 className="records-action-icon" />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
 
-                    {filteredRewards.length === 0 && (
-                        <div className="empty-state">
-                            <Gift size={48} />
-                            <h3>No rewards found</h3>
-                            <p>Try adjusting your filters or add a new reward.</p>
+                        {filteredRewards.length === 0 && (
+                            <div className="empty-state">
+                                <Gift size={48} />
+                                <h3>No rewards found</h3>
+                                <p>Try adjusting your filters or add a new reward.</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Pagination */}
+                    {filteredRewards.length > 0 && (
+                        <div className="rewards-pagination">
+                            <div className="rewards-pagination-info">
+                                <span>Items per page:</span>
+                                <select
+                                    value={itemsPerPage}
+                                    onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                                    className="rewards-items-per-page-select"
+                                >
+                                    <option value={6}>6</option>
+                                    <option value={8}>8</option>
+                                    <option value={12}>12</option>
+                                    <option value={16}>16</option>
+                                </select>
+                                <span className="rewards-pagination-range">
+                                    {startIndex + 1}-{Math.min(endIndex, filteredRewards.length)} of {filteredRewards.length}
+                                </span>
+                            </div>
+
+                            <div className="rewards-pagination-controls">
+                                <button
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                    className="rewards-pagination-btn"
+                                >
+                                    <ChevronLeft size={16} />
+                                </button>
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                    className="rewards-pagination-btn"
+                                >
+                                    <ChevronRight size={16} />
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>
+            </Layout>
 
-                {/* Pagination */}
-                {filteredRewards.length > 0 && (
-                    <div className="rewards-pagination">
-                        <div className="rewards-pagination-info">
-                            <span>Items per page:</span>
-                            <select
-                                value={itemsPerPage}
-                                onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                                className="rewards-items-per-page-select"
-                            >
-                                <option value={6}>6</option>
-                                <option value={8}>8</option>
-                                <option value={12}>12</option>
-                                <option value={16}>16</option>
-                            </select>
-                            <span className="rewards-pagination-range">
-                                {startIndex + 1}-{Math.min(endIndex, filteredRewards.length)} of {filteredRewards.length}
-                            </span>
+            {/* Add/Edit Modal */}
+            {showAddEditModal && (
+                <div className="modal-overlay">
+                    <div className="modal">
+                        <div className="modal-header">
+                            <h2>{editingReward ? 'Edit Reward' : 'Add New Reward'}</h2>
+                            <button onClick={() => setShowAddEditModal(false)}><X size={24} /></button>
                         </div>
-
-                        <div className="rewards-pagination-controls">
-                            <button
-                                onClick={() => handlePageChange(currentPage - 1)}
-                                disabled={currentPage === 1}
-                                className="rewards-pagination-btn"
-                            >
-                                <ChevronLeft size={16} />
-                            </button>
-                            <button
-                                onClick={() => handlePageChange(currentPage + 1)}
-                                disabled={currentPage === totalPages}
-                                className="rewards-pagination-btn"
-                            >
-                                <ChevronRight size={16} />
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-                {/* Add/Edit Modal */}
-                {showAddEditModal && (
-                    <div className="modal-overlay">
-                        <div className="modal">
-                            <div className="modal-header">
-                                <h2>{editingReward ? 'Edit Reward' : 'Add New Reward'}</h2>
-                                <button onClick={() => setShowAddEditModal(false)}><X size={24} /></button>
-                            </div>
-                            <div className="modal-body">
-                                <div className="form-grid">
-                                    <div className="form-group">
-                                        <label>Reward Name *</label>
-                                        <input
-                                            value={formData.name}
-                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Type *</label>
-                                        <select
-                                            value={formData.type}
-                                            onChange={(e) => setFormData({
-                                                ...formData,
-                                                type: e.target.value,
-                                                discountValue: '',
-                                                stock: ''
-                                            })}
-                                        >
-                                            <option value="voucher">Voucher (Discount)</option>
-                                            <option value="product">Physical Product</option>
-                                        </select>
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Category *</label>
-                                        <input
-                                            value={formData.category}
-                                            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                            placeholder="e.g. Food & Beverages, Merchandise"
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Points Required *</label>
-                                        <input
-                                            type="number"
-                                            value={formData.pointsRequired}
-                                            onChange={(e) => setFormData({ ...formData, pointsRequired: e.target.value })}
-                                        />
-                                    </div>
-
-                                    {formData.type === 'voucher' && (
-                                        <div className="form-group">
-                                            <label>Discount Percentage *</label>
-                                            <input
-                                                type="number"
-                                                value={formData.discountValue}
-                                                onChange={(e) => setFormData({ ...formData, discountValue: e.target.value })}
-                                                placeholder="e.g. 20"
-                                            />
-                                        </div>
-                                    )}
-
-                                    {formData.type === 'product' && (
-                                        <div className="form-group">
-                                            <label>Stock Quantity</label>
-                                            <input
-                                                type="number"
-                                                value={formData.stock}
-                                                onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                                                placeholder="e.g. 20"
-                                            />
-                                        </div>
-                                    )}
-
-                                    <div className="form-group">
-                                        <label>Expiry Date (Optional)</label>
-                                        <input
-                                            type="date"
-                                            value={formData.expiryDate}
-                                            onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
-                                            min={new Date().toISOString().split('T')[0]}
-                                        />
-                                        <small>Reward will expire on this date</small>
-                                    </div>
-
-                                    <div className="form-group">
-                                        <label>Max Claims Per User</label>
-                                        <input
-                                            type="number"
-                                            value={formData.maxClaimsPerUser}
-                                            onChange={(e) => setFormData({ ...formData, maxClaimsPerUser: e.target.value })}
-                                            min="1"
-                                        />
-                                        <small>How many times a user can claim this reward</small>
-                                    </div>
-
-                                    <div className="form-group full-width">
-                                        <label>Description (Optional)</label>
-                                        <textarea
-                                            rows={3}
-                                            value={formData.description}
-                                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                        />
-                                    </div>
+                        <div className="modal-body">
+                            <div className="form-grid">
+                                <div className="form-group">
+                                    <label>Reward Name *</label>
+                                    <input
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    />
                                 </div>
-
-                                <div className="modal-actions">
-                                    <button onClick={() => setShowAddEditModal(false)} className="cancel-btn">Cancel</button>
-                                    <button
-                                        onClick={handleSave}
-                                        disabled={!formData.name || !formData.category || !formData.pointsRequired || (formData.type === 'voucher' && !formData.discountValue)}
-                                        className="save-btn"
+                                <div className="form-group">
+                                    <label>Type *</label>
+                                    <select
+                                        value={formData.type}
+                                        onChange={(e) => setFormData({
+                                            ...formData,
+                                            type: e.target.value,
+                                            discountValue: '',
+                                            stock: ''
+                                        })}
                                     >
-                                        {editingReward ? 'Save Changes' : 'Add Reward'}
-                                    </button>
+                                        <option value="voucher">Voucher (Discount)</option>
+                                        <option value="product">Physical Product</option>
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>Category *</label>
+                                    <input
+                                        value={formData.category}
+                                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                        placeholder="e.g. Food & Beverages, Merchandise"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Points Required *</label>
+                                    <input
+                                        type="number"
+                                        value={formData.pointsRequired}
+                                        onChange={(e) => setFormData({ ...formData, pointsRequired: e.target.value })}
+                                    />
+                                </div>
+
+                                {formData.type === 'voucher' && (
+                                    <div className="form-group">
+                                        <label>Discount Percentage *</label>
+                                        <input
+                                            type="number"
+                                            value={formData.discountValue}
+                                            onChange={(e) => setFormData({ ...formData, discountValue: e.target.value })}
+                                            placeholder="e.g. 20"
+                                        />
+                                    </div>
+                                )}
+
+                                {formData.type === 'product' && (
+                                    <div className="form-group">
+                                        <label>Stock Quantity</label>
+                                        <input
+                                            type="number"
+                                            value={formData.stock}
+                                            onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                                            placeholder="e.g. 20"
+                                        />
+                                    </div>
+                                )}
+
+                                <div className="form-group">
+                                    <label>Expiry Date (Optional)</label>
+                                    <input
+                                        type="date"
+                                        value={formData.expiryDate}
+                                        onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
+                                        min={new Date().toISOString().split('T')[0]}
+                                    />
+                                    <small>Reward will expire on this date</small>
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Max Claims Per User</label>
+                                    <input
+                                        type="number"
+                                        value={formData.maxClaimsPerUser}
+                                        onChange={(e) => setFormData({ ...formData, maxClaimsPerUser: e.target.value })}
+                                        min="1"
+                                    />
+                                    <small>How many times a user can claim this reward</small>
+                                </div>
+
+                                <div className="form-group full-width">
+                                    <label>Description (Optional)</label>
+                                    <textarea
+                                        rows={3}
+                                        value={formData.description}
+                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                    />
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                )}
 
-                {/* Delete Confirm Modal */}
-                {showDeleteConfirm && (
-                    <div className="modal-overlay">
-                        <div className="confirm-modal">
-                            <AlertCircle size={48} className="warning-icon" />
-                            <h3>Delete Reward</h3>
-                            <p>Are you sure you want to delete this reward? This action cannot be undone.</p>
-                            <div className="confirm-actions">
-                                <button onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
-                                <button onClick={handleDeleteConfirm} className="delete-confirm">Delete</button>
+                            <div className="modal-actions">
+                                <button onClick={() => setShowAddEditModal(false)} className="cancel-btn">Cancel</button>
+                                <button
+                                    onClick={handleSave}
+                                    disabled={!formData.name || !formData.category || !formData.pointsRequired || (formData.type === 'voucher' && !formData.discountValue)}
+                                    className="save-btn"
+                                >
+                                    {editingReward ? 'Save Changes' : 'Add Reward'}
+                                </button>
                             </div>
                         </div>
                     </div>
-                )}
-            </div>
-        </Layout>
+                </div>
+            )}
+
+            {/* Delete Confirm Modal */}
+            {showDeleteConfirm && (
+                <div className="modal-overlay">
+                    <div className="confirm-modal">
+                        <AlertCircle size={48} className="warning-icon" />
+                        <h3>Delete Reward</h3>
+                        <p>Are you sure you want to delete this reward? This action cannot be undone.</p>
+                        <div className="confirm-actions">
+                            <button onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
+                            <button onClick={handleDeleteConfirm} className="delete-confirm">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
     );
 };
 

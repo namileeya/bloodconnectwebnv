@@ -562,8 +562,10 @@ const DonorEligibility = ({ onNavigate }) => {
     return (
       <Layout onNavigate={onNavigate} currentPage="donor-eligibility">
         <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>Loading donor eligibility...</p>
+          <div className="loading-content">
+            <div className="loading-spinner"></div>
+            <p className="loading-text">Loading donor eligibility...</p>
+          </div>
         </div>
       </Layout>
     );
@@ -578,363 +580,365 @@ const DonorEligibility = ({ onNavigate }) => {
   };
 
   return (
-    <Layout onNavigate={onNavigate} currentPage="donor-eligibility">
-      <div className="eligibility-page">
-        {/* Debug Button */}
-        <button
-          onClick={debugCheckDatabase}
-          className="debug-button"
-          style={{
-            position: 'fixed',
-            bottom: '20px',
-            right: '20px',
-            zIndex: 1000,
-            padding: '8px 12px',
-            background: '#dc2626',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            fontSize: '12px',
-            fontWeight: 'bold',
-            cursor: 'pointer'
-          }}
-        >
-          Debug DB
-        </button>
-
-        {/* Header */}
-        <div className="eligibility-header-container">
-          <h1 className="eligibility-header-title">Donor Eligibility Management</h1>
-        </div>
-
-        {/* View Mode Tabs */}
-        <div className="view-mode-tabs">
+    <>
+      <Layout onNavigate={onNavigate} currentPage="donor-eligibility">
+        <div className="eligibility-page">
+          {/* Debug Button */}
           <button
-            className={`tab-btn ${viewMode === 'pending' ? 'active' : ''}`}
-            onClick={() => setViewMode('pending')}
+            onClick={debugCheckDatabase}
+            className="debug-button"
+            style={{
+              position: 'fixed',
+              bottom: '20px',
+              right: '20px',
+              zIndex: 1000,
+              padding: '8px 12px',
+              background: '#dc2626',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              fontSize: '12px',
+              fontWeight: 'bold',
+              cursor: 'pointer'
+            }}
           >
-            <AlertCircle size={18} />
-            Pending Review ({stats.pending})
+            Debug DB
           </button>
-          <button
-            className={`tab-btn ${viewMode === 'all' ? 'active' : ''}`}
-            onClick={() => setViewMode('all')}
-          >
-            All Decisions ({stats.total})
-          </button>
-        </div>
 
-        {/* Stats */}
-        <div className="eligibility-stats-grid">
-          <div className="eligibility-stat-card total">
-            <h3 className="stat-number">{stats.total}</h3>
-            <p className="stat-label">Total Requests</p>
+          {/* Header */}
+          <div className="eligibility-header-container">
+            <h1 className="eligibility-header-title">Donor Eligibility Management</h1>
           </div>
-          <div className="eligibility-stat-card pending">
-            <h3 className="stat-number">{stats.pending}</h3>
-            <p className="stat-label">Pending Review</p>
-          </div>
-          <div className="eligibility-stat-card eligible">
-            <h3 className="stat-number">{stats.eligible}</h3>
-            <p className="stat-label">Eligible</p>
-          </div>
-          <div className="eligibility-stat-card deferred">
-            <h3 className="stat-number">{stats.deferred}</h3>
-            <p className="stat-label">Temporarily Deferred</p>
-          </div>
-          <div className="eligibility-stat-card ineligible">
-            <h3 className="stat-number">{stats.ineligible}</h3>
-            <p className="stat-label">Permanently Ineligible</p>
-          </div>
-        </div>
 
-        {/* Filters */}
-        <div className="eligibility-filters-container">
-          <div className="eligibility-filters-grid">
-            <div className="eligibility-search-container">
-              <label className="eligibility-filter-label">Search Donors</label>
-              <div className="eligibility-search-input-container">
-                <Search className="eligibility-search-icon" />
-                <input
-                  type="text"
-                  placeholder="Search by name, IC, email, or blood type..."
-                  className="eligibility-search-input"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
+          {/* View Mode Tabs */}
+          <div className="view-mode-tabs">
+            <button
+              className={`tab-btn ${viewMode === 'pending' ? 'active' : ''}`}
+              onClick={() => setViewMode('pending')}
+            >
+              <AlertCircle size={18} />
+              Pending Review ({stats.pending})
+            </button>
+            <button
+              className={`tab-btn ${viewMode === 'all' ? 'active' : ''}`}
+              onClick={() => setViewMode('all')}
+            >
+              All Decisions ({stats.total})
+            </button>
+          </div>
+
+          {/* Stats */}
+          <div className="eligibility-stats-grid">
+            <div className="eligibility-stat-card total">
+              <h3 className="stat-number">{stats.total}</h3>
+              <p className="stat-label">Total Requests</p>
             </div>
-            <div className="eligibility-filter-select-container">
-              <label className="eligibility-filter-label">Filter by Status</label>
-              <select
-                className="eligibility-status-filter"
-                value={eligibilityFilter}
-                onChange={(e) => setEligibilityFilter(e.target.value)}
-              >
-                <option value="All">All Status</option>
-                <option value="Pending Review">Pending Review</option>
-                <option value="Eligible">Eligible</option>
-                <option value="Temporarily Deferred">Temporarily Deferred</option>
-                <option value="Permanently Ineligible">Permanently Ineligible</option>
-              </select>
+            <div className="eligibility-stat-card pending">
+              <h3 className="stat-number">{stats.pending}</h3>
+              <p className="stat-label">Pending Review</p>
+            </div>
+            <div className="eligibility-stat-card eligible">
+              <h3 className="stat-number">{stats.eligible}</h3>
+              <p className="stat-label">Eligible</p>
+            </div>
+            <div className="eligibility-stat-card deferred">
+              <h3 className="stat-number">{stats.deferred}</h3>
+              <p className="stat-label">Temporarily Deferred</p>
+            </div>
+            <div className="eligibility-stat-card ineligible">
+              <h3 className="stat-number">{stats.ineligible}</h3>
+              <p className="stat-label">Permanently Ineligible</p>
             </div>
           </div>
-        </div>
 
-        {/* Donor Cards Grid */}
-        <div className="eligibility-grid">
-          {currentDonors.length === 0 ? (
-            <div className="eligibility-empty-state">
-              <Search className="empty-icon" />
-              <h3>No {viewMode === 'pending' ? 'pending ' : ''}donors found</h3>
-              <p>Try adjusting your search or filters</p>
-              <button
-                onClick={debugCheckDatabase}
-                className="debug-link"
-                style={{
-                  marginTop: '10px',
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#dc2626',
-                  textDecoration: 'underline',
-                  cursor: 'pointer'
-                }}
-              >
-                Check database for requests
-              </button>
-            </div>
-          ) : (
-            currentDonors.map((donor) => (
-              <div key={donor.id} className="eligibility-card">
-                <div className="eligibility-card-header">
-                  <div className="donor-avatar">
-                    {donor.fullName.split(' ').map((n) => n[0]).join('').substring(0, 2)}
-                  </div>
-                  <div className="donor-info">
-                    <h3 className="donor-name">{donor.fullName}</h3>
-                    <p className="donor-ic">
-                      {donor.idType}: {donor.ic}
-                    </p>
-                    <div className="donor-tags">
-                      <span className="blood-type-tag">{donor.bloodType}</span>
-                      <span className={`eligibility-badge ${getEligibilityBadgeClass(donor.display_status)}`}>
-                        {getEligibilityIcon(donor.display_status)}
-                        {donor.display_status}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="eligibility-card-body">
-                  <div className="eligibility-meta">
-                    <div className="meta-item">
-                      <span className="meta-label">Submitted:</span>
-                      <span className="meta-value">{formatDateTime(donor.submittedDate)}</span>
-                    </div>
-                    {donor.decision_date && (
-                      <div className="meta-item">
-                        <span className="meta-label">Decided:</span>
-                        <span className="meta-value">{formatDateTime(donor.decision_date)}</span>
-                      </div>
-                    )}
-                    {donor.lastDonation && (
-                      <div className="meta-item">
-                        <span className="meta-label">Last Donation:</span>
-                        <span className="meta-value">{formatDate(donor.lastDonation)}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Questionnaire Summary */}
-                  {renderQuestionnaireSummary(donor.answers)}
-
-                  {donor.admin_notes && (
-                    <div className="admin-notes">
-                      <span className="notes-label">Admin Notes:</span>
-                      <span className="notes-value">{donor.admin_notes}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="eligibility-card-actions">
-                  <button onClick={() => handleEdit(donor)} className="action-btn edit-btn">
-                    <Edit2 size={16} />
-                    {donor.admin_decision ? 'Update Decision' : 'Review Eligibility'}
-                  </button>
-                  {viewMode === 'pending' && (
-                    <button onClick={() => handleDeleteClick(donor.id)} className="action-btn delete-btn">
-                      <Trash2 size={16} />
-                    </button>
-                  )}
+          {/* Filters */}
+          <div className="eligibility-filters-container">
+            <div className="eligibility-filters-grid">
+              <div className="eligibility-search-container">
+                <label className="eligibility-filter-label">Search Donors</label>
+                <div className="eligibility-search-input-container">
+                  <Search className="eligibility-search-icon" />
+                  <input
+                    type="text"
+                    placeholder="Search by name, IC, email, or blood type..."
+                    className="eligibility-search-input"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
                 </div>
               </div>
-            ))
-          )}
-        </div>
-
-        {/* Pagination */}
-        {filteredDonors.length > 0 && (
-          <div className="eligibility-pagination">
-            <div className="pagination-info">
-              <span>Items per page:</span>
-              <select value={itemsPerPage} onChange={(e) => setItemsPerPage(Number(e.target.value))} className="items-select">
-                <option value={6}>6</option>
-                <option value={8}>8</option>
-                <option value={12}>12</option>
-                <option value={16}>16</option>
-              </select>
-              <span className="range">
-                {startIndex + 1}-{Math.min(endIndex, filteredDonors.length)} of {filteredDonors.length}
-              </span>
-            </div>
-            <div className="pagination-controls">
-              <button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1}>
-                <ChevronLeft size={16} />
-              </button>
-              <button onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>
-                <ChevronRight size={16} />
-              </button>
+              <div className="eligibility-filter-select-container">
+                <label className="eligibility-filter-label">Filter by Status</label>
+                <select
+                  className="eligibility-status-filter"
+                  value={eligibilityFilter}
+                  onChange={(e) => setEligibilityFilter(e.target.value)}
+                >
+                  <option value="All">All Status</option>
+                  <option value="Pending Review">Pending Review</option>
+                  <option value="Eligible">Eligible</option>
+                  <option value="Temporarily Deferred">Temporarily Deferred</option>
+                  <option value="Permanently Ineligible">Permanently Ineligible</option>
+                </select>
+              </div>
             </div>
           </div>
-        )}
 
-        {/* Edit Modal */}
-        {showEditModal && selectedDonor && (
-          <div className="eligibility-modal-overlay">
-            <div className="eligibility-modal large-modal">
-              <div className="modal-header">
-                <h2>Review Donor Eligibility</h2>
-                <button onClick={() => setShowEditModal(false)} className="close-btn">
-                  <X size={20} />
+          {/* Donor Cards Grid */}
+          <div className="eligibility-grid">
+            {currentDonors.length === 0 ? (
+              <div className="eligibility-empty-state">
+                <Search className="empty-icon" />
+                <h3>No {viewMode === 'pending' ? 'pending ' : ''}donors found</h3>
+                <p>Try adjusting your search or filters</p>
+                <button
+                  onClick={debugCheckDatabase}
+                  className="debug-link"
+                  style={{
+                    marginTop: '10px',
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#dc2626',
+                    textDecoration: 'underline',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Check database for requests
                 </button>
               </div>
-
-              <div className="modal-body">
-                {/* Donor Info */}
-                <div className="donor-header">
-                  <h3>{selectedDonor.fullName}</h3>
-                  <p>{selectedDonor.idType}: {selectedDonor.ic} • {selectedDonor.bloodType}</p>
-                  <p className="text-sm text-gray-600">Email: {selectedDonor.userEmail}</p>
-                  <p className="text-sm text-gray-600">Submitted: {formatDateTime(selectedDonor.submittedDate)}</p>
-                </div>
-
-                {/* Medical Info */}
-                <div className="medical-info-section">
-                  <h4 className="section-title">Medical Information</h4>
-                  <div className="medical-grid">
-                    <div className="medical-item">
-                      <span className="medical-label">Weight:</span>
-                      <span className="medical-value">{selectedDonor.weight} kg</span>
+            ) : (
+              currentDonors.map((donor) => (
+                <div key={donor.id} className="eligibility-card">
+                  <div className="eligibility-card-header">
+                    <div className="donor-avatar">
+                      {donor.fullName.split(' ').map((n) => n[0]).join('').substring(0, 2)}
                     </div>
-                    <div className="medical-item">
-                      <span className="medical-label">Conditions:</span>
-                      <span className="medical-value">{selectedDonor.medicalConditions}</span>
-                    </div>
-                    <div className="medical-item">
-                      <span className="medical-label">Allergies:</span>
-                      <span className="medical-value">{selectedDonor.allergies}</span>
-                    </div>
-                    {selectedDonor.lastDonation && (
-                      <div className="medical-item">
-                        <span className="medical-label">Last Donation:</span>
-                        <span className="medical-value">{formatDate(selectedDonor.lastDonation)}</span>
+                    <div className="donor-info">
+                      <h3 className="donor-name">{donor.fullName}</h3>
+                      <p className="donor-ic">
+                        {donor.idType}: {donor.ic}
+                      </p>
+                      <div className="donor-tags">
+                        <span className="blood-type-tag">{donor.bloodType}</span>
+                        <span className={`eligibility-badge ${getEligibilityBadgeClass(donor.display_status)}`}>
+                          {getEligibilityIcon(donor.display_status)}
+                          {donor.display_status}
+                        </span>
                       </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Questionnaire Answers */}
-                <div className="questionnaire-section">
-                  <h4 className="section-title">Questionnaire Answers</h4>
-                  {renderFullQuestionnaire(questionnaireAnswers)}
-                </div>
-
-                {/* Admin Decision Form */}
-                <div className="decision-form">
-                  <h4 className="section-title">Make Decision</h4>
-
-                  <div className="form-group">
-                    <label>Eligibility Status *</label>
-                    <select
-                      value={adminDecision.display_status}
-                      onChange={(e) => {
-                        const displayStatus = e.target.value;
-                        const adminDecisionValue = reverseStatusMapping[displayStatus] || '';
-                        setAdminDecision({
-                          ...adminDecision,
-                          display_status: displayStatus,
-                          admin_decision: adminDecisionValue,
-                        });
-                      }}
-                      className="form-select"
-                      required
-                    >
-                      <option value="">Select status</option>
-                      <option value="Eligible">Eligible</option>
-                      <option value="Temporarily Deferred">Temporarily Deferred</option>
-                      <option value="Permanently Ineligible">Permanently Ineligible</option>
-                    </select>
+                    </div>
                   </div>
 
-                  <div className="form-group">
-                    <label>Reason / Notes *</label>
-                    <textarea
-                      value={adminDecision.admin_notes}
-                      onChange={(e) => setAdminDecision({
-                        ...adminDecision,
-                        admin_notes: e.target.value
-                      })}
-                      rows="3"
-                      className="form-textarea"
-                      placeholder="Provide reason for your decision. This will be included in the notification sent to the donor."
-                      required
-                    />
-                    <p className="form-hint">This note will be sent to the donor in the notification.</p>
-                  </div>
-
-                  <div className="notification-preview">
-                    <h5 className="preview-title">Notification Preview:</h5>
-                    <div className="preview-content">
-                      {adminDecision.display_status ? (
-                        <p>{getNotificationMessage(adminDecision.display_status, adminDecision.admin_notes)}</p>
-                      ) : (
-                        <p className="text-gray-500">Select a status to see preview</p>
+                  <div className="eligibility-card-body">
+                    <div className="eligibility-meta">
+                      <div className="meta-item">
+                        <span className="meta-label">Submitted:</span>
+                        <span className="meta-value">{formatDateTime(donor.submittedDate)}</span>
+                      </div>
+                      {donor.decision_date && (
+                        <div className="meta-item">
+                          <span className="meta-label">Decided:</span>
+                          <span className="meta-value">{formatDateTime(donor.decision_date)}</span>
+                        </div>
+                      )}
+                      {donor.lastDonation && (
+                        <div className="meta-item">
+                          <span className="meta-label">Last Donation:</span>
+                          <span className="meta-value">{formatDate(donor.lastDonation)}</span>
+                        </div>
                       )}
                     </div>
+
+                    {/* Questionnaire Summary */}
+                    {renderQuestionnaireSummary(donor.answers)}
+
+                    {donor.admin_notes && (
+                      <div className="admin-notes">
+                        <span className="notes-label">Admin Notes:</span>
+                        <span className="notes-value">{donor.admin_notes}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="eligibility-card-actions">
+                    <button onClick={() => handleEdit(donor)} className="action-btn edit-btn">
+                      <Edit2 size={16} />
+                      {donor.admin_decision ? 'Update Decision' : 'Review Eligibility'}
+                    </button>
+                    {viewMode === 'pending' && (
+                      <button onClick={() => handleDeleteClick(donor.id)} className="action-btn delete-btn">
+                        <Trash2 size={16} />
+                      </button>
+                    )}
                   </div>
                 </div>
-              </div>
+              ))
+            )}
+          </div>
 
-              <div className="modal-actions">
-                <button onClick={() => setShowEditModal(false)} className="cancel-btn">Cancel</button>
-                <button
-                  onClick={handleSaveEligibility}
-                  className="save-btn"
-                  disabled={!adminDecision.admin_decision || !adminDecision.admin_notes.trim()}
-                >
-                  Save Decision & Send Notification
+          {/* Pagination */}
+          {filteredDonors.length > 0 && (
+            <div className="eligibility-pagination">
+              <div className="pagination-info">
+                <span>Items per page:</span>
+                <select value={itemsPerPage} onChange={(e) => setItemsPerPage(Number(e.target.value))} className="items-select">
+                  <option value={6}>6</option>
+                  <option value={8}>8</option>
+                  <option value={12}>12</option>
+                  <option value={16}>16</option>
+                </select>
+                <span className="range">
+                  {startIndex + 1}-{Math.min(endIndex, filteredDonors.length)} of {filteredDonors.length}
+                </span>
+              </div>
+              <div className="pagination-controls">
+                <button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1}>
+                  <ChevronLeft size={16} />
+                </button>
+                <button onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>
+                  <ChevronRight size={16} />
                 </button>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
+      </Layout>
 
-        {/* Delete Confirmation */}
-        {showDeleteConfirm && (
-          <div className="eligibility-modal-overlay">
-            <div className="confirm-modal">
-              <AlertCircle className="confirm-icon" />
-              <h3>Archive Eligibility Request?</h3>
-              <p>This will archive the request. The user will need to submit a new request.</p>
-              <div className="confirm-actions">
-                <button onClick={() => setShowDeleteConfirm(false)} className="cancel-btn">Cancel</button>
-                <button onClick={handleDeleteConfirm} className="delete-confirm-btn">Archive</button>
+      {/* Edit Modal */}
+      {showEditModal && selectedDonor && (
+        <div className="eligibility-modal-overlay">
+          <div className="eligibility-modal large-modal">
+            <div className="modal-header">
+              <h2>Review Donor Eligibility</h2>
+              <button onClick={() => setShowEditModal(false)} className="close-btn">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="modal-body">
+              {/* Donor Info */}
+              <div className="donor-header">
+                <h3>{selectedDonor.fullName}</h3>
+                <p>{selectedDonor.idType}: {selectedDonor.ic} • {selectedDonor.bloodType}</p>
+                <p className="text-sm text-gray-600">Email: {selectedDonor.userEmail}</p>
+                <p className="text-sm text-gray-600">Submitted: {formatDateTime(selectedDonor.submittedDate)}</p>
+              </div>
+
+              {/* Medical Info */}
+              <div className="medical-info-section">
+                <h4 className="section-title">Medical Information</h4>
+                <div className="medical-grid">
+                  <div className="medical-item">
+                    <span className="medical-label">Weight:</span>
+                    <span className="medical-value">{selectedDonor.weight} kg</span>
+                  </div>
+                  <div className="medical-item">
+                    <span className="medical-label">Conditions:</span>
+                    <span className="medical-value">{selectedDonor.medicalConditions}</span>
+                  </div>
+                  <div className="medical-item">
+                    <span className="medical-label">Allergies:</span>
+                    <span className="medical-value">{selectedDonor.allergies}</span>
+                  </div>
+                  {selectedDonor.lastDonation && (
+                    <div className="medical-item">
+                      <span className="medical-label">Last Donation:</span>
+                      <span className="medical-value">{formatDate(selectedDonor.lastDonation)}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Questionnaire Answers */}
+              <div className="questionnaire-section">
+                <h4 className="section-title">Questionnaire Answers</h4>
+                {renderFullQuestionnaire(questionnaireAnswers)}
+              </div>
+
+              {/* Admin Decision Form */}
+              <div className="decision-form">
+                <h4 className="section-title">Make Decision</h4>
+
+                <div className="form-group">
+                  <label>Eligibility Status *</label>
+                  <select
+                    value={adminDecision.display_status}
+                    onChange={(e) => {
+                      const displayStatus = e.target.value;
+                      const adminDecisionValue = reverseStatusMapping[displayStatus] || '';
+                      setAdminDecision({
+                        ...adminDecision,
+                        display_status: displayStatus,
+                        admin_decision: adminDecisionValue,
+                      });
+                    }}
+                    className="form-select"
+                    required
+                  >
+                    <option value="">Select status</option>
+                    <option value="Eligible">Eligible</option>
+                    <option value="Temporarily Deferred">Temporarily Deferred</option>
+                    <option value="Permanently Ineligible">Permanently Ineligible</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Reason / Notes *</label>
+                  <textarea
+                    value={adminDecision.admin_notes}
+                    onChange={(e) => setAdminDecision({
+                      ...adminDecision,
+                      admin_notes: e.target.value
+                    })}
+                    rows="3"
+                    className="form-textarea"
+                    placeholder="Provide reason for your decision. This will be included in the notification sent to the donor."
+                    required
+                  />
+                  <p className="form-hint">This note will be sent to the donor in the notification.</p>
+                </div>
+
+                <div className="notification-preview">
+                  <h5 className="preview-title">Notification Preview:</h5>
+                  <div className="preview-content">
+                    {adminDecision.display_status ? (
+                      <p>{getNotificationMessage(adminDecision.display_status, adminDecision.admin_notes)}</p>
+                    ) : (
+                      <p className="text-gray-500">Select a status to see preview</p>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
+
+            <div className="modal-actions">
+              <button onClick={() => setShowEditModal(false)} className="cancel-btn">Cancel</button>
+              <button
+                onClick={handleSaveEligibility}
+                className="save-btn"
+                disabled={!adminDecision.admin_decision || !adminDecision.admin_notes.trim()}
+              >
+                Save Decision & Send Notification
+              </button>
+            </div>
           </div>
-        )}
-      </div>
-    </Layout>
+        </div>
+      )}
+
+      {/* Delete Confirmation */}
+      {showDeleteConfirm && (
+        <div className="eligibility-modal-overlay">
+          <div className="confirm-modal">
+            <AlertCircle className="confirm-icon" />
+            <h3>Archive Eligibility Request?</h3>
+            <p>This will archive the request. The user will need to submit a new request.</p>
+            <div className="confirm-actions">
+              <button onClick={() => setShowDeleteConfirm(false)} className="cancel-btn">Cancel</button>
+              <button onClick={handleDeleteConfirm} className="delete-confirm-btn">Archive</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

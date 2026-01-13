@@ -263,7 +263,7 @@ const Dashboard = ({ onNavigate }) => {
   };
 
   // Format last updated time
-  const formatLastUpdated = () => {
+  const getTimeAgo = () => {
     if (!lastUpdated) return '';
     const now = new Date();
     const diffMs = now - lastUpdated;
@@ -278,6 +278,22 @@ const Dashboard = ({ onNavigate }) => {
     return lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
+  // Helper function to format dd/mm/yyyy to readable format
+  const formatEventDate = (dateStr) => {
+    if (!dateStr) return 'Date TBD';
+    try {
+      const [day, month, year] = dateStr.split('/').map(Number);
+      const date = new Date(year, month - 1, day);
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    } catch (error) {
+      return dateStr;
+    }
+  };
+
   const handleRefresh = async () => {
     await loadDashboardData();
   };
@@ -289,7 +305,6 @@ const Dashboard = ({ onNavigate }) => {
           <div className="loading-content">
             <div className="loading-spinner"></div>
             <p className="loading-text">Loading dashboard data...</p>
-            <p className="text-sm text-gray-500 mt-2">Fetching real-time statistics</p>
           </div>
         </div>
       </Layout>
@@ -303,14 +318,6 @@ const Dashboard = ({ onNavigate }) => {
         <div className="dashboard-header-container">
           <div>
             <h1 className="dashboard-header-title">Dashboard</h1>
-            <p className="text-gray-600 mt-1">
-              Real-time overview of your blood donation system
-              {lastUpdated && (
-                <span className="text-sm text-gray-500 ml-2">
-                  • Updated {formatLastUpdated()}
-                </span>
-              )}
-            </p>
           </div>
           <div className="dashboard-header-actions">
             <button
@@ -866,7 +873,7 @@ const Dashboard = ({ onNavigate }) => {
               <Calendar className="events-header-icon" />
               <h2 className="dashboard-events-title">Upcoming Events</h2>
             </div>
-            <button className="dashboard-view-all-btn" onClick={() => onNavigate && onNavigate('event-management')}>
+            <button className="dashboard-view-all-btn" onClick={() => onNavigate && onNavigate('manage-events-slots')}>
               View All
             </button>
           </div>
@@ -876,7 +883,7 @@ const Dashboard = ({ onNavigate }) => {
                 <div key={event.id} className="dashboard-event-card">
                   <div className="event-date-badge">
                     <Calendar className="event-date-icon" />
-                    <span className="event-date-text">{event.date}</span>
+                    <span className="event-date-text">{formatEventDate(event.date)}</span>
                   </div>
                   <h3 className="event-title">{event.title}</h3>
                   <div className="event-details">
@@ -895,7 +902,7 @@ const Dashboard = ({ onNavigate }) => {
                   </div>
                   <button
                     className="event-register-btn"
-                    onClick={() => onNavigate && onNavigate('event-management')}
+                    onClick={() => onNavigate && onNavigate('manage-events-slots')}
                   >
                     View Details
                   </button>
@@ -915,7 +922,7 @@ const Dashboard = ({ onNavigate }) => {
         <div className="dashboard-activity-container">
           <div className="dashboard-activity-header">
             <h2 className="dashboard-activity-title">Recent Activity</h2>
-            <button className="dashboard-view-all-btn" onClick={() => onNavigate && onNavigate('donation-management')}>
+            <button className="dashboard-view-all-btn" onClick={() => onNavigate && onNavigate('donation-records')}>
               View All
             </button>
           </div>
@@ -959,10 +966,6 @@ const Dashboard = ({ onNavigate }) => {
               Donation Management
             </h3>
             <div className="quick-actions-grid">
-              <button className="dashboard-quick-action-btn action-btn-primary" onClick={() => onNavigate && onNavigate('donation-management')}>
-                <Heart className="quick-action-icon" />
-                <span>Donations</span>
-              </button>
               <button className="dashboard-quick-action-btn action-btn-primary" onClick={() => onNavigate && onNavigate('donation-records')}>
                 <FileText className="quick-action-icon" />
                 <span>Records</span>
@@ -999,10 +1002,6 @@ const Dashboard = ({ onNavigate }) => {
               Event Management
             </h3>
             <div className="quick-actions-grid">
-              <button className="dashboard-quick-action-btn action-btn-tertiary" onClick={() => onNavigate && onNavigate('event-management')}>
-                <Calendar className="quick-action-icon" />
-                <span>Events</span>
-              </button>
               <button className="dashboard-quick-action-btn action-btn-tertiary" onClick={() => onNavigate && onNavigate('manage-events-slots')}>
                 <Clock className="quick-action-icon" />
                 <span>Slots</span>

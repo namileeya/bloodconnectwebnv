@@ -327,7 +327,7 @@
 }
 
 .modal-button {
-  @apply px-6 py-2.5 rounded-lg font-semibold text-sm transition-all;
+  @apply px-6 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2;
 }
 
 .cancel-button {

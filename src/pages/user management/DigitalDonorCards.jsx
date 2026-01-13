@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { QrCode, X, Plus, Edit2, Download, Camera, Check, AlertCircle, Search, Trash2 } from 'lucide-react';
+import { QrCode, X, Plus, Edit2, Download, Camera, Check, AlertCircle, Search, Trash2, User, Phone, Mail, FileText } from 'lucide-react';
 import Layout from '../../components/Layout';
 import QRCode from 'qrcode';
 import jsQR from 'jsqr';
@@ -13,6 +13,7 @@ import {
   doc,
   getDocs,
   getDoc,
+  addDoc,
   updateDoc,
   deleteDoc,
   query,
@@ -115,97 +116,6 @@ const DigitalDonorCards = ({ onNavigate }) => {
     setFilteredDonors(filtered);
   }, [searchQuery, bloodTypeFilter, donors]);
 
-  // Get the actual status from all possible fields in priority order
-  const getEligibilityStatus = (requestData) => {
-    if (!requestData) return 'Not Submitted';
-
-    // Priority 1: admin_decision (admin's final decision)
-    if (requestData.admin_decision && requestData.admin_decision !== '') {
-      return requestData.admin_decision;
-    }
-
-    // Priority 2: adminStatus (admin's system status)
-    if (requestData.adminStatus && requestData.adminStatus !== '') {
-      return requestData.adminStatus;
-    }
-
-    // Priority 3: status (original submission status)
-    if (requestData.status && requestData.status !== '') {
-      return requestData.status;
-    }
-
-    // Priority 4: autoStatus (auto-calculated status)
-    if (requestData.autoStatus && requestData.autoStatus !== '') {
-      return requestData.autoStatus;
-    }
-
-    return 'Submitted (Pending Review)';
-  };
-
-  // Determine if status indicates eligibility
-  const isEligible = (status) => {
-    if (!status || status === 'Not Submitted') return false;
-
-    const statusLower = status.toLowerCase().trim();
-
-    // Eligible statuses
-    const eligibleStatuses = [
-      'approved',
-      'approved_permanent',
-      'eligible',
-      'eligible_permanent',
-      'cleared',
-      'passed'
-    ];
-
-    return eligibleStatuses.includes(statusLower);
-  };
-
-  // Format status for display (make it user-friendly)
-  const formatEligibilityStatus = (status) => {
-    if (!status || status === 'Not Submitted') return 'Not Submitted';
-
-    const statusLower = status.toLowerCase().trim();
-
-    // Map status to user-friendly display names
-    const statusMap = {
-      // Approved/Eligible statuses
-      'approved': 'Approved',
-      'approved_permanent': 'Approved (Permanent)',
-      'eligible': 'Eligible',
-      'eligible_permanent': 'Eligible (Permanent)',
-      'cleared': 'Cleared',
-      'passed': 'Passed',
-
-      // Pending/Review statuses
-      'pending': 'Pending Review',
-      'pending_review': 'Pending Review',
-      'under_review': 'Under Review',
-      'review_in_progress': 'Review in Progress',
-      'submitted (pending review)': 'Submitted (Pending Review)',
-      'submitted': 'Submitted',
-
-      // Deferred statuses
-      'deferred': 'Deferred',
-      'deferred_temporary': 'Temporarily Deferred',
-      'deferred_permanent': 'Permanently Deferred',
-
-      // Ineligible/Rejected statuses
-      'ineligible': 'Ineligible',
-      'ineligible_temporary': 'Temporarily Ineligible',
-      'ineligible_permanent': 'Permanently Ineligible',
-      'rejected': 'Rejected',
-      'failed': 'Failed',
-
-      // Other statuses
-      'cancelled': 'Cancelled',
-      'expired': 'Expired',
-      'not_submitted': 'Not Submitted'
-    };
-
-    return statusMap[statusLower] || status;
-  };
-
   const loadDonors = async () => {
     setLoading(true);
     try {
@@ -228,124 +138,68 @@ const DigitalDonorCards = ({ onNavigate }) => {
           console.error(`Error fetching donor profile for ${userId}:`, error);
         }
 
-        // 3. Fetch LATEST eligibility request (sorted by submittedDate)
+        // 3. Fetch latest eligibility request - IMPROVED QUERY
         let eligibilityStatus = 'Not Submitted';
-        let isEligibleFlag = false;
-        let eligibilityDetails = null;
-        let hasEligibilityRequest = false;
-
         try {
-          // First check if the eligibility_requests collection exists
-          const eligibilityCollection = collection(db, 'eligibility_requests');
+          const eligibilityQuery = query(
+            collection(db, 'eligibility_requests'),
+            where('userId', '==', userId)
+          );
+          const eligibilitySnapshot = await getDocs(eligibilityQuery);
 
-          // Try to query with proper error handling
-          try {
-            const eligibilityQuery = query(
-              eligibilityCollection,
-              where('userId', '==', userId),
-              orderBy('submittedDate', 'desc'),
-              limit(1)
-            );
+          if (!eligibilitySnapshot.empty) {
+            // Get all requests and find the most recent
+            let latestDate = null;
+            let latestRequest = null;
 
-            const eligibilitySnapshot = await getDocs(eligibilityQuery);
+            eligibilitySnapshot.forEach(doc => {
+              const requestData = doc.data();
 
-            if (!eligibilitySnapshot.empty) {
-              hasEligibilityRequest = true;
-              const latestDoc = eligibilitySnapshot.docs[0];
-              const requestData = latestDoc.data();
-
-              // Get the actual status from all possible fields
-              eligibilityStatus = getEligibilityStatus(requestData);
-              isEligibleFlag = isEligible(eligibilityStatus);
-
-              // Store details for debugging
-              eligibilityDetails = {
-                admin_decision: requestData.admin_decision,
-                adminStatus: requestData.adminStatus,
-                status: requestData.status,
-                autoStatus: requestData.autoStatus,
-                finalStatus: eligibilityStatus,
-                isEligible: isEligibleFlag,
-                hasRequest: true
-              };
-
-              console.log(`Eligibility status for ${userId}:`, eligibilityStatus);
-            } else {
-              // No eligibility request found
-              console.log(`No eligibility request found for ${userId}`);
-              eligibilityDetails = {
-                hasRequest: false,
-                message: 'No eligibility request submitted'
-              };
-            }
-          } catch (queryError) {
-            // Handle query errors (e.g., missing index)
-            console.warn(`Query error for ${userId}:`, queryError.message);
-
-            // Try a simpler query without orderBy
-            try {
-              const simpleQuery = query(
-                eligibilityCollection,
-                where('userId', '==', userId)
-              );
-              const simpleSnapshot = await getDocs(simpleQuery);
-
-              if (!simpleSnapshot.empty) {
-                hasEligibilityRequest = true;
-                // Find the latest document manually
-                let latestDoc = null;
-                let latestDate = null;
-
-                simpleSnapshot.forEach(doc => {
-                  const data = doc.data();
-                  if (data.submittedDate) {
-                    const docDate = data.submittedDate.toDate();
-                    if (!latestDate || docDate > latestDate) {
-                      latestDate = docDate;
-                      latestDoc = { id: doc.id, data: data };
-                    }
-                  }
-                });
-
-                if (latestDoc) {
-                  eligibilityStatus = getEligibilityStatus(latestDoc.data);
-                  isEligibleFlag = isEligible(eligibilityStatus);
-
-                  eligibilityDetails = {
-                    admin_decision: latestDoc.data.admin_decision,
-                    adminStatus: latestDoc.data.adminStatus,
-                    status: latestDoc.data.status,
-                    autoStatus: latestDoc.data.autoStatus,
-                    finalStatus: eligibilityStatus,
-                    isEligible: isEligibleFlag,
-                    hasRequest: true
-                  };
+              if (requestData.submittedDate) {
+                const requestDate = requestData.submittedDate.toDate();
+                if (!latestDate || requestDate > latestDate) {
+                  latestDate = requestDate;
+                  latestRequest = requestData;
                 }
               }
-            } catch (simpleError) {
-              console.error(`Simple query also failed for ${userId}:`, simpleError);
+            });
+
+            if (latestRequest) {
+              eligibilityStatus = latestRequest.status || 'pending';
             }
           }
         } catch (error) {
-          console.error(`General error fetching eligibility for ${userId}:`, error);
-          // Don't set error status, just use default
+          console.error(`Error fetching eligibility for ${userId}:`, error);
         }
 
-        // 4. Fetch last donation date
+        // 4. Fetch last donation date - IMPROVED QUERY
         let lastDonation = '';
         try {
           const donationsQuery = query(
             collection(db, 'donations'),
-            where('donor_id', '==', userId),
-            orderBy('donation_date', 'desc'),
-            limit(1)
+            where('donor_id', '==', userId)
           );
           const donationsSnapshot = await getDocs(donationsQuery);
 
           if (!donationsSnapshot.empty) {
-            const latestDonation = donationsSnapshot.docs[0].data();
-            if (latestDonation.donation_date) {
-              lastDonation = latestDonation.donation_date.toDate().toISOString().split('T')[0];
+            // Get all donations and find the most recent
+            let latestDate = null;
+            let latestDonationData = null;
+
+            donationsSnapshot.forEach(doc => {
+              const donationData = doc.data();
+
+              if (donationData.donation_date) {
+                const donationDate = donationData.donation_date.toDate();
+                if (!latestDate || donationDate > latestDate) {
+                  latestDate = donationDate;
+                  latestDonationData = donationData;
+                }
+              }
+            });
+
+            if (latestDonationData && latestDonationData.donation_date) {
+              lastDonation = latestDonationData.donation_date.toDate().toISOString().split('T')[0];
             }
           }
         } catch (error) {
@@ -371,16 +225,14 @@ const DigitalDonorCards = ({ onNavigate }) => {
           emergencyContactPhone: donorProfile.emergency_contact_phone || '',
           // Calculated fields
           eligibilityStatus,
-          eligibilityDetails, // For debugging
-          hasEligibilityRequest,
           lastDonation,
-          isEligible: isEligibleFlag,
-          // For backward compatibility
+          // For backward compatibility with existing code
           name: donorProfile.full_name || '',
           bloodType: donorProfile.blood_group || '',
           emergencyContact: donorProfile.emergency_contact_name || '',
           emergencyPhone: donorProfile.emergency_contact_phone || '',
           medicalNotes: `${donorProfile.medical_conditions || 'None'}${donorProfile.allergies ? `, Allergies: ${donorProfile.allergies}` : ''}`,
+          isEligible: eligibilityStatus === 'approved',
           createdAt: donorProfile.created_at?.toDate?.() || new Date(),
         });
       }
@@ -390,13 +242,12 @@ const DigitalDonorCards = ({ onNavigate }) => {
 
     } catch (err) {
       console.error('Error loading donors:', err);
-      setError('Failed to load donor cards: ' + err.message);
+      setError('Failed to load donor cards');
     } finally {
       setLoading(false);
     }
   };
 
-  // Rest of the functions remain the same...
   const generateRandomPassword = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let password = '';
@@ -478,7 +329,8 @@ const DigitalDonorCards = ({ onNavigate }) => {
     if (!selectedDonor) return;
 
     try {
-      // Delete from Firestore collections
+      // Note: Deleting auth user requires backend function
+      // For now, just delete from Firestore collections
       await deleteDoc(doc(db, 'users', selectedDonor.id));
       await deleteDoc(doc(db, 'donor_profiles', selectedDonor.id));
 
@@ -513,7 +365,7 @@ const DigitalDonorCards = ({ onNavigate }) => {
 
     try {
       if (editingDonor) {
-        // Update existing donor
+        // Update existing donor - only update donor_profiles (emergency contact, etc.)
         await updateDoc(doc(db, 'donor_profiles', editingDonor.id), {
           emergency_contact_name: formData.emergency_contact_name,
           emergency_contact_phone: formData.emergency_contact_phone,
@@ -529,7 +381,7 @@ const DigitalDonorCards = ({ onNavigate }) => {
         setEditingDonor(null);
 
       } else {
-        // Create new user
+        // Create new user (same as User Management)
         const password = generateRandomPassword();
 
         // 1. Create Firebase Auth user
@@ -747,65 +599,37 @@ const DigitalDonorCards = ({ onNavigate }) => {
       }
       const donorProfile = donorDoc.data();
 
-      // Fetch LATEST eligibility request
+      // Fetch latest eligibility request
       let eligibilityStatus = 'Not Submitted';
-      let isEligibleFlag = false;
-      let hasEligibilityRequest = false;
-
       try {
-        // Try complex query first
-        try {
-          const eligibilityQuery = query(
-            collection(db, 'eligibility_requests'),
-            where('userId', '==', userId),
-            orderBy('submittedDate', 'desc'),
-            limit(1)
-          );
-          const eligibilitySnapshot = await getDocs(eligibilityQuery);
+        const eligibilityQuery = query(
+          collection(db, 'eligibility_requests'),
+          where('userId', '==', userId)
+        );
+        const eligibilitySnapshot = await getDocs(eligibilityQuery);
 
-          if (!eligibilitySnapshot.empty) {
-            hasEligibilityRequest = true;
-            const latestDoc = eligibilitySnapshot.docs[0];
-            const requestData = latestDoc.data();
+        if (!eligibilitySnapshot.empty) {
+          // Get most recent request
+          let latestDate = null;
+          let latestRequest = null;
 
-            eligibilityStatus = getEligibilityStatus(requestData);
-            isEligibleFlag = isEligible(eligibilityStatus);
-          }
-        } catch (complexError) {
-          // Fallback to simple query
-          console.warn('Complex query failed, trying simple query:', complexError.message);
-          const simpleQuery = query(
-            collection(db, 'eligibility_requests'),
-            where('userId', '==', userId)
-          );
-          const simpleSnapshot = await getDocs(simpleQuery);
-
-          if (!simpleSnapshot.empty) {
-            hasEligibilityRequest = true;
-            // Find latest manually
-            let latestDoc = null;
-            let latestDate = null;
-
-            simpleSnapshot.forEach(doc => {
-              const data = doc.data();
-              if (data.submittedDate) {
-                const docDate = data.submittedDate.toDate();
-                if (!latestDate || docDate > latestDate) {
-                  latestDate = docDate;
-                  latestDoc = data;
-                }
+          eligibilitySnapshot.forEach(doc => {
+            const requestData = doc.data();
+            if (requestData.submittedDate) {
+              const requestDate = requestData.submittedDate.toDate();
+              if (!latestDate || requestDate > latestDate) {
+                latestDate = requestDate;
+                latestRequest = requestData;
               }
-            });
-
-            if (latestDoc) {
-              eligibilityStatus = getEligibilityStatus(latestDoc);
-              isEligibleFlag = isEligible(eligibilityStatus);
             }
+          });
+
+          if (latestRequest) {
+            eligibilityStatus = latestRequest.status || 'pending';
           }
         }
       } catch (error) {
         console.error('Error fetching eligibility:', error);
-        // Keep default "Not Submitted" status
       }
 
       // Fetch last donation
@@ -813,16 +637,28 @@ const DigitalDonorCards = ({ onNavigate }) => {
       try {
         const donationsQuery = query(
           collection(db, 'donations'),
-          where('donor_id', '==', userId),
-          orderBy('donation_date', 'desc'),
-          limit(1)
+          where('donor_id', '==', userId)
         );
         const donationsSnapshot = await getDocs(donationsQuery);
 
         if (!donationsSnapshot.empty) {
-          const latestDonation = donationsSnapshot.docs[0].data();
-          if (latestDonation.donation_date) {
-            lastDonation = latestDonation.donation_date.toDate().toISOString().split('T')[0];
+          // Get most recent donation
+          let latestDate = null;
+          let latestDonationData = null;
+
+          donationsSnapshot.forEach(doc => {
+            const donationData = doc.data();
+            if (donationData.donation_date) {
+              const donationDate = donationData.donation_date.toDate();
+              if (!latestDate || donationDate > latestDate) {
+                latestDate = donationDate;
+                latestDonationData = donationData;
+              }
+            }
+          });
+
+          if (latestDonationData && latestDonationData.donation_date) {
+            lastDonation = latestDonationData.donation_date.toDate().toISOString().split('T')[0];
           }
         }
       } catch (error) {
@@ -840,10 +676,9 @@ const DigitalDonorCards = ({ onNavigate }) => {
           phone: userData.phone_number || '',
           emergencyContactName: donorProfile.emergency_contact_name || '',
           emergencyContactPhone: donorProfile.emergency_contact_phone || '',
-          eligibilityStatus: formatEligibilityStatus(eligibilityStatus),
+          eligibilityStatus,
           lastDonation,
-          isEligible: isEligibleFlag,
-          hasEligibilityRequest,
+          isEligible: eligibilityStatus === 'approved',
         },
       });
 
@@ -927,629 +762,607 @@ const DigitalDonorCards = ({ onNavigate }) => {
   }
 
   return (
-    <Layout onNavigate={onNavigate} currentPage="digital-donor-cards">
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="donor-cards-header-container">
-          <h1 className="donor-cards-header-title">Digital Donor Cards</h1>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="error-container">
-            <AlertCircle className="error-icon" />
-            <p className="error-text">{error}</p>
-            <button onClick={() => setError('')} className="error-close">
-              <X className="error-close-icon" />
-            </button>
-          </div>
-        )}
-
-        {/* Stats Cards */}
-        <div className="donor-cards-stats-grid">
-          <div className="donor-stat-card stat-card-total">
-            <QrCode className="stat-icon text-blue-600" />
-            <div>
-              <h3 className="stat-number-blue">{stats.total}</h3>
-              <p className="stat-label">Total Donor Cards</p>
-            </div>
-          </div>
-          <div className="donor-stat-card stat-card-rare">
-            <AlertCircle className="stat-icon text-purple-600" />
-            <div>
-              <h3 className="stat-number-purple">{stats.rare}</h3>
-              <p className="stat-label">Rare Blood Types</p>
-            </div>
-          </div>
-          <div className="donor-stat-card stat-card-eligible">
-            <Check className="stat-icon text-green-600" />
-            <div>
-              <h3 className="stat-number-green">{stats.eligible}</h3>
-              <p className="stat-label">Eligible Donors</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Action Buttons & Filters */}
-        <div className="donor-cards-actions-container">
-          <div className="donor-cards-button-group">
-            <button onClick={handleCreateUserWithCard} className="donor-action-btn add-btn">
-              <Plus size={20} />
-              Create User with Card
-            </button>
-            <button onClick={handleVerifyCard} className="donor-action-btn verify-btn">
-              <Camera size={20} />
-              Verify Card
-            </button>
+    <>
+      <Layout onNavigate={onNavigate} currentPage="digital-donor-cards">
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="donor-cards-header-container">
+            <h1 className="donor-cards-header-title">Digital Donor Cards</h1>
           </div>
 
-          <div className="donor-cards-filters-row">
-            <div className="donor-search-input-container">
-              <Search className="donor-search-icon" />
-              <input
-                type="text"
-                placeholder="Search by name, ID, email, or blood type..."
-                className="donor-search-input"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <select
-              className="donor-bloodtype-filter"
-              value={bloodTypeFilter}
-              onChange={(e) => setBloodTypeFilter(e.target.value)}
-            >
-              <option value="All">All Blood Types</option>
-              {bloodTypes.map(type => (
-                <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Donor Cards Grid */}
-        <div className="donor-list-section">
-          <div className="donor-list-header">
-            <h2 className="donor-list-title">Registered Donors</h2>
-            <div className="donor-count-badge">{filteredDonors.length} donors</div>
-          </div>
-
-          <div className="donor-cards-grid">
-            {filteredDonors.map((donor) => (
-              <div key={donor.id} className="donor-card-wrapper" onClick={() => handleViewCard(donor)}>
-                <div className="donor-card-actions">
-                  <button
-                    onClick={(e) => handleEditDonor(donor, e)}
-                    className="donor-action-button donor-edit-button"
-                    title="Edit"
-                  >
-                    <Edit2 className="donor-action-icon" />
-                  </button>
-                  <button
-                    onClick={(e) => handleDeleteClick(donor, e)}
-                    className="donor-action-button donor-delete-button"
-                    title="Delete"
-                  >
-                    <Trash2 className="donor-action-icon" />
-                  </button>
-                </div>
-
-                <div className="donor-card-content">
-                  <div className="donor-qr-container">
-                    <div className="donor-qr-badge">
-                      <QrCode size={64} strokeWidth={2} />
-                    </div>
-                  </div>
-
-                  <div className="donor-info">
-                    <h3 className="donor-name">{donor.fullName}</h3>
-                    <div className="donor-status">
-                      <span className="blood-type">{donor.bloodGroup}</span>
-                      <span className="separator">•</span>
-                      <span className="donor-id">ID: {donor.displayId}</span>
-                    </div>
-                    <div className="donor-meta">
-                      <p className="donor-last-donation">
-                        Last Donation: {formatLastDonation(donor.lastDonation)}
-                      </p>
-                      <p className="donor-eligibility">
-                        Eligibility: <span className={`eligibility-badge ${donor.isEligible ? 'eligible' : 'not-eligible'}`}>
-                          {formatEligibilityStatus(donor.eligibilityStatus)}
-                        </span>
-                      </p>
-                    </div>
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleViewCard(donor);
-                      }}
-                      className="view-details-btn"
-                    >
-                      View Full Card
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {filteredDonors.length === 0 && (
-            <div className="donor-empty-state">
-              <div className="donor-empty-state-icon">
-                <QrCode />
-              </div>
-              <h3 className="donor-empty-state-title">No donor cards found</h3>
-              <p className="donor-empty-state-description">
-                Try adjusting your search or add a new donor card
-              </p>
+          {/* Error Message */}
+          {error && (
+            <div className="error-container">
+              <AlertCircle className="error-icon" />
+              <p className="error-text">{error}</p>
+              <button onClick={() => setError('')} className="error-close">
+                <X className="error-close-icon" />
+              </button>
             </div>
           )}
-        </div>
 
-        {/* Full Card Modal */}
-        {showCardModal && selectedDonor && (
-          <div className="card-modal-overlay" onClick={() => setShowCardModal(false)}>
-            <div className="card-modal-content" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-card">
-                <div className="modal-card-header">
-                  <h2>Digital Donor Card</h2>
-                  <button onClick={() => setShowCardModal(false)} className="modal-close-btn">
-                    <X size={24} />
-                  </button>
-                </div>
-
-                <div className="modal-qr-section">
-                  <div className="modal-qr-code">
-                    <QRCodeGenerator value={selectedDonor.qrCodeData} size={160} />
-                  </div>
-                </div>
-
-                <div className="modal-card-details">
-                  <div className="modal-detail-row">
-                    <span className="detail-label">Name:</span>
-                    <span className="detail-value">{selectedDonor.fullName}</span>
-                  </div>
-                  <div className="modal-detail-row">
-                    <span className="detail-label">Display ID:</span>
-                    <span className="detail-value">{selectedDonor.displayId}</span>
-                  </div>
-                  <div className="modal-detail-row">
-                    <span className="detail-label">User ID:</span>
-                    <span className="detail-value small-text">{selectedDonor.id}</span>
-                  </div>
-                  <div className="modal-detail-row">
-                    <span className="detail-label">Blood Type:</span>
-                    <span className="blood-type-large">{selectedDonor.bloodGroup}</span>
-                  </div>
-                  <div className="modal-detail-row">
-                    <span className="detail-label">Email:</span>
-                    <span className="detail-value">{selectedDonor.email || 'Not provided'}</span>
-                  </div>
-                  <div className="modal-detail-row">
-                    <span className="detail-label">Phone:</span>
-                    <span className="detail-value">{selectedDonor.phone || 'Not provided'}</span>
-                  </div>
-                  <div className="modal-detail-row">
-                    <span className="detail-label">Last Donation:</span>
-                    <span className="detail-value">{formatLastDonation(selectedDonor.lastDonation)}</span>
-                  </div>
-                  <div className="modal-detail-row">
-                    <span className="detail-label">Eligibility Status:</span>
-                    <span className={`detail-badge ${selectedDonor.isEligible ? 'badge-eligible' : 'badge-ineligible'}`}>
-                      {formatEligibilityStatus(selectedDonor.eligibilityStatus)}
-                    </span>
-                  </div>
-
-                  {/* Debug information - can be removed in production */}
-                  {selectedDonor.eligibilityDetails && (
-                    <div className="modal-detail-row debug-info">
-                      <span className="detail-label">Status Details:</span>
-                      <div className="detail-value small-text">
-                        <div>Has Eligibility Request: {selectedDonor.hasEligibilityRequest ? 'Yes' : 'No'}</div>
-                        {selectedDonor.eligibilityDetails.admin_decision && (
-                          <div>Admin Decision: {selectedDonor.eligibilityDetails.admin_decision}</div>
-                        )}
-                        {selectedDonor.eligibilityDetails.adminStatus && (
-                          <div>Admin Status: {selectedDonor.eligibilityDetails.adminStatus}</div>
-                        )}
-                        {selectedDonor.eligibilityDetails.status && (
-                          <div>Status: {selectedDonor.eligibilityDetails.status}</div>
-                        )}
-                        {selectedDonor.eligibilityDetails.autoStatus && (
-                          <div>Auto Status: {selectedDonor.eligibilityDetails.autoStatus}</div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {selectedDonor.emergencyContactName && (
-                    <div className="modal-detail-row">
-                      <span className="detail-label">Emergency Contact:</span>
-                      <span className="detail-value">{selectedDonor.emergencyContactName}</span>
-                    </div>
-                  )}
-                  {selectedDonor.emergencyContactPhone && (
-                    <div className="modal-detail-row">
-                      <span className="detail-label">Emergency Phone:</span>
-                      <span className="detail-value">{selectedDonor.emergencyContactPhone}</span>
-                    </div>
-                  )}
-                  <div className="modal-detail-row">
-                    <span className="detail-label">Medical Conditions:</span>
-                    <span className="detail-value">{selectedDonor.medicalConditions}</span>
-                  </div>
-                  {selectedDonor.allergies && selectedDonor.allergies !== 'None' && (
-                    <div className="modal-detail-row">
-                      <span className="detail-label">Allergies:</span>
-                      <span className="detail-value">{selectedDonor.allergies}</span>
-                    </div>
-                  )}
-                  <div className="modal-detail-row">
-                    <span className="detail-label">QR Code Data:</span>
-                    <span className="detail-value small-text">{selectedDonor.qrCodeData}</span>
-                  </div>
-                </div>
-
-                <div className="modal-actions">
-                  <button onClick={handleDownloadCard} className="modal-download-button">
-                    <Download size={20} />
-                    Download Card
-                  </button>
-                  <button onClick={() => setShowCardModal(false)} className="modal-close-button">
-                    Close
-                  </button>
-                </div>
+          {/* Stats Cards */}
+          <div className="donor-cards-stats-grid">
+            <div className="donor-stat-card stat-card-total">
+              <QrCode className="stat-icon text-blue-600" />
+              <div>
+                <h3 className="stat-number-blue">{stats.total}</h3>
+                <p className="stat-label">Total Donor Cards</p>
+              </div>
+            </div>
+            <div className="donor-stat-card stat-card-rare">
+              <AlertCircle className="stat-icon text-purple-600" />
+              <div>
+                <h3 className="stat-number-purple">{stats.rare}</h3>
+                <p className="stat-label">Rare Blood Types</p>
+              </div>
+            </div>
+            <div className="donor-stat-card stat-card-eligible">
+              <Check className="stat-icon text-green-600" />
+              <div>
+                <h3 className="stat-number-green">{stats.eligible}</h3>
+                <p className="stat-label">Eligible Donors</p>
               </div>
             </div>
           </div>
-        )}
 
-        {/* Add/Edit Modal */}
-        {showAddEditModal && (
-          <div className="card-modal-overlay" onClick={() => setShowAddEditModal(false)}>
-            <div className="card-modal-content" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-card">
-                <div className="modal-card-header">
-                  <h2>{editingDonor ? 'Edit Donor Card' : 'Create User with Card'}</h2>
-                  <button onClick={() => setShowAddEditModal(false)} className="modal-close-btn">
-                    <X size={24} />
-                  </button>
+          {/* Action Buttons & Filters */}
+          <div className="donor-cards-actions-container">
+            <div className="donor-cards-button-group">
+              <button onClick={handleCreateUserWithCard} className="donor-action-btn add-btn">
+                <Plus size={20} />
+                Create User with Card
+              </button>
+              <button onClick={handleVerifyCard} className="donor-action-btn verify-btn">
+                <Camera size={20} />
+                Verify Card
+              </button>
+            </div>
+
+            <div className="donor-cards-filters-row">
+              <div className="donor-search-input-container">
+                <Search className="donor-search-icon" />
+                <input
+                  type="text"
+                  placeholder="Search by name, ID, email, or blood type..."
+                  className="donor-search-input"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <select
+                className="donor-bloodtype-filter"
+                value={bloodTypeFilter}
+                onChange={(e) => setBloodTypeFilter(e.target.value)}
+              >
+                <option value="All">All Blood Types</option>
+                {bloodTypes.map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Donor Cards Grid */}
+          <div className="donor-list-section">
+            <div className="donor-list-header">
+              <h2 className="donor-list-title">Registered Donors</h2>
+              <div className="donor-count-badge">{filteredDonors.length} donors</div>
+            </div>
+
+            <div className="donor-cards-grid">
+              {filteredDonors.map((donor) => (
+                <div key={donor.id} className="donor-card-wrapper" onClick={() => handleViewCard(donor)}>
+                  <div className="donor-card-actions">
+                    <button
+                      onClick={(e) => handleEditDonor(donor, e)}
+                      className="donor-action-button donor-edit-button"
+                      title="Edit"
+                    >
+                      <Edit2 className="donor-action-icon" />
+                    </button>
+                    <button
+                      onClick={(e) => handleDeleteClick(donor, e)}
+                      className="donor-action-button donor-delete-button"
+                      title="Delete"
+                    >
+                      <Trash2 className="donor-action-icon" />
+                    </button>
+                  </div>
+
+                  <div className="donor-card-content">
+                    <div className="donor-qr-container">
+                      <div className="donor-qr-badge">
+                        <QrCode size={64} strokeWidth={2} />
+                      </div>
+                    </div>
+
+                    <div className="donor-info">
+                      <h3 className="donor-name">{donor.fullName}</h3>
+                      <div className="donor-status">
+                        <span className="blood-type">{donor.bloodGroup}</span>
+                        <span className="separator">•</span>
+                        <span className="donor-id">ID: {donor.displayId}</span>
+                      </div>
+                      <div className="donor-meta">
+                        <p className="donor-last-donation">
+                          Last Donation: {formatLastDonation(donor.lastDonation)}
+                        </p>
+                        <p className="donor-eligibility">
+                          Eligibility: <span className={`eligibility-badge ${donor.isEligible ? 'eligible' : 'not-eligible'}`}>
+                            {donor.eligibilityStatus}
+                          </span>
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewCard(donor);
+                        }}
+                        className="view-details-btn"
+                      >
+                        View Full Card
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {filteredDonors.length === 0 && (
+              <div className="donor-empty-state">
+                <div className="donor-empty-state-icon">
+                  <QrCode />
+                </div>
+                <h3 className="donor-empty-state-title">No donor cards found</h3>
+                <p className="donor-empty-state-description">
+                  Try adjusting your search or add a new donor card
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </Layout>
+
+      {/* Full Card Modal */}
+      {showCardModal && selectedDonor && (
+        <div className="card-modal-overlay" onClick={() => setShowCardModal(false)}>
+          <div className="card-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-card">
+              <div className="modal-card-header">
+                <h2>Digital Donor Card</h2>
+                <button onClick={() => setShowCardModal(false)} className="modal-close-btn">
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="modal-qr-section">
+                <div className="modal-qr-code">
+                  <QRCodeGenerator value={selectedDonor.qrCodeData} size={160} />
+                </div>
+              </div>
+
+              <div className="modal-card-details">
+                <div className="modal-detail-row">
+                  <span className="detail-label">Name:</span>
+                  <span className="detail-value">{selectedDonor.fullName}</span>
+                </div>
+                <div className="modal-detail-row">
+                  <span className="detail-label">Display ID:</span>
+                  <span className="detail-value">{selectedDonor.displayId}</span>
+                </div>
+                <div className="modal-detail-row">
+                  <span className="detail-label">User ID:</span>
+                  <span className="detail-value small-text">{selectedDonor.id}</span>
+                </div>
+                <div className="modal-detail-row">
+                  <span className="detail-label">Blood Type:</span>
+                  <span className="blood-type-large">{selectedDonor.bloodGroup}</span>
+                </div>
+                <div className="modal-detail-row">
+                  <span className="detail-label">Email:</span>
+                  <span className="detail-value">{selectedDonor.email || 'Not provided'}</span>
+                </div>
+                <div className="modal-detail-row">
+                  <span className="detail-label">Phone:</span>
+                  <span className="detail-value">{selectedDonor.phone || 'Not provided'}</span>
+                </div>
+                <div className="modal-detail-row">
+                  <span className="detail-label">Last Donation:</span>
+                  <span className="detail-value">{formatLastDonation(selectedDonor.lastDonation)}</span>
+                </div>
+                <div className="modal-detail-row">
+                  <span className="detail-label">Eligibility Status:</span>
+                  <span className={`detail-badge ${selectedDonor.isEligible ? 'badge-eligible' : 'badge-ineligible'}`}>
+                    {selectedDonor.eligibilityStatus}
+                  </span>
+                </div>
+                {selectedDonor.emergencyContactName && (
+                  <div className="modal-detail-row">
+                    <span className="detail-label">Emergency Contact:</span>
+                    <span className="detail-value">{selectedDonor.emergencyContactName}</span>
+                  </div>
+                )}
+                {selectedDonor.emergencyContactPhone && (
+                  <div className="modal-detail-row">
+                    <span className="detail-label">Emergency Phone:</span>
+                    <span className="detail-value">{selectedDonor.emergencyContactPhone}</span>
+                  </div>
+                )}
+                <div className="modal-detail-row">
+                  <span className="detail-label">Medical Conditions:</span>
+                  <span className="detail-value">{selectedDonor.medicalConditions}</span>
+                </div>
+                {selectedDonor.allergies && selectedDonor.allergies !== 'None' && (
+                  <div className="modal-detail-row">
+                    <span className="detail-label">Allergies:</span>
+                    <span className="detail-value">{selectedDonor.allergies}</span>
+                  </div>
+                )}
+                <div className="modal-detail-row">
+                  <span className="detail-label">QR Code Data:</span>
+                  <span className="detail-value small-text">{selectedDonor.qrCodeData}</span>
+                </div>
+              </div>
+
+              <div className="modal-actions">
+                <button onClick={handleDownloadCard} className="modal-download-button">
+                  <Download size={20} />
+                  Download Card
+                </button>
+                <button onClick={() => setShowCardModal(false)} className="modal-close-button">
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add/Edit Modal */}
+      {showAddEditModal && (
+        <div className="card-modal-overlay" onClick={() => setShowAddEditModal(false)}>
+          <div className="card-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-card">
+              <div className="modal-card-header">
+                <h2>{editingDonor ? 'Edit Donor Card' : 'Create User with Card'}</h2>
+                <button onClick={() => setShowAddEditModal(false)} className="modal-close-btn">
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="modal-form-content">
+                {!editingDonor && (
+                  <>
+                    <div className="modal-section-divider">
+                      <span className="modal-section-title">Account Information</span>
+                    </div>
+                    <div className="modal-form-group">
+                      <label className="modal-form-label">Email *</label>
+                      <input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        className="modal-form-input"
+                        placeholder="email@example.com"
+                        required
+                      />
+                    </div>
+                  </>
+                )}
+
+                <div className="modal-section-divider">
+                  <span className="modal-section-title">Personal Information</span>
                 </div>
 
-                <div className="modal-form-content">
-                  {!editingDonor && (
-                    <>
-                      <div className="modal-section-divider">
-                        <span className="modal-section-title">Account Information</span>
-                      </div>
-                      <div className="modal-form-group">
-                        <label className="modal-form-label">Email *</label>
-                        <input
-                          type="email"
-                          value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          className="modal-form-input"
-                          placeholder="email@example.com"
-                          required
-                        />
-                      </div>
-                    </>
-                  )}
+                <div className="modal-form-group">
+                  <label className="modal-form-label">Full Name *</label>
+                  <input
+                    type="text"
+                    value={formData.full_name}
+                    onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                    className="modal-form-input"
+                    placeholder="Enter full name"
+                    required
+                  />
+                </div>
 
-                  <div className="modal-section-divider">
-                    <span className="modal-section-title">Personal Information</span>
+                <div className="modal-form-row">
+                  <div className="modal-form-group">
+                    <label className="modal-form-label">Blood Group *</label>
+                    <select
+                      value={formData.blood_group}
+                      onChange={(e) => setFormData({ ...formData, blood_group: e.target.value })}
+                      className="modal-form-select"
+                    >
+                      {bloodTypes.map(type => (
+                        <option key={type} value={type}>{type}</option>
+                      ))}
+                    </select>
                   </div>
 
                   <div className="modal-form-group">
-                    <label className="modal-form-label">Full Name *</label>
+                    <label className="modal-form-label">Gender</label>
+                    <select
+                      value={formData.gender}
+                      onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                      className="modal-form-select"
+                    >
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="modal-form-row">
+                  <div className="modal-form-group">
+                    <label className="modal-form-label">Phone Number</label>
                     <input
-                      type="text"
-                      value={formData.full_name}
-                      onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                      type="tel"
+                      value={formData.phone_number}
+                      onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
                       className="modal-form-input"
-                      placeholder="Enter full name"
-                      required
+                      placeholder="+60123456789"
                     />
                   </div>
 
-                  <div className="modal-form-row">
+                  {!editingDonor && (
                     <div className="modal-form-group">
-                      <label className="modal-form-label">Blood Group *</label>
-                      <select
-                        value={formData.blood_group}
-                        onChange={(e) => setFormData({ ...formData, blood_group: e.target.value })}
-                        className="modal-form-select"
-                      >
-                        {bloodTypes.map(type => (
-                          <option key={type} value={type}>{type}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="modal-form-group">
-                      <label className="modal-form-label">Gender</label>
-                      <select
-                        value={formData.gender}
-                        onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                        className="modal-form-select"
-                      >
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="modal-form-row">
-                    <div className="modal-form-group">
-                      <label className="modal-form-label">Phone Number</label>
+                      <label className="modal-form-label">Date of Birth</label>
                       <input
-                        type="tel"
-                        value={formData.phone_number}
-                        onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
+                        type="date"
+                        value={formData.birth_date}
+                        onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
                         className="modal-form-input"
-                        placeholder="+60123456789"
                       />
                     </div>
+                  )}
+                </div>
 
-                    {!editingDonor && (
+                <div className="modal-section-divider">
+                  <span className="modal-section-title">Emergency Contact</span>
+                </div>
+
+                <div className="modal-form-row">
+                  <div className="modal-form-group">
+                    <label className="modal-form-label">Contact Name</label>
+                    <input
+                      type="text"
+                      value={formData.emergency_contact_name}
+                      onChange={(e) => setFormData({ ...formData, emergency_contact_name: e.target.value })}
+                      className="modal-form-input"
+                      placeholder="Enter emergency contact name"
+                    />
+                  </div>
+
+                  <div className="modal-form-group">
+                    <label className="modal-form-label">Contact Phone</label>
+                    <input
+                      type="tel"
+                      value={formData.emergency_contact_phone}
+                      onChange={(e) => setFormData({ ...formData, emergency_contact_phone: e.target.value })}
+                      className="modal-form-input"
+                      placeholder="+60123456789"
+                    />
+                  </div>
+                </div>
+
+                <div className="modal-section-divider">
+                  <span className="modal-section-title">Medical Information</span>
+                </div>
+
+                <div className="modal-form-group">
+                  <label className="modal-form-label">Medical Conditions</label>
+                  <textarea
+                    value={formData.medical_conditions}
+                    onChange={(e) => setFormData({ ...formData, medical_conditions: e.target.value })}
+                    className="modal-form-textarea"
+                    rows="2"
+                    placeholder="Enter any medical conditions or 'None'"
+                  />
+                </div>
+
+                <div className="modal-form-group">
+                  <label className="modal-form-label">Allergies</label>
+                  <textarea
+                    value={formData.allergies}
+                    onChange={(e) => setFormData({ ...formData, allergies: e.target.value })}
+                    className="modal-form-textarea"
+                    rows="2"
+                    placeholder="Enter any allergies or 'None'"
+                  />
+                </div>
+
+                {!editingDonor && (
+                  <>
+                    <div className="modal-section-divider">
+                      <span className="modal-section-title">Additional Information</span>
+                    </div>
+                    <div className="modal-form-row">
                       <div className="modal-form-group">
-                        <label className="modal-form-label">Date of Birth</label>
+                        <label className="modal-form-label">Height (cm)</label>
                         <input
-                          type="date"
-                          value={formData.birth_date}
-                          onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
+                          type="number"
+                          value={formData.height}
+                          onChange={(e) => setFormData({ ...formData, height: e.target.value })}
                           className="modal-form-input"
+                          placeholder="Enter height"
                         />
                       </div>
-                    )}
-                  </div>
 
-                  <div className="modal-section-divider">
-                    <span className="modal-section-title">Emergency Contact</span>
-                  </div>
+                      <div className="modal-form-group">
+                        <label className="modal-form-label">Weight (kg)</label>
+                        <input
+                          type="number"
+                          value={formData.weight}
+                          onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                          className="modal-form-input"
+                          placeholder="Enter weight"
+                        />
+                      </div>
+                    </div>
 
-                  <div className="modal-form-row">
                     <div className="modal-form-group">
-                      <label className="modal-form-label">Contact Name</label>
+                      <label className="modal-form-label">Blood Bank ID</label>
                       <input
                         type="text"
-                        value={formData.emergency_contact_name}
-                        onChange={(e) => setFormData({ ...formData, emergency_contact_name: e.target.value })}
+                        value={formData.blood_bank_id}
+                        onChange={(e) => setFormData({ ...formData, blood_bank_id: e.target.value })}
                         className="modal-form-input"
-                        placeholder="Enter emergency contact name"
+                        placeholder="e.g., 906-890 (optional)"
                       />
                     </div>
-
-                    <div className="modal-form-group">
-                      <label className="modal-form-label">Contact Phone</label>
-                      <input
-                        type="tel"
-                        value={formData.emergency_contact_phone}
-                        onChange={(e) => setFormData({ ...formData, emergency_contact_phone: e.target.value })}
-                        className="modal-form-input"
-                        placeholder="+60123456789"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="modal-section-divider">
-                    <span className="modal-section-title">Medical Information</span>
-                  </div>
-
-                  <div className="modal-form-group">
-                    <label className="modal-form-label">Medical Conditions</label>
-                    <textarea
-                      value={formData.medical_conditions}
-                      onChange={(e) => setFormData({ ...formData, medical_conditions: e.target.value })}
-                      className="modal-form-textarea"
-                      rows="2"
-                      placeholder="Enter any medical conditions or 'None'"
-                    />
-                  </div>
-
-                  <div className="modal-form-group">
-                    <label className="modal-form-label">Allergies</label>
-                    <textarea
-                      value={formData.allergies}
-                      onChange={(e) => setFormData({ ...formData, allergies: e.target.value })}
-                      className="modal-form-textarea"
-                      rows="2"
-                      placeholder="Enter any allergies or 'None'"
-                    />
-                  </div>
-
-                  {!editingDonor && (
-                    <>
-                      <div className="modal-section-divider">
-                        <span className="modal-section-title">Additional Information</span>
-                      </div>
-                      <div className="modal-form-row">
-                        <div className="modal-form-group">
-                          <label className="modal-form-label">Height (cm)</label>
-                          <input
-                            type="number"
-                            value={formData.height}
-                            onChange={(e) => setFormData({ ...formData, height: e.target.value })}
-                            className="modal-form-input"
-                            placeholder="Enter height"
-                          />
-                        </div>
-
-                        <div className="modal-form-group">
-                          <label className="modal-form-label">Weight (kg)</label>
-                          <input
-                            type="number"
-                            value={formData.weight}
-                            onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-                            className="modal-form-input"
-                            placeholder="Enter weight"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="modal-form-group">
-                        <label className="modal-form-label">Blood Bank ID</label>
-                        <input
-                          type="text"
-                          value={formData.blood_bank_id}
-                          onChange={(e) => setFormData({ ...formData, blood_bank_id: e.target.value })}
-                          className="modal-form-input"
-                          placeholder="e.g., 906-890 (optional)"
-                        />
-                      </div>
-                    </>
-                  )}
-                </div>
-
-                <div className="modal-form-actions">
-                  <button
-                    onClick={() => setShowAddEditModal(false)}
-                    className="modal-cancel-button"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSubmit}
-                    className="modal-save-button"
-                  >
-                    {editingDonor ? 'Update Card' : 'Create User & Card'}
-                  </button>
-                </div>
+                  </>
+                )}
               </div>
-            </div>
-          </div>
-        )}
 
-        {/* Verify Modal */}
-        {showVerifyModal && (
-          <div className="card-modal-overlay" onClick={() => setShowVerifyModal(false)}>
-            <div className="card-modal-content verify-modal-width" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-card">
-                <div className="modal-card-header verify-header">
-                  <h2>Verify Donor Card</h2>
-                  <button onClick={() => setShowVerifyModal(false)} className="modal-close-btn">
-                    <X size={24} />
-                  </button>
-                </div>
-
-                <div className="modal-form-content">
-                  <p className="verify-description">Enter the donor ID/display ID from the card or upload/scan a QR code to verify authenticity.</p>
-
-                  <div className="modal-form-group">
-                    <label className="modal-form-label">Donor ID / Display ID / QR Code Data</label>
-                    <input
-                      type="text"
-                      value={verificationInput}
-                      onChange={(e) => setVerificationInput(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && verifyDonorCard(verificationInput)}
-                      className="modal-form-input"
-                      placeholder="e.g., DON-9MW4SEL or BLOODCONNECT:USER:9MW4SELaQibhaXDatRgRkegBzHG3"
-                    />
-                  </div>
-
-                  <div className="verify-divider">
-                    <span>OR</span>
-                  </div>
-
-                  <div className="modal-form-group">
-                    <label className="modal-form-label">Upload QR Code Image</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleQRImageUpload}
-                      className="modal-form-file-input"
-                    />
-                    <p className="file-input-hint">Upload a screenshot or photo of the QR code</p>
-                  </div>
-
-                  <button
-                    onClick={() => verifyDonorCard(verificationInput)}
-                    className="verify-button"
-                    disabled={!verificationInput.trim()}
-                  >
-                    Verify Card
-                  </button>
-
-                  {verificationResult && (
-                    <div className={`verification-result ${verificationResult.valid ? 'result-valid' : 'result-invalid'}`}>
-                      <div className="verification-result-header">
-                        {verificationResult.valid ? (
-                          <Check className="verification-icon valid-icon" size={24} />
-                        ) : (
-                          <AlertCircle className="verification-icon invalid-icon" size={24} />
-                        )}
-                        <h3 className="verification-result-title">
-                          {verificationResult.valid ? 'Valid Card ✓' : 'Invalid Card ✗'}
-                        </h3>
-                      </div>
-                      {verificationResult.valid ? (
-                        <div className="verification-details">
-                          <p><strong>Name:</strong> {verificationResult.donor.fullName}</p>
-                          <p><strong>Display ID:</strong> {verificationResult.donor.displayId}</p>
-                          <p><strong>Blood Type:</strong> {verificationResult.donor.bloodGroup}</p>
-                          <p><strong>Email:</strong> {verificationResult.donor.email || 'Not provided'}</p>
-                          <p><strong>Phone:</strong> {verificationResult.donor.phone || 'Not provided'}</p>
-                          <p><strong>Last Donation:</strong> {formatLastDonation(verificationResult.donor.lastDonation)}</p>
-                          <p><strong>Eligibility Status:</strong>
-                            <span className={`verification-status ${verificationResult.donor.isEligible ? 'status-eligible' : 'status-ineligible'}`}>
-                              {verificationResult.donor.eligibilityStatus}
-                            </span>
-                          </p>
-                          <p><strong>Eligibility Request:</strong> {verificationResult.donor.hasEligibilityRequest ? 'Submitted' : 'Not Submitted'}</p>
-                          {verificationResult.donor.emergencyContactName && (
-                            <p><strong>Emergency Contact:</strong> {verificationResult.donor.emergencyContactName}</p>
-                          )}
-                          {verificationResult.donor.emergencyContactPhone && (
-                            <p><strong>Emergency Phone:</strong> {verificationResult.donor.emergencyContactPhone}</p>
-                          )}
-                        </div>
-                      ) : (
-                        <p className="verification-error-message">{verificationResult.message}</p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Delete Confirmation Modal */}
-        {showDeleteConfirm && selectedDonor && (
-          <div className="modal-overlay">
-            <div className="delete-confirm-modal">
-              <div className="delete-icon-container">
-                <Trash2 className="delete-icon" />
-              </div>
-              <h3 className="delete-title">Delete Donor Card</h3>
-              <p className="delete-message">
-                Are you sure you want to delete the donor card for <strong>{selectedDonor.fullName}</strong>? This will also delete the user account. This action cannot be undone.
-              </p>
-              <div className="delete-details">
-                <p><strong>Display ID:</strong> {selectedDonor.displayId}</p>
-                <p><strong>Blood Type:</strong> {selectedDonor.bloodGroup}</p>
-                <p><strong>Email:</strong> {selectedDonor.email}</p>
-              </div>
-              <div className="delete-actions">
+              <div className="modal-form-actions">
                 <button
-                  onClick={() => setShowDeleteConfirm(false)}
-                  className="cancel-btn"
+                  onClick={() => setShowAddEditModal(false)}
+                  className="modal-cancel-button"
                 >
                   Cancel
                 </button>
                 <button
-                  onClick={handleDeleteConfirm}
-                  className="delete-btn"
+                  onClick={handleSubmit}
+                  className="modal-save-button"
                 >
-                  Delete Card & User
+                  {editingDonor ? 'Update Card' : 'Create User & Card'}
                 </button>
               </div>
             </div>
           </div>
-        )}
-      </div>
-    </Layout>
+        </div>
+      )}
+
+      {/* Verify Modal */}
+      {showVerifyModal && (
+        <div className="card-modal-overlay" onClick={() => setShowVerifyModal(false)}>
+          <div className="card-modal-content verify-modal-width" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-card">
+              <div className="modal-card-header verify-header">
+                <h2>Verify Donor Card</h2>
+                <button onClick={() => setShowVerifyModal(false)} className="modal-close-btn">
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="modal-form-content">
+                <p className="verify-description">Enter the donor ID/display ID from the card or upload/scan a QR code to verify authenticity.</p>
+
+                <div className="modal-form-group">
+                  <label className="modal-form-label">Donor ID / Display ID / QR Code Data</label>
+                  <input
+                    type="text"
+                    value={verificationInput}
+                    onChange={(e) => setVerificationInput(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && verifyDonorCard(verificationInput)}
+                    className="modal-form-input"
+                    placeholder="e.g., DON-9MW4SEL or BLOODCONNECT:USER:9MW4SELaQibhaXDatRgRkegBzHG3"
+                  />
+                </div>
+
+                <div className="verify-divider">
+                  <span>OR</span>
+                </div>
+
+                <div className="modal-form-group">
+                  <label className="modal-form-label">Upload QR Code Image</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleQRImageUpload}
+                    className="modal-form-file-input"
+                  />
+                  <p className="file-input-hint">Upload a screenshot or photo of the QR code</p>
+                </div>
+
+                <button
+                  onClick={() => verifyDonorCard(verificationInput)}
+                  className="verify-button"
+                  disabled={!verificationInput.trim()}
+                >
+                  Verify Card
+                </button>
+
+                {verificationResult && (
+                  <div className={`verification-result ${verificationResult.valid ? 'result-valid' : 'result-invalid'}`}>
+                    <div className="verification-result-header">
+                      {verificationResult.valid ? (
+                        <Check className="verification-icon valid-icon" size={24} />
+                      ) : (
+                        <AlertCircle className="verification-icon invalid-icon" size={24} />
+                      )}
+                      <h3 className="verification-result-title">
+                        {verificationResult.valid ? 'Valid Card ✓' : 'Invalid Card ✗'}
+                      </h3>
+                    </div>
+                    {verificationResult.valid ? (
+                      <div className="verification-details">
+                        <p><strong>Name:</strong> {verificationResult.donor.fullName}</p>
+                        <p><strong>Display ID:</strong> {verificationResult.donor.displayId}</p>
+                        <p><strong>Blood Type:</strong> {verificationResult.donor.bloodGroup}</p>
+                        <p><strong>Email:</strong> {verificationResult.donor.email || 'Not provided'}</p>
+                        <p><strong>Phone:</strong> {verificationResult.donor.phone || 'Not provided'}</p>
+                        <p><strong>Last Donation:</strong> {formatLastDonation(verificationResult.donor.lastDonation)}</p>
+                        <p><strong>Eligibility Status:</strong>
+                          <span className={`verification-status ${verificationResult.donor.isEligible ? 'status-eligible' : 'status-ineligible'}`}>
+                            {verificationResult.donor.eligibilityStatus}
+                          </span>
+                        </p>
+                        {verificationResult.donor.emergencyContactName && (
+                          <p><strong>Emergency Contact:</strong> {verificationResult.donor.emergencyContactName}</p>
+                        )}
+                        {verificationResult.donor.emergencyContactPhone && (
+                          <p><strong>Emergency Phone:</strong> {verificationResult.donor.emergencyContactPhone}</p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="verification-error-message">{verificationResult.message}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && selectedDonor && (
+        <div className="modal-overlay">
+          <div className="delete-confirm-modal">
+            <div className="delete-icon-container">
+              <Trash2 className="delete-icon" />
+            </div>
+            <h3 className="delete-title">Delete Donor Card</h3>
+            <p className="delete-message">
+              Are you sure you want to delete the donor card for <strong>{selectedDonor.fullName}</strong>? This will also delete the user account. This action cannot be undone.
+            </p>
+            <div className="delete-details">
+              <p><strong>Display ID:</strong> {selectedDonor.displayId}</p>
+              <p><strong>Blood Type:</strong> {selectedDonor.bloodGroup}</p>
+              <p><strong>Email:</strong> {selectedDonor.email}</p>
+            </div>
+            <div className="delete-actions">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="cancel-btn"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                className="delete-btn"
+              >
+                Delete Card & User
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

@@ -1995,993 +1995,1044 @@ const DonationRecords = ({ onNavigate }) => {
   }
 
   return (
-    <Layout onNavigate={onNavigate} currentPage="donation-records">
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="records-header-container">
-          <h1 className="records-header-title">Donation Records</h1>
-          <p className="text-sm text-gray-600">
-            Showing records from {hospitals.length} hospitals
-          </p>
-          <div className="records-header-actions">
-            <button
-              className="add-record-button"
-              onClick={handleAddClick}
-            >
-              Add Record
-            </button>
+    <>
+      <Layout onNavigate={onNavigate} currentPage="donation-records">
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="records-header-container">
+            <h1 className="records-header-title">Donation Records</h1>
+            <div className="records-header-actions">
+              <button
+                className="add-record-button"
+                onClick={handleAddClick}
+              >
+                Add Record
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* Error/Success Messages */}
-        {error && (
-          <div className="error-container error-alert">
-            <AlertCircle className="error-icon" />
-            <p className="error-text">{error}</p>
-            <button onClick={() => setError('')} className="error-close">
-              <X className="error-close-icon" />
-            </button>
-          </div>
-        )}
+          {/* Error/Success Messages */}
+          {error && (
+            <div className="error-container error-alert">
+              <AlertCircle className="error-icon" />
+              <p className="error-text">{error}</p>
+              <button onClick={() => setError('')} className="error-close">
+                <X className="error-close-icon" />
+              </button>
+            </div>
+          )}
 
-        {success && (
-          <div className="error-container success-alert">
-            <CheckCircle className="error-icon" />
-            <p className="error-text">{success}</p>
-            <button onClick={() => setSuccess('')} className="error-close">
-              <X className="error-close-icon" />
-            </button>
-          </div>
-        )}
+          {success && (
+            <div className="error-container success-alert">
+              <CheckCircle className="error-icon" />
+              <p className="error-text">{success}</p>
+              <button onClick={() => setSuccess('')} className="error-close">
+                <X className="error-close-icon" />
+              </button>
+            </div>
+          )}
 
-        {/* Stats Cards - FIXED: Now shows counts for filtered records */}
-        <div className="records-stats-grid">
-          <div className="records-stat-card stat-card-total">
-            <h3 className="stat-number-blue">{stats.total}</h3>
-            <p className="stat-label">Total</p>
+          {/* Stats Cards - FIXED: Now shows counts for filtered records */}
+          <div className="records-stats-grid">
+            <div className="records-stat-card stat-card-total">
+              <h3 className="stat-number-blue">{stats.total}</h3>
+              <p className="stat-label">Total</p>
+            </div>
+            <div className="records-stat-card stat-card-completed">
+              <h3 className="stat-number-green">{stats.completed}</h3>
+              <p className="stat-label">Completed</p>
+            </div>
+            <div className="records-stat-card stat-card-scheduled">
+              <h3 className="stat-number-orange">{stats.registered}</h3>
+              <p className="stat-label">Registered</p>
+            </div>
+            <div className="records-stat-card stat-card-confirmed">
+              <h3 className="stat-number-teal">{stats.confirmed}</h3>
+              <p className="stat-label">Confirmed</p>
+            </div>
+            <div className="records-stat-card stat-card-pending">
+              <h3 className="stat-number-purple">{stats.pending}</h3>
+              <p className="stat-label">Pending</p>
+            </div>
+            <div className="records-stat-card stat-card-rejected">
+              <h3 className="stat-number-red">{stats.rejected}</h3>
+              <p className="stat-label">Rejected</p>
+            </div>
+            <div className="records-stat-card stat-card-cancelled">
+              <h3 className="stat-number-gray">{stats.cancelled}</h3>
+              <p className="stat-label">Cancelled</p>
+            </div>
+            <div className="records-stat-card stat-card-noshow">
+              <h3 className="stat-number-yellow">{stats.noshow}</h3>
+              <p className="stat-label">No-show</p>
+            </div>
           </div>
-          <div className="records-stat-card stat-card-completed">
-            <h3 className="stat-number-green">{stats.completed}</h3>
-            <p className="stat-label">Completed</p>
-          </div>
-          <div className="records-stat-card stat-card-scheduled">
-            <h3 className="stat-number-orange">{stats.registered}</h3>
-            <p className="stat-label">Registered</p>
-          </div>
-          <div className="records-stat-card stat-card-confirmed">
-            <h3 className="stat-number-teal">{stats.confirmed}</h3>
-            <p className="stat-label">Confirmed</p>
-          </div>
-          <div className="records-stat-card stat-card-pending">
-            <h3 className="stat-number-purple">{stats.pending}</h3>
-            <p className="stat-label">Pending</p>
-          </div>
-          <div className="records-stat-card stat-card-rejected">
-            <h3 className="stat-number-red">{stats.rejected}</h3>
-            <p className="stat-label">Rejected</p>
-          </div>
-          <div className="records-stat-card stat-card-cancelled">
-            <h3 className="stat-number-gray">{stats.cancelled}</h3>
-            <p className="stat-label">Cancelled</p>
-          </div>
-          <div className="records-stat-card stat-card-noshow">
-            <h3 className="stat-number-yellow">{stats.noshow}</h3>
-            <p className="stat-label">No-show</p>
-          </div>
-        </div>
 
-        {/* Search and Filters */}
-        <div className="records-filters-container">
-          <div className="records-filters-grid">
-            <div className="records-search-container">
-              <label className="records-filter-label">Search Records</label>
-              <div className="records-search-input-container">
-                <Search className="records-search-icon" />
-                <input
-                  type="text"
-                  placeholder="Search by name, ID, hospital, or serial number..."
-                  className="records-search-input"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
+          {/* Search and Filters */}
+          <div className="records-filters-container">
+            <div className="records-filters-grid">
+              <div className="records-search-container">
+                <label className="records-filter-label">Search Records</label>
+                <div className="records-search-input-container">
+                  <Search className="records-search-icon" />
+                  <input
+                    type="text"
+                    placeholder="Search by name, ID, hospital, or serial number..."
+                    className="records-search-input"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className="records-filter-select-container">
-              <label className="records-filter-label">Status</label>
-              <select
-                className="records-status-filter"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                {ALL_STATUSES.map(status => (
-                  <option key={status} value={status}>{status}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="records-filter-select-container">
-              <label className="records-filter-label">Month</label>
-              <select
-                className="records-month-filter"
-                value={monthFilter}
-                onChange={(e) => setMonthFilter(e.target.value)}
-              >
-                {monthOptions.map(month => (
-                  <option key={month.value} value={month.value}>{month.label}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="records-filter-select-container">
-              <label className="records-filter-label">Year</label>
-              <select
-                className="records-year-filter"
-                value={yearFilter}
-                onChange={(e) => setYearFilter(e.target.value)}
-              >
-                {yearOptions.map(year => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Records Table */}
-        <div className="records-table-container">
-          <div className="records-table-wrapper">
-            <table className="records-table">
-              <thead className="records-table-header">
-                <tr>
-                  <th className="records-table-header-cell">ID</th>
-                  <th className="records-table-header-cell">DONOR</th>
-                  <th className="records-table-header-cell">HOSPITAL</th>
-                  <th className="records-table-header-cell">DATE</th>
-                  <th className="records-table-header-cell">STATUS</th>
-                  <th className="records-table-header-cell">ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody className="records-table-body">
-                {paginatedRecords.map((record) => {
-                  const isCompleted = record.status === 'Completed';
-                  const canBeUsed = canMarkAsUsed(record);
-
-                  return (
-                    <tr key={`${record.id}-${record.firestoreBookingId}`} className="records-table-row">
-                      <td className="records-table-cell records-id-cell">
-                        {record.id}
-                      </td>
-                      <td className="records-table-cell">
-                        <div className="donor-info-cell">
-                          <span className="name-text">{record.name}</span>
-                          {record.eventInfo?.title && record.eventInfo.title !== 'Unknown Event' && (
-                            <div className="event-info-badge">
-                              <Calendar size={12} />
-                              <span>{record.eventInfo.title}</span>
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                      <td className="records-table-cell">
-                        <div className="hospital-cell">
-                          <MapPin size={12} />
-                          <span className="hospital-text">{record.hospitalName || 'Unknown Hospital'}</span>
-                        </div>
-                      </td>
-                      <td className="records-table-cell">
-                        <span className="date-text">{formatDate(record.date)}</span>
-                      </td>
-                      <td className="records-table-cell">
-                        <div className={`records-status-badge ${getStatusClasses(record)}`}>
-                          {getStatusIcon(record)}
-                          <span>{getStatusText(record)}</span>
-                        </div>
-                      </td>
-                      <td className="records-table-cell">
-                        <div className="records-actions-container">
-                          <button
-                            onClick={() => handleViewDetails(record)}
-                            className="records-action-button view-button"
-                            title="View Details"
-                          >
-                            <User className="records-action-icon" />
-                          </button>
-                          {/* Mark as Used Button - WITH VISUAL FEEDBACK */}
-                          {record.status === 'Completed' && (
-                            <button
-                              onClick={() => handleMarkAsUsedClick(record)}
-                              className={`records-action-button ${record.donationDetails?.used ? 'used-completed' : 'used-button'
-                                }`}
-                              title={
-                                record.donationDetails?.used
-                                  ? "Already Used"
-                                  : canMarkAsUsed(record)
-                                    ? "Mark as Used"
-                                    : "Cannot be used"
-                              }
-                              disabled={record.donationDetails?.used || !canMarkAsUsed(record)}
-                            >
-                              {record.donationDetails?.used ? (
-                                <Heart className="records-action-icon text-green-600" fill="#10b981" />
-                              ) : (
-                                <Heart className="records-action-icon" />
-                              )}
-                            </button>
-                          )}
-
-                          {/* Show disabled heart icon for completed donations that can't be marked as used */}
-                          {isCompleted && record.donationDetails && !canBeUsed && (
-                            <button
-                              className="records-action-button disabled-button"
-                              title={
-                                record.donationDetails.used
-                                  ? 'Already Used'
-                                  : record.donationDetails.status !== 'stored'
-                                    ? 'Not in stored status'
-                                    : !record.donationDetails.bloodType || record.donationDetails.bloodType === 'Unknown'
-                                      ? 'No valid blood type'
-                                      : record.donationDetails.expiryDate && new Date(record.donationDetails.expiryDate) < new Date()
-                                        ? 'Expired'
-                                        : 'Cannot be used'
-                              }
-                              disabled
-                            >
-                              <Heart className="records-action-icon text-gray-400" />
-                            </button>
-                          )}
-
-                          <button
-                            onClick={() => handleDeleteClick(record.id)}
-                            className="records-action-button cancel-button"
-                            title="Delete"
-                            disabled={record.status === 'Completed'}
-                          >
-                            <XCircle className="records-action-icon" />
-                          </button>
-
-                          {/* Status-specific actions */}
-                          {record.status === 'Pending' && (
-                            <>
-                              <button
-                                onClick={() => handleCompleteClick(record)}
-                                className="records-action-button approve-button"
-                                title="Complete Donation"
-                              >
-                                <Award className="records-action-icon" />
-                              </button>
-                              <button
-                                onClick={() => handleRegisterClick(record)}
-                                className="records-action-button schedule-button"
-                                title="Register"
-                              >
-                                <Calendar className="records-action-icon" />
-                              </button>
-                              <button
-                                onClick={() => handleRejectClick(record)}
-                                className="records-action-button reject-button"
-                                title="Reject"
-                              >
-                                <XOctagon className="records-action-icon" />
-                              </button>
-                              <button
-                                onClick={() => handleCancelClick(record)}
-                                className="records-action-button cancel-status-button"
-                                title="Cancel"
-                              >
-                                <Ban className="records-action-icon" />
-                              </button>
-                            </>
-                          )}
-
-                          {record.status === 'Registered' && (
-                            <>
-                              <button
-                                onClick={() => handleCompleteClick(record)}
-                                className="records-action-button approve-button"
-                                title="Complete Donation"
-                              >
-                                <Award className="records-action-icon" />
-                              </button>
-                              <button
-                                onClick={() => handleConfirmClick(record)}
-                                className="records-action-button confirm-button"
-                                title="Confirm"
-                              >
-                                <Check className="records-action-icon" />
-                              </button>
-                              <button
-                                onClick={() => handleNoShowClick(record)}
-                                className="records-action-button noshow-button"
-                                title="Mark as No-show"
-                              >
-                                <UserX className="records-action-icon" />
-                              </button>
-                            </>
-                          )}
-
-                          {record.status === 'Confirmed' && (
-                            <>
-                              <button
-                                onClick={() => handleCompleteClick(record)}
-                                className="records-action-button approve-button"
-                                title="Complete Donation"
-                              >
-                                <Award className="records-action-icon" />
-                              </button>
-                              <button
-                                onClick={() => handleNoShowClick(record)}
-                                className="records-action-button noshow-button"
-                                title="Mark as No-show"
-                              >
-                                <UserX className="records-action-icon" />
-                              </button>
-                            </>
-                          )}
-
-                          {(record.status === 'Rejected' || record.status === 'Cancelled' || record.status === 'No-show') && (
-                            <button
-                              onClick={() => handleEdit(record)}
-                              className="records-action-button reschedule-button"
-                              title="Edit"
-                            >
-                              <Edit2 className="records-action-icon" />
-                            </button>
-                          )}
-
-                          {record.status === 'Completed' && !canBeUsed && (
-                            <button
-                              onClick={() => handleEdit(record)}
-                              className="records-action-button reschedule-button"
-                              title="Edit"
-                            >
-                              <Edit2 className="records-action-icon" />
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-
-          {filteredRecords.length === 0 && !loading && (
-            <div className="records-empty-state">
-              <div className="records-empty-state-icon">
-                <Search />
-              </div>
-              <h3 className="records-empty-state-title">
-                {records.length === 0 ? 'No donation records found' : 'No matching records'}
-              </h3>
-              <p className="records-empty-state-description">
-                {records.length === 0
-                  ? 'Start by adding a donation record or wait for bookings'
-                  : 'Try adjusting your search filters'}
-              </p>
-              {records.length === 0 && (
-                <button
-                  onClick={handleAddClick}
-                  className="add-record-button"
-                  style={{ marginTop: '1rem' }}
+              <div className="records-filter-select-container">
+                <label className="records-filter-label">Status</label>
+                <select
+                  className="records-status-filter"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
                 >
-                  Add First Record
+                  {ALL_STATUSES.map(status => (
+                    <option key={status} value={status}>{status}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="records-filter-select-container">
+                <label className="records-filter-label">Month</label>
+                <select
+                  className="records-month-filter"
+                  value={monthFilter}
+                  onChange={(e) => setMonthFilter(e.target.value)}
+                >
+                  {monthOptions.map(month => (
+                    <option key={month.value} value={month.value}>{month.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="records-filter-select-container">
+                <label className="records-filter-label">Year</label>
+                <select
+                  className="records-year-filter"
+                  value={yearFilter}
+                  onChange={(e) => setYearFilter(e.target.value)}
+                >
+                  {yearOptions.map(year => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Records Table */}
+          <div className="records-table-container">
+            <div className="records-table-wrapper">
+              <table className="records-table">
+                <thead className="records-table-header">
+                  <tr>
+                    <th className="records-table-header-cell">ID</th>
+                    <th className="records-table-header-cell">DONOR</th>
+                    <th className="records-table-header-cell">HOSPITAL</th>
+                    <th className="records-table-header-cell">DATE</th>
+                    <th className="records-table-header-cell">STATUS</th>
+                    <th className="records-table-header-cell">ACTIONS</th>
+                  </tr>
+                </thead>
+                <tbody className="records-table-body">
+                  {paginatedRecords.map((record) => {
+                    const isCompleted = record.status === 'Completed';
+                    const canBeUsed = canMarkAsUsed(record);
+
+                    return (
+                      <tr key={`${record.id}-${record.firestoreBookingId}`} className="records-table-row">
+                        <td className="records-table-cell records-id-cell">
+                          {record.id}
+                        </td>
+                        <td className="records-table-cell">
+                          <div className="donor-info-cell">
+                            <span className="name-text">{record.name}</span>
+                            {record.eventInfo?.title && record.eventInfo.title !== 'Unknown Event' && (
+                              <div className="event-info-badge">
+                                <Calendar size={12} />
+                                <span>{record.eventInfo.title}</span>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                        <td className="records-table-cell">
+                          <div className="hospital-cell">
+                            <MapPin size={12} />
+                            <span className="hospital-text">{record.hospitalName || 'Unknown Hospital'}</span>
+                          </div>
+                        </td>
+                        <td className="records-table-cell">
+                          <span className="date-text">{formatDate(record.date)}</span>
+                        </td>
+                        <td className="records-table-cell">
+                          <div className={`records-status-badge ${getStatusClasses(record)}`}>
+                            {getStatusIcon(record)}
+                            <span>{getStatusText(record)}</span>
+                          </div>
+                        </td>
+                        <td className="records-table-cell">
+                          <div className="records-actions-container">
+                            <button
+                              onClick={() => handleViewDetails(record)}
+                              className="records-action-button view-button"
+                              title="View Details"
+                            >
+                              <User className="records-action-icon" />
+                            </button>
+                            {/* Mark as Used Button - WITH VISUAL FEEDBACK */}
+                            {record.status === 'Completed' && (
+                              <button
+                                onClick={() => handleMarkAsUsedClick(record)}
+                                className={`records-action-button ${record.donationDetails?.used ? 'used-completed' : 'used-button'
+                                  }`}
+                                title={
+                                  record.donationDetails?.used
+                                    ? "Already Used"
+                                    : canMarkAsUsed(record)
+                                      ? "Mark as Used"
+                                      : "Cannot be used"
+                                }
+                                disabled={record.donationDetails?.used || !canMarkAsUsed(record)}
+                              >
+                                {record.donationDetails?.used ? (
+                                  <Heart className="records-action-icon text-green-600" fill="#10b981" />
+                                ) : (
+                                  <Heart className="records-action-icon" />
+                                )}
+                              </button>
+                            )}
+
+                            {/* Show disabled heart icon for completed donations that can't be marked as used */}
+                            {isCompleted && record.donationDetails && !canBeUsed && (
+                              <button
+                                className="records-action-button disabled-button"
+                                title={
+                                  record.donationDetails.used
+                                    ? 'Already Used'
+                                    : record.donationDetails.status !== 'stored'
+                                      ? 'Not in stored status'
+                                      : !record.donationDetails.bloodType || record.donationDetails.bloodType === 'Unknown'
+                                        ? 'No valid blood type'
+                                        : record.donationDetails.expiryDate && new Date(record.donationDetails.expiryDate) < new Date()
+                                          ? 'Expired'
+                                          : 'Cannot be used'
+                                }
+                                disabled
+                              >
+                                <Heart className="records-action-icon text-gray-400" />
+                              </button>
+                            )}
+
+                            <button
+                              onClick={() => handleDeleteClick(record.id)}
+                              className="records-action-button cancel-button"
+                              title="Delete"
+                              disabled={record.status === 'Completed'}
+                            >
+                              <XCircle className="records-action-icon" />
+                            </button>
+
+                            {/* Status-specific actions */}
+                            {record.status === 'Pending' && (
+                              <>
+                                <button
+                                  onClick={() => handleCompleteClick(record)}
+                                  className="records-action-button approve-button"
+                                  title="Complete Donation"
+                                >
+                                  <Award className="records-action-icon" />
+                                </button>
+                                <button
+                                  onClick={() => handleRegisterClick(record)}
+                                  className="records-action-button schedule-button"
+                                  title="Register"
+                                >
+                                  <Calendar className="records-action-icon" />
+                                </button>
+                                <button
+                                  onClick={() => handleRejectClick(record)}
+                                  className="records-action-button reject-button"
+                                  title="Reject"
+                                >
+                                  <XOctagon className="records-action-icon" />
+                                </button>
+                                <button
+                                  onClick={() => handleCancelClick(record)}
+                                  className="records-action-button cancel-status-button"
+                                  title="Cancel"
+                                >
+                                  <Ban className="records-action-icon" />
+                                </button>
+                              </>
+                            )}
+
+                            {record.status === 'Registered' && (
+                              <>
+                                <button
+                                  onClick={() => handleCompleteClick(record)}
+                                  className="records-action-button approve-button"
+                                  title="Complete Donation"
+                                >
+                                  <Award className="records-action-icon" />
+                                </button>
+                                <button
+                                  onClick={() => handleConfirmClick(record)}
+                                  className="records-action-button confirm-button"
+                                  title="Confirm"
+                                >
+                                  <Check className="records-action-icon" />
+                                </button>
+                                <button
+                                  onClick={() => handleNoShowClick(record)}
+                                  className="records-action-button noshow-button"
+                                  title="Mark as No-show"
+                                >
+                                  <UserX className="records-action-icon" />
+                                </button>
+                              </>
+                            )}
+
+                            {record.status === 'Confirmed' && (
+                              <>
+                                <button
+                                  onClick={() => handleCompleteClick(record)}
+                                  className="records-action-button approve-button"
+                                  title="Complete Donation"
+                                >
+                                  <Award className="records-action-icon" />
+                                </button>
+                                <button
+                                  onClick={() => handleNoShowClick(record)}
+                                  className="records-action-button noshow-button"
+                                  title="Mark as No-show"
+                                >
+                                  <UserX className="records-action-icon" />
+                                </button>
+                              </>
+                            )}
+
+                            {(record.status === 'Rejected' || record.status === 'Cancelled' || record.status === 'No-show') && (
+                              <button
+                                onClick={() => handleEdit(record)}
+                                className="records-action-button reschedule-button"
+                                title="Edit"
+                              >
+                                <Edit2 className="records-action-icon" />
+                              </button>
+                            )}
+
+                            {record.status === 'Completed' && !canBeUsed && (
+                              <button
+                                onClick={() => handleEdit(record)}
+                                className="records-action-button reschedule-button"
+                                title="Edit"
+                              >
+                                <Edit2 className="records-action-icon" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {filteredRecords.length === 0 && !loading && (
+              <div className="records-empty-state">
+                <div className="records-empty-state-icon">
+                  <Search />
+                </div>
+                <h3 className="records-empty-state-title">
+                  {records.length === 0 ? 'No donation records found' : 'No matching records'}
+                </h3>
+                <p className="records-empty-state-description">
+                  {records.length === 0
+                    ? 'Start by adding a donation record or wait for bookings'
+                    : 'Try adjusting your search filters'}
+                </p>
+                {records.length === 0 && (
+                  <button
+                    onClick={handleAddClick}
+                    className="add-record-button"
+                    style={{ marginTop: '1rem' }}
+                  >
+                    Add First Record
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Pagination */}
+          {filteredRecords.length > 0 && (
+            <div className="records-pagination">
+              <div className="records-pagination-info">
+                <span>Items per page:</span>
+                <select
+                  value={itemsPerPage}
+                  onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                  className="records-items-per-page-select"
+                >
+                  <option value={6}>6</option>
+                  <option value={8}>8</option>
+                  <option value={12}>12</option>
+                  <option value={16}>16</option>
+                </select>
+                <span className="records-pagination-range">
+                  {startIndex + 1}-{Math.min(endIndex, filteredRecords.length)} of {filteredRecords.length}
+                </span>
+              </div>
+
+              <div className="records-pagination-controls">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="records-pagination-btn"
+                >
+                  <ChevronLeft size={16} />
                 </button>
-              )}
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="records-pagination-btn"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
             </div>
           )}
         </div>
+      </Layout>
 
-        {/* Pagination */}
-        {filteredRecords.length > 0 && (
-          <div className="records-pagination">
-            <div className="records-pagination-info">
-              <span>Items per page:</span>
-              <select
-                value={itemsPerPage}
-                onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                className="records-items-per-page-select"
-              >
-                <option value={6}>6</option>
-                <option value={8}>8</option>
-                <option value={12}>12</option>
-                <option value={16}>16</option>
-              </select>
-              <span className="records-pagination-range">
-                {startIndex + 1}-{Math.min(endIndex, filteredRecords.length)} of {filteredRecords.length}
-              </span>
-            </div>
+      {/* All Modals - Moved outside Layout */}
 
-            <div className="records-pagination-controls">
+      {/* Edit Modal */}
+      {showModal && selectedRecord && (
+        <div className="records-modal-overlay">
+          <div className="records-modal-container">
+            <div className="records-modal-header">
+              <h2 className="records-modal-title">Edit Donation Record</h2>
               <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="records-pagination-btn"
+                onClick={() => setShowModal(false)}
+                className="records-modal-close"
               >
-                <ChevronLeft size={16} />
-              </button>
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="records-pagination-btn"
-              >
-                <ChevronRight size={16} />
+                <X className="records-modal-close-icon" />
               </button>
             </div>
-          </div>
-        )}
-
-        {/* Mark as Used Modal */}
-        {showUsedModal && usingRecord && usingHospital && hospitalBloodStock && (
-          <div className="records-modal-overlay">
-            <div className="records-confirm-modal">
-              <div className="records-confirm-icon-container">
-                <Heart className="records-confirm-icon text-green-600" />
+            <div className="records-modal-body">
+              <div className="records-modal-form">
+                <div className="records-form-group">
+                  <label className="records-form-label">Record ID</label>
+                  <input
+                    type="text"
+                    className="records-form-input"
+                    value={selectedRecord.id}
+                    disabled
+                  />
+                </div>
+                <div className="records-form-group">
+                  <label className="records-form-label">Name</label>
+                  <input
+                    type="text"
+                    className="records-form-input"
+                    value={selectedRecord.name}
+                    onChange={(e) => setSelectedRecord({ ...selectedRecord, name: e.target.value })}
+                  />
+                </div>
+                <div className="records-form-group">
+                  <label className="records-form-label">Address</label>
+                  <input
+                    type="text"
+                    className="records-form-input"
+                    value={selectedRecord.address}
+                    onChange={(e) => setSelectedRecord({ ...selectedRecord, address: e.target.value })}
+                  />
+                </div>
+                <div className="records-form-group">
+                  <label className="records-form-label">Date</label>
+                  <input
+                    type="date"
+                    className="records-form-input"
+                    value={selectedRecord.date}
+                    onChange={(e) => setSelectedRecord({ ...selectedRecord, date: e.target.value })}
+                  />
+                </div>
+                <div className="records-form-group">
+                  <label className="records-form-label">Status</label>
+                  <select
+                    className="records-form-select"
+                    value={selectedRecord.status}
+                    onChange={(e) => setSelectedRecord({ ...selectedRecord, status: e.target.value })}
+                  >
+                    {STATUS_OPTIONS.map(status => (
+                      <option key={status} value={status}>{status}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              <h3 className="records-confirm-title">Mark Blood as Used</h3>
-              <div className="records-used-details">
-                <div className="records-used-detail-row">
-                  <span className="records-used-detail-label">Donor:</span>
-                  <span className="records-used-detail-value">{usingRecord.name}</span>
-                </div>
-                <div className="records-used-detail-row">
-                  <span className="records-used-detail-label">Blood Type:</span>
-                  <span className="records-used-detail-value">{hospitalBloodStock.bloodType}</span>
-                </div>
-                <div className="records-used-detail-row">
-                  <span className="records-used-detail-label">Hospital:</span>
-                  <span className="records-used-detail-value">{usingHospital.name}</span>
-                </div>
-                <div className="records-used-detail-row">
-                  <span className="records-used-detail-label">Current Stock:</span>
-                  <span className="records-used-detail-value">{hospitalBloodStock.quantity} units</span>
-                </div>
-                <div className="records-used-detail-row">
-                  <span className="records-used-detail-label">New Stock:</span>
-                  <span className="records-used-detail-value">{hospitalBloodStock.quantity - 1} units</span>
-                </div>
-              </div>
-              <p className="records-confirm-message">
-                This action will mark this blood donation as used and deduct 1 unit from hospital inventory.
-              </p>
-              <div className="records-confirm-actions">
+              <div className="records-modal-actions">
                 <button
-                  onClick={() => {
-                    setShowUsedModal(false);
-                    setUsingRecord(null);
-                    setUsingHospital(null);
-                    setHospitalBloodStock(null);
-                  }}
-                  className="records-confirm-button records-confirm-cancel"
+                  onClick={() => setShowModal(false)}
+                  className="records-modal-button records-cancel-button"
                 >
                   Cancel
                 </button>
                 <button
-                  onClick={handleSubmitUsed}
-                  className="records-confirm-button records-confirm-used"
+                  onClick={async () => {
+                    try {
+                      setError('');
+                      setSuccess('');
+
+                      if (selectedRecord.firestoreDonationId) {
+                        const donationRef = doc(db, 'donations', selectedRecord.firestoreDonationId);
+                        await updateDoc(donationRef, {
+                          donor_name: selectedRecord.name,
+                          status: selectedRecord.status.toLowerCase() === 'completed' ? 'stored' :
+                            selectedRecord.status.toLowerCase() === 'rejected' ? 'rejected' :
+                              selectedRecord.status.toLowerCase() === 'cancelled' ? 'cancelled' :
+                                selectedRecord.status.toLowerCase() === 'no-show' ? 'no-show' :
+                                  'pending',
+                          donation_date: Timestamp.fromDate(new Date(selectedRecord.date))
+                        });
+                      }
+
+                      if (selectedRecord.firestoreBookingId) {
+                        const bookingRef = doc(db, 'slot_bookings', selectedRecord.firestoreBookingId);
+                        await updateDoc(bookingRef, {
+                          bookingStatus: selectedRecord.status.toLowerCase(),
+                          updatedAt: serverTimestamp()
+                        });
+
+                        if (selectedRecord.userId && selectedRecord.userId !== 'walk_in' && selectedRecord.status !== 'Pending') {
+                          await sendNotification(selectedRecord.userId, {
+                            title: `Donation Status Updated to ${selectedRecord.status}`,
+                            message: `Your donation status has been updated to ${selectedRecord.status}`,
+                            data: {
+                              recordId: selectedRecord.id,
+                              status: selectedRecord.status.toLowerCase(),
+                              previousStatus: selectedRecord.status
+                            }
+                          });
+                        }
+                      }
+
+                      await loadRecords();
+                      setShowModal(false);
+                      setSuccess('Record updated successfully!');
+
+                    } catch (err) {
+                      console.error('Error updating record:', err);
+                      setError(`Failed to update record: ${err.message}`);
+                    }
+                  }}
+                  className="records-modal-button records-save-button"
                 >
-                  Mark as Used
+                  Save Changes
                 </button>
               </div>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Edit Modal */}
-        {showModal && selectedRecord && (
-          <div className="records-modal-overlay">
-            <div className="records-modal-container">
-              <div className="records-modal-header">
-                <h2 className="records-modal-title">Edit Donation Record</h2>
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="records-modal-close"
-                >
-                  <X className="records-modal-close-icon" />
-                </button>
-              </div>
-              <div className="records-modal-body">
-                <div className="records-modal-form">
-                  <div className="records-form-group">
-                    <label className="records-form-label">Record ID</label>
+      {/* Add Record Modal */}
+      {showAddModal && (
+        <div className="records-modal-overlay">
+          <div className="records-modal-container" style={{ maxWidth: '500px' }}>
+            <div className="records-modal-header">
+              <h2 className="records-modal-title">Add New Record</h2>
+              <button
+                onClick={() => {
+                  setShowAddModal(false);
+                  setUserSearchResults([]);
+                  setShowUserDropdown(false);
+                }}
+                className="records-modal-close"
+              >
+                <X className="records-modal-close-icon" />
+              </button>
+            </div>
+            <div className="records-modal-body">
+              <div className="records-modal-form">
+                <div className="records-form-group">
+                  <label className="records-form-label">Search User *</label>
+                  <div className="relative">
                     <input
                       type="text"
                       className="records-form-input"
-                      value={selectedRecord.id}
-                      disabled
+                      placeholder="Search by name, email, phone, or IC..."
+                      value={newRecord.name}
+                      onChange={(e) => handleUserSearch(e.target.value)}
+                      required
+                      onFocus={() => {
+                        if (newRecord.name.length >= 2) {
+                          setShowUserDropdown(true);
+                        }
+                      }}
                     />
+                    {searchingUsers && (
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                      </div>
+                    )}
+
+                    {showUserDropdown && userSearchResults.length > 0 && (
+                      <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        {userSearchResults.map((user) => (
+                          <div
+                            key={user.id}
+                            className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                            onClick={() => selectUser(user)}
+                          >
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <p className="font-medium text-gray-900">{user.name}</p>
+                                <div className="flex items-center mt-1 text-sm text-gray-500">
+                                  <Mail size={12} className="mr-1" />
+                                  <span>{user.email}</span>
+                                </div>
+                                {user.phone && user.phone !== 'No phone' && (
+                                  <div className="flex items-center mt-1 text-sm text-gray-500">
+                                    <Phone size={12} className="mr-1" />
+                                    <span>{user.phone}</span>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex flex-col items-end">
+                                <span className={`text-xs px-2 py-1 rounded-full mb-1 ${user.source === 'donor_profile'
+                                  ? 'bg-green-100 text-green-800'
+                                  : user.source === 'donor_profile_only'
+                                    ? 'bg-blue-100 text-blue-800'
+                                    : 'bg-gray-100 text-gray-800'
+                                  }`}>
+                                  {user.source === 'donor_profile'
+                                    ? 'Donor'
+                                    : user.source === 'donor_profile_only'
+                                      ? 'Donor (No User)'
+                                      : 'User'}
+                                </span>
+                                {user.hasDonorProfile && (
+                                  <span className="text-xs px-2 py-0.5 bg-red-100 text-red-800 rounded-full">
+                                    Blood: {user.bloodType}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="mt-2 flex flex-wrap gap-1">
+                              <div className="flex items-center text-xs text-gray-600">
+                                <MapPin size={10} className="mr-1" />
+                                <span className="truncate max-w-[150px]">{user.address}</span>
+                              </div>
+                              {user.icNumber && user.icNumber !== 'No IC' && (
+                                <div className="flex items-center text-xs text-gray-600">
+                                  <FileText size={10} className="mr-1" />
+                                  <span>{user.icNumber}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {showUserDropdown && userSearchResults.length === 0 && newRecord.name.length >= 2 && !searchingUsers && (
+                      <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
+                        <div className="px-4 py-3 text-gray-500 text-center">
+                          No users found. Try searching by name, email, or phone number.
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="records-form-group">
-                    <label className="records-form-label">Name</label>
-                    <input
-                      type="text"
-                      className="records-form-input"
-                      value={selectedRecord.name}
-                      onChange={(e) => setSelectedRecord({ ...selectedRecord, name: e.target.value })}
-                    />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Start typing (min 2 chars) to search for existing users. Selecting a user will auto-fill their details.
+                  </p>
+                </div>
+
+                {newRecord.userId && (
+                  <div className="p-3 bg-green-50 rounded-lg mb-4">
+                    <div className="flex items-start">
+                      <User className="w-5 h-5 text-green-600 mr-2 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="font-medium text-green-800">{newRecord.name}</p>
+                        <div className="mt-1 space-y-1">
+                          <div className="flex items-center text-sm text-green-700">
+                            <Mail size={12} className="mr-1" />
+                            <span>{newRecord.userEmail || 'No email'}</span>
+                          </div>
+                          {newRecord.userPhone && newRecord.userPhone !== 'No phone' && (
+                            <div className="flex items-center text-sm text-green-700">
+                              <Phone size={12} className="mr-1" />
+                              <span>{newRecord.userPhone}</span>
+                            </div>
+                          )}
+                          <div className="flex items-center text-sm text-green-700">
+                            <MapPin size={12} className="mr-1" />
+                            <span>{newRecord.address || 'No address'}</span>
+                          </div>
+                          <div className="flex items-center text-sm text-green-700">
+                            <span className="font-medium mr-1">Blood Type:</span>
+                            <span>{newRecord.bloodType}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
+                )}
+
+                {!newRecord.userId && (
                   <div className="records-form-group">
                     <label className="records-form-label">Address</label>
                     <input
                       type="text"
                       className="records-form-input"
-                      value={selectedRecord.address}
-                      onChange={(e) => setSelectedRecord({ ...selectedRecord, address: e.target.value })}
+                      placeholder="Enter address"
+                      value={newRecord.address}
+                      onChange={(e) => setNewRecord({ ...newRecord, address: e.target.value })}
                     />
                   </div>
+                )}
+
+                <div className="records-form-group">
+                  <label className="records-form-label">Date *</label>
+                  <input
+                    type="date"
+                    className="records-form-input"
+                    value={newRecord.date}
+                    onChange={(e) => setNewRecord({ ...newRecord, date: e.target.value })}
+                    required
+                  />
+                </div>
+
+                {(!newRecord.userId || newRecord.bloodType === 'Unknown') && (
                   <div className="records-form-group">
-                    <label className="records-form-label">Date</label>
-                    <input
-                      type="date"
-                      className="records-form-input"
-                      value={selectedRecord.date}
-                      onChange={(e) => setSelectedRecord({ ...selectedRecord, date: e.target.value })}
-                    />
-                  </div>
-                  <div className="records-form-group">
-                    <label className="records-form-label">Status</label>
+                    <label className="records-form-label">Blood Type</label>
                     <select
                       className="records-form-select"
-                      value={selectedRecord.status}
-                      onChange={(e) => setSelectedRecord({ ...selectedRecord, status: e.target.value })}
+                      value={newRecord.bloodType}
+                      onChange={(e) => setNewRecord({ ...newRecord, bloodType: e.target.value })}
                     >
-                      {STATUS_OPTIONS.map(status => (
-                        <option key={status} value={status}>{status}</option>
-                      ))}
+                      <option value="Unknown">Unknown</option>
+                      <option value="A+">A+</option>
+                      <option value="A-">A-</option>
+                      <option value="B+">B+</option>
+                      <option value="B-">B-</option>
+                      <option value="AB+">AB+</option>
+                      <option value="AB-">AB-</option>
+                      <option value="O+">O+</option>
+                      <option value="O-">O-</option>
                     </select>
                   </div>
-                </div>
-                <div className="records-modal-actions">
-                  <button
-                    onClick={() => setShowModal(false)}
-                    className="records-modal-button records-cancel-button"
+                )}
+
+                <div className="records-form-group">
+                  <label className="records-form-label">Status *</label>
+                  <select
+                    className="records-form-select"
+                    value={newRecord.status}
+                    onChange={(e) => setNewRecord({ ...newRecord, status: e.target.value })}
                   >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={async () => {
-                      try {
-                        setError('');
-                        setSuccess('');
-
-                        if (selectedRecord.firestoreDonationId) {
-                          const donationRef = doc(db, 'donations', selectedRecord.firestoreDonationId);
-                          await updateDoc(donationRef, {
-                            donor_name: selectedRecord.name,
-                            status: selectedRecord.status.toLowerCase() === 'completed' ? 'stored' :
-                              selectedRecord.status.toLowerCase() === 'rejected' ? 'rejected' :
-                                selectedRecord.status.toLowerCase() === 'cancelled' ? 'cancelled' :
-                                  selectedRecord.status.toLowerCase() === 'no-show' ? 'no-show' :
-                                    'pending',
-                            donation_date: Timestamp.fromDate(new Date(selectedRecord.date))
-                          });
-                        }
-
-                        if (selectedRecord.firestoreBookingId) {
-                          const bookingRef = doc(db, 'slot_bookings', selectedRecord.firestoreBookingId);
-                          await updateDoc(bookingRef, {
-                            bookingStatus: selectedRecord.status.toLowerCase(),
-                            updatedAt: serverTimestamp()
-                          });
-
-                          if (selectedRecord.userId && selectedRecord.userId !== 'walk_in' && selectedRecord.status !== 'Pending') {
-                            await sendNotification(selectedRecord.userId, {
-                              title: `Donation Status Updated to ${selectedRecord.status}`,
-                              message: `Your donation status has been updated to ${selectedRecord.status}`,
-                              data: {
-                                recordId: selectedRecord.id,
-                                status: selectedRecord.status.toLowerCase(),
-                                previousStatus: selectedRecord.status
-                              }
-                            });
-                          }
-                        }
-
-                        await loadRecords();
-                        setShowModal(false);
-                        setSuccess('Record updated successfully!');
-
-                      } catch (err) {
-                        console.error('Error updating record:', err);
-                        setError(`Failed to update record: ${err.message}`);
-                      }
-                    }}
-                    className="records-modal-button records-save-button"
-                  >
-                    Save Changes
-                  </button>
+                    <option value="Pending">Pending</option>
+                    <option value="Registered">Registered</option>
+                    <option value="Confirmed">Confirmed</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Rejected">Rejected</option>
+                    <option value="Cancelled">Cancelled</option>
+                    <option value="No-show">No-show</option>
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    For walk-in entries, selecting "Completed" will create a donation record.
+                  </p>
                 </div>
               </div>
-            </div>
-          </div>
-        )}
 
-        {/* Add Record Modal */}
-        {showAddModal && (
-          <div className="records-modal-overlay">
-            <div className="records-modal-container" style={{ maxWidth: '500px' }}>
-              <div className="records-modal-header">
-                <h2 className="records-modal-title">Add New Record</h2>
+              <div className="records-modal-actions">
                 <button
                   onClick={() => {
                     setShowAddModal(false);
                     setUserSearchResults([]);
                     setShowUserDropdown(false);
                   }}
-                  className="records-modal-close"
-                >
-                  <X className="records-modal-close-icon" />
-                </button>
-              </div>
-              <div className="records-modal-body">
-                <div className="records-modal-form">
-                  <div className="records-form-group">
-                    <label className="records-form-label">Search User *</label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        className="records-form-input"
-                        placeholder="Search by name, email, phone, or IC..."
-                        value={newRecord.name}
-                        onChange={(e) => handleUserSearch(e.target.value)}
-                        required
-                        onFocus={() => {
-                          if (newRecord.name.length >= 2) {
-                            setShowUserDropdown(true);
-                          }
-                        }}
-                      />
-                      {searchingUsers && (
-                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                          <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
-                        </div>
-                      )}
-
-                      {showUserDropdown && userSearchResults.length > 0 && (
-                        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                          {userSearchResults.map((user) => (
-                            <div
-                              key={user.id}
-                              className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                              onClick={() => selectUser(user)}
-                            >
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <p className="font-medium text-gray-900">{user.name}</p>
-                                  <div className="flex items-center mt-1 text-sm text-gray-500">
-                                    <Mail size={12} className="mr-1" />
-                                    <span>{user.email}</span>
-                                  </div>
-                                  {user.phone && user.phone !== 'No phone' && (
-                                    <div className="flex items-center mt-1 text-sm text-gray-500">
-                                      <Phone size={12} className="mr-1" />
-                                      <span>{user.phone}</span>
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="flex flex-col items-end">
-                                  <span className={`text-xs px-2 py-1 rounded-full mb-1 ${user.source === 'donor_profile'
-                                      ? 'bg-green-100 text-green-800'
-                                      : user.source === 'donor_profile_only'
-                                        ? 'bg-blue-100 text-blue-800'
-                                        : 'bg-gray-100 text-gray-800'
-                                    }`}>
-                                    {user.source === 'donor_profile'
-                                      ? 'Donor'
-                                      : user.source === 'donor_profile_only'
-                                        ? 'Donor (No User)'
-                                        : 'User'}
-                                  </span>
-                                  {user.hasDonorProfile && (
-                                    <span className="text-xs px-2 py-0.5 bg-red-100 text-red-800 rounded-full">
-                                      Blood: {user.bloodType}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="mt-2 flex flex-wrap gap-1">
-                                <div className="flex items-center text-xs text-gray-600">
-                                  <MapPin size={10} className="mr-1" />
-                                  <span className="truncate max-w-[150px]">{user.address}</span>
-                                </div>
-                                {user.icNumber && user.icNumber !== 'No IC' && (
-                                  <div className="flex items-center text-xs text-gray-600">
-                                    <FileText size={10} className="mr-1" />
-                                    <span>{user.icNumber}</span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {showUserDropdown && userSearchResults.length === 0 && newRecord.name.length >= 2 && !searchingUsers && (
-                        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
-                          <div className="px-4 py-3 text-gray-500 text-center">
-                            No users found. Try searching by name, email, or phone number.
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Start typing (min 2 chars) to search for existing users. Selecting a user will auto-fill their details.
-                    </p>
-                  </div>
-
-                  {newRecord.userId && (
-                    <div className="p-3 bg-green-50 rounded-lg mb-4">
-                      <div className="flex items-start">
-                        <User className="w-5 h-5 text-green-600 mr-2 mt-0.5" />
-                        <div className="flex-1">
-                          <p className="font-medium text-green-800">{newRecord.name}</p>
-                          <div className="mt-1 space-y-1">
-                            <div className="flex items-center text-sm text-green-700">
-                              <Mail size={12} className="mr-1" />
-                              <span>{newRecord.userEmail || 'No email'}</span>
-                            </div>
-                            {newRecord.userPhone && newRecord.userPhone !== 'No phone' && (
-                              <div className="flex items-center text-sm text-green-700">
-                                <Phone size={12} className="mr-1" />
-                                <span>{newRecord.userPhone}</span>
-                              </div>
-                            )}
-                            <div className="flex items-center text-sm text-green-700">
-                              <MapPin size={12} className="mr-1" />
-                              <span>{newRecord.address || 'No address'}</span>
-                            </div>
-                            <div className="flex items-center text-sm text-green-700">
-                              <span className="font-medium mr-1">Blood Type:</span>
-                              <span>{newRecord.bloodType}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {!newRecord.userId && (
-                    <div className="records-form-group">
-                      <label className="records-form-label">Address</label>
-                      <input
-                        type="text"
-                        className="records-form-input"
-                        placeholder="Enter address"
-                        value={newRecord.address}
-                        onChange={(e) => setNewRecord({ ...newRecord, address: e.target.value })}
-                      />
-                    </div>
-                  )}
-
-                  <div className="records-form-group">
-                    <label className="records-form-label">Date *</label>
-                    <input
-                      type="date"
-                      className="records-form-input"
-                      value={newRecord.date}
-                      onChange={(e) => setNewRecord({ ...newRecord, date: e.target.value })}
-                      required
-                    />
-                  </div>
-
-                  {(!newRecord.userId || newRecord.bloodType === 'Unknown') && (
-                    <div className="records-form-group">
-                      <label className="records-form-label">Blood Type</label>
-                      <select
-                        className="records-form-select"
-                        value={newRecord.bloodType}
-                        onChange={(e) => setNewRecord({ ...newRecord, bloodType: e.target.value })}
-                      >
-                        <option value="Unknown">Unknown</option>
-                        <option value="A+">A+</option>
-                        <option value="A-">A-</option>
-                        <option value="B+">B+</option>
-                        <option value="B-">B-</option>
-                        <option value="AB+">AB+</option>
-                        <option value="AB-">AB-</option>
-                        <option value="O+">O+</option>
-                        <option value="O-">O-</option>
-                      </select>
-                    </div>
-                  )}
-
-                  <div className="records-form-group">
-                    <label className="records-form-label">Status *</label>
-                    <select
-                      className="records-form-select"
-                      value={newRecord.status}
-                      onChange={(e) => setNewRecord({ ...newRecord, status: e.target.value })}
-                    >
-                      <option value="Pending">Pending</option>
-                      <option value="Registered">Registered</option>
-                      <option value="Confirmed">Confirmed</option>
-                      <option value="Completed">Completed</option>
-                      <option value="Rejected">Rejected</option>
-                      <option value="Cancelled">Cancelled</option>
-                      <option value="No-show">No-show</option>
-                    </select>
-                    <p className="text-xs text-gray-500 mt-1">
-                      For walk-in entries, selecting "Completed" will create a donation record.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="records-modal-actions">
-                  <button
-                    onClick={() => {
-                      setShowAddModal(false);
-                      setUserSearchResults([]);
-                      setShowUserDropdown(false);
-                    }}
-                    className="records-modal-button records-cancel-button"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleAddSubmit}
-                    disabled={!newRecord.name.trim() || !newRecord.date}
-                    className="records-modal-button records-save-button"
-                  >
-                    Add Record
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Delete Confirmation Modal */}
-        {showDeleteConfirm && (
-          <div className="records-modal-overlay">
-            <div className="records-confirm-modal">
-              <div className="records-confirm-icon-container">
-                <AlertCircle className="records-confirm-icon" />
-              </div>
-              <h3 className="records-confirm-title">Delete Record</h3>
-              <p className="records-confirm-message">
-                Are you sure you want to delete this donation record? This action cannot be undone.
-              </p>
-              <div className="records-confirm-actions">
-                <button
-                  onClick={() => setShowDeleteConfirm(false)}
-                  className="records-confirm-button records-confirm-cancel"
+                  className="records-modal-button records-cancel-button"
                 >
                   Cancel
                 </button>
                 <button
-                  onClick={handleDeleteConfirm}
-                  className="records-confirm-button records-confirm-delete"
+                  onClick={handleAddSubmit}
+                  disabled={!newRecord.name.trim() || !newRecord.date}
+                  className="records-modal-button records-save-button"
                 >
-                  Delete
+                  Add Record
                 </button>
               </div>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Details Modal */}
-        {showDetailsModal && selectedRecord && (
-          <div className="records-modal-overlay">
-            <div className="records-modal-container">
-              <div className="records-modal-header">
-                <h2 className="records-modal-title">Donation Record Details</h2>
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="records-modal-overlay">
+          <div className="records-confirm-modal">
+            <div className="records-confirm-icon-container">
+              <AlertCircle className="records-confirm-icon" />
+            </div>
+            <h3 className="records-confirm-title">Delete Record</h3>
+            <p className="records-confirm-message">
+              Are you sure you want to delete this donation record? This action cannot be undone.
+            </p>
+            <div className="records-confirm-actions">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="records-confirm-button records-confirm-cancel"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                className="records-confirm-button records-confirm-delete"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Details Modal */}
+      {showDetailsModal && selectedRecord && (
+        <div className="records-modal-overlay">
+          <div className="records-modal-container">
+            <div className="records-modal-header">
+              <h2 className="records-modal-title">Donation Record Details</h2>
+              <button
+                onClick={() => setShowDetailsModal(false)}
+                className="records-modal-close"
+              >
+                <X className="records-modal-close-icon" />
+              </button>
+            </div>
+            <div className="records-modal-body">
+              <div className="records-details-grid">
+                <div className="records-detail-item">
+                  <label className="records-detail-label">Record ID</label>
+                  <p className="records-detail-value">{selectedRecord.id}</p>
+                </div>
+                <div className="records-detail-item">
+                  <label className="records-detail-label">Status</label>
+                  <span className={`records-status-badge ${getStatusClasses(selectedRecord)}`}>
+                    {getStatusIcon(selectedRecord)}
+                    <span>{getStatusText(selectedRecord)}</span>
+                  </span>
+                </div>
+                <div className="records-detail-item">
+                  <label className="records-detail-label">Name</label>
+                  <p className="records-detail-value">{selectedRecord.name}</p>
+                </div>
+                <div className="records-detail-item">
+                  <label className="records-detail-label">Address</label>
+                  <p className="records-detail-value">{selectedRecord.address}</p>
+                </div>
+                <div className="records-detail-item">
+                  <label className="records-detail-label">Hospital</label>
+                  <p className="records-detail-value">{selectedRecord.hospitalName || 'Unknown Hospital'}</p>
+                </div>
+                <div className="records-detail-item">
+                  <label className="records-detail-label">Date</label>
+                  <p className="records-detail-value">{formatDate(selectedRecord.date)}</p>
+                </div>
+
+                {selectedRecord.eventInfo && (
+                  <div className="records-detail-item records-detail-full-width">
+                    <label className="records-detail-label">Event Information</label>
+                    <div className="records-event-details-grid">
+                      <div className="records-event-detail-item">
+                        <span className="records-event-detail-label">Event:</span>
+                        <span className="records-event-detail-value">{selectedRecord.eventInfo.title}</span>
+                      </div>
+                      <div className="records-event-detail-item">
+                        <span className="records-event-detail-label">Location:</span>
+                        <span className="records-event-detail-value">{selectedRecord.eventInfo.location}</span>
+                      </div>
+                      <div className="records-event-detail-item">
+                        <span className="records-event-detail-label">Time:</span>
+                        <span className="records-event-detail-value">{selectedRecord.eventInfo.time}</span>
+                      </div>
+                      <div className="records-event-detail-item">
+                        <span className="records-event-detail-label">Confirmation Code:</span>
+                        <span className="records-event-detail-value">{selectedRecord.eventInfo.confirmationCode}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {selectedRecord.donationDetails && (
+                  <div className="records-detail-item records-detail-full-width">
+                    <label className="records-detail-label">Donation Details</label>
+                    <div className="records-donation-details-grid">
+                      <div className="records-donation-detail-item">
+                        <span className="records-donation-detail-label">Serial Number:</span>
+                        <span className="records-donation-detail-value">{selectedRecord.donationDetails.serialNumber}</span>
+                      </div>
+                      <div className="records-donation-detail-item">
+                        <span className="records-donation-detail-label">Amount Donated:</span>
+                        <span className="records-donation-detail-value">{selectedRecord.donationDetails.amountDonated} ml</span>
+                      </div>
+                      <div className="records-donation-detail-item">
+                        <span className="records-donation-detail-label">Blood Type:</span>
+                        <span className="records-donation-detail-value">{selectedRecord.donationDetails.bloodType}</span>
+                      </div>
+                      <div className="records-donation-detail-item">
+                        <span className="records-donation-detail-label">Expiry Date:</span>
+                        <span className="records-donation-detail-value">{formatDate(selectedRecord.donationDetails.expiryDate)}</span>
+                      </div>
+                      {selectedRecord.donationDetails.completedDate && (
+                        <div className="records-donation-detail-item">
+                          <span className="records-donation-detail-label">Completed Date:</span>
+                          <span className="records-donation-detail-value">{formatDateTime(selectedRecord.donationDetails.completedDate)}</span>
+                        </div>
+                      )}
+                      {selectedRecord.donationDetails.used && (
+                        <div className="records-donation-detail-item">
+                          <span className="records-donation-detail-label">Status:</span>
+                          <span className="records-donation-detail-value text-green-600 font-semibold">Used</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="records-modal-actions">
                 <button
                   onClick={() => setShowDetailsModal(false)}
-                  className="records-modal-close"
+                  className="records-modal-button records-cancel-button"
                 >
-                  <X className="records-modal-close-icon" />
+                  Close
                 </button>
-              </div>
-              <div className="records-modal-body">
-                <div className="records-details-grid">
-                  <div className="records-detail-item">
-                    <label className="records-detail-label">Record ID</label>
-                    <p className="records-detail-value">{selectedRecord.id}</p>
-                  </div>
-                  <div className="records-detail-item">
-                    <label className="records-detail-label">Status</label>
-                    <span className={`records-status-badge ${getStatusClasses(selectedRecord)}`}>
-                      {getStatusIcon(selectedRecord)}
-                      <span>{getStatusText(selectedRecord)}</span>
-                    </span>
-                  </div>
-                  <div className="records-detail-item">
-                    <label className="records-detail-label">Name</label>
-                    <p className="records-detail-value">{selectedRecord.name}</p>
-                  </div>
-                  <div className="records-detail-item">
-                    <label className="records-detail-label">Address</label>
-                    <p className="records-detail-value">{selectedRecord.address}</p>
-                  </div>
-                  <div className="records-detail-item">
-                    <label className="records-detail-label">Hospital</label>
-                    <p className="records-detail-value">{selectedRecord.hospitalName || 'Unknown Hospital'}</p>
-                  </div>
-                  <div className="records-detail-item">
-                    <label className="records-detail-label">Date</label>
-                    <p className="records-detail-value">{formatDate(selectedRecord.date)}</p>
-                  </div>
-
-                  {selectedRecord.eventInfo && (
-                    <div className="records-detail-item records-detail-full-width">
-                      <label className="records-detail-label">Event Information</label>
-                      <div className="records-event-details-grid">
-                        <div className="records-event-detail-item">
-                          <span className="records-event-detail-label">Event:</span>
-                          <span className="records-event-detail-value">{selectedRecord.eventInfo.title}</span>
-                        </div>
-                        <div className="records-event-detail-item">
-                          <span className="records-event-detail-label">Location:</span>
-                          <span className="records-event-detail-value">{selectedRecord.eventInfo.location}</span>
-                        </div>
-                        <div className="records-event-detail-item">
-                          <span className="records-event-detail-label">Time:</span>
-                          <span className="records-event-detail-value">{selectedRecord.eventInfo.time}</span>
-                        </div>
-                        <div className="records-event-detail-item">
-                          <span className="records-event-detail-label">Confirmation Code:</span>
-                          <span className="records-event-detail-value">{selectedRecord.eventInfo.confirmationCode}</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {selectedRecord.donationDetails && (
-                    <div className="records-detail-item records-detail-full-width">
-                      <label className="records-detail-label">Donation Details</label>
-                      <div className="records-donation-details-grid">
-                        <div className="records-donation-detail-item">
-                          <span className="records-donation-detail-label">Serial Number:</span>
-                          <span className="records-donation-detail-value">{selectedRecord.donationDetails.serialNumber}</span>
-                        </div>
-                        <div className="records-donation-detail-item">
-                          <span className="records-donation-detail-label">Amount Donated:</span>
-                          <span className="records-donation-detail-value">{selectedRecord.donationDetails.amountDonated} ml</span>
-                        </div>
-                        <div className="records-donation-detail-item">
-                          <span className="records-donation-detail-label">Blood Type:</span>
-                          <span className="records-donation-detail-value">{selectedRecord.donationDetails.bloodType}</span>
-                        </div>
-                        <div className="records-donation-detail-item">
-                          <span className="records-donation-detail-label">Expiry Date:</span>
-                          <span className="records-donation-detail-value">{formatDate(selectedRecord.donationDetails.expiryDate)}</span>
-                        </div>
-                        {selectedRecord.donationDetails.completedDate && (
-                          <div className="records-donation-detail-item">
-                            <span className="records-donation-detail-label">Completed Date:</span>
-                            <span className="records-donation-detail-value">{formatDateTime(selectedRecord.donationDetails.completedDate)}</span>
-                          </div>
-                        )}
-                        {selectedRecord.donationDetails.used && (
-                          <div className="records-donation-detail-item">
-                            <span className="records-donation-detail-label">Status:</span>
-                            <span className="records-donation-detail-value text-green-600 font-semibold">Used</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div className="records-modal-actions">
-                  <button
-                    onClick={() => setShowDetailsModal(false)}
-                    className="records-modal-button records-cancel-button"
-                  >
-                    Close
-                  </button>
-                </div>
               </div>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Completion Modal */}
-        {showCompletionModal && completingRecord && (
-          <div className="records-modal-overlay">
-            <div className="records-completion-modal">
-              <div className="records-modal-header">
-                <h2 className="records-modal-title">Complete Donation</h2>
+      {/* Completion Modal */}
+      {showCompletionModal && completingRecord && (
+        <div className="records-modal-overlay">
+          <div className="records-completion-modal">
+            <div className="records-modal-header">
+              <h2 className="records-modal-title">Complete Donation</h2>
+              <button
+                onClick={() => {
+                  setShowCompletionModal(false);
+                  setCompletionData({
+                    serialNumber: '',
+                    amountDonated: '',
+                    expiryDate: ''
+                  });
+                  setCompletionErrors({});
+                }}
+                className="records-modal-close"
+              >
+                <X className="records-modal-close-icon" />
+              </button>
+            </div>
+
+            <div className="records-modal-body">
+              <div className="records-completion-donor-info">
+                <div className="records-completion-donor-header">
+                  <Award className="w-6 h-6 text-green-600" />
+                  <div>
+                    <h3 className="records-completion-donor-name">{completionData.donorName || completingRecord.name}</h3>
+                    <p className="records-completion-donor-meta">
+                      ID: {completingRecord.id} • {completingRecord.address}
+                    </p>
+                    <p className="records-completion-donor-meta">
+                      Blood Type: <span className="font-semibold">{completionData.bloodType || 'Unknown'}</span>
+                    </p>
+                  </div>
+                </div>
+                {completingRecord.eventInfo && (
+                  <div className="records-completion-event-info">
+                    <p><strong>Event:</strong> {completingRecord.eventInfo.title}</p>
+                    <p><strong>Location:</strong> {completingRecord.eventInfo.location}</p>
+                    <p><strong>Time:</strong> {completingRecord.eventInfo.time}</p>
+                    {completingRecord.eventInfo.confirmationCode && (
+                      <p><strong>Confirmation Code:</strong> {completingRecord.eventInfo.confirmationCode}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="records-completion-form">
+                <div className="records-completion-form-group">
+                  <label className="records-completion-form-label">
+                    Serial Number <span className="text-red-600">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    className={`records-completion-form-input ${completionErrors.serialNumber ? 'input-error' : ''}`}
+                    placeholder="e.g., BLD-2025-001234"
+                    value={completionData.serialNumber}
+                    onChange={(e) => setCompletionData({
+                      ...completionData,
+                      serialNumber: e.target.value
+                    })}
+                  />
+                  {completionErrors.serialNumber && (
+                    <p className="records-completion-form-error">{completionErrors.serialNumber}</p>
+                  )}
+                </div>
+
+                <div className="records-completion-form-group">
+                  <label className="records-completion-form-label">
+                    Amount Donated (ml) <span className="text-red-600">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    className={`records-completion-form-input ${completionErrors.amountDonated ? 'input-error' : ''}`}
+                    placeholder="e.g., 450"
+                    value={completionData.amountDonated}
+                    onChange={(e) => setCompletionData({
+                      ...completionData,
+                      amountDonated: e.target.value
+                    })}
+                    min="1"
+                    max="1000"
+                    step="50"
+                  />
+                  {completionErrors.amountDonated && (
+                    <p className="records-completion-form-error">{completionErrors.amountDonated}</p>
+                  )}
+                </div>
+
+                <div className="records-completion-form-group">
+                  <label className="records-completion-form-label">
+                    Expiry Date <span className="text-red-600">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    className={`records-completion-form-input ${completionErrors.expiryDate ? 'input-error' : ''}`}
+                    value={completionData.expiryDate}
+                    onChange={(e) => setCompletionData({
+                      ...completionData,
+                      expiryDate: e.target.value
+                    })}
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                  {completionErrors.expiryDate && (
+                    <p className="records-completion-form-error">{completionErrors.expiryDate}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="records-completion-modal-actions">
                 <button
                   onClick={() => {
                     setShowCompletionModal(false);
@@ -2992,246 +3043,196 @@ const DonationRecords = ({ onNavigate }) => {
                     });
                     setCompletionErrors({});
                   }}
-                  className="records-modal-close"
-                >
-                  <X className="records-modal-close-icon" />
-                </button>
-              </div>
-
-              <div className="records-modal-body">
-                <div className="records-completion-donor-info">
-                  <div className="records-completion-donor-header">
-                    <Award className="w-6 h-6 text-green-600" />
-                    <div>
-                      <h3 className="records-completion-donor-name">{completionData.donorName || completingRecord.name}</h3>
-                      <p className="records-completion-donor-meta">
-                        ID: {completingRecord.id} • {completingRecord.address}
-                      </p>
-                      <p className="records-completion-donor-meta">
-                        Blood Type: <span className="font-semibold">{completionData.bloodType || 'Unknown'}</span>
-                      </p>
-                    </div>
-                  </div>
-                  {completingRecord.eventInfo && (
-                    <div className="records-completion-event-info">
-                      <p><strong>Event:</strong> {completingRecord.eventInfo.title}</p>
-                      <p><strong>Location:</strong> {completingRecord.eventInfo.location}</p>
-                      <p><strong>Time:</strong> {completingRecord.eventInfo.time}</p>
-                      {completingRecord.eventInfo.confirmationCode && (
-                        <p><strong>Confirmation Code:</strong> {completingRecord.eventInfo.confirmationCode}</p>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                <div className="records-completion-form">
-                  <div className="records-completion-form-group">
-                    <label className="records-completion-form-label">
-                      Serial Number <span className="text-red-600">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      className={`records-completion-form-input ${completionErrors.serialNumber ? 'input-error' : ''}`}
-                      placeholder="e.g., BLD-2025-001234"
-                      value={completionData.serialNumber}
-                      onChange={(e) => setCompletionData({
-                        ...completionData,
-                        serialNumber: e.target.value
-                      })}
-                    />
-                    {completionErrors.serialNumber && (
-                      <p className="records-completion-form-error">{completionErrors.serialNumber}</p>
-                    )}
-                  </div>
-
-                  <div className="records-completion-form-group">
-                    <label className="records-completion-form-label">
-                      Amount Donated (ml) <span className="text-red-600">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      className={`records-completion-form-input ${completionErrors.amountDonated ? 'input-error' : ''}`}
-                      placeholder="e.g., 450"
-                      value={completionData.amountDonated}
-                      onChange={(e) => setCompletionData({
-                        ...completionData,
-                        amountDonated: e.target.value
-                      })}
-                      min="1"
-                      max="1000"
-                      step="50"
-                    />
-                    {completionErrors.amountDonated && (
-                      <p className="records-completion-form-error">{completionErrors.amountDonated}</p>
-                    )}
-                  </div>
-
-                  <div className="records-completion-form-group">
-                    <label className="records-completion-form-label">
-                      Expiry Date <span className="text-red-600">*</span>
-                    </label>
-                    <input
-                      type="date"
-                      className={`records-completion-form-input ${completionErrors.expiryDate ? 'input-error' : ''}`}
-                      value={completionData.expiryDate}
-                      onChange={(e) => setCompletionData({
-                        ...completionData,
-                        expiryDate: e.target.value
-                      })}
-                      min={new Date().toISOString().split('T')[0]}
-                    />
-                    {completionErrors.expiryDate && (
-                      <p className="records-completion-form-error">{completionErrors.expiryDate}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="records-completion-modal-actions">
-                  <button
-                    onClick={() => {
-                      setShowCompletionModal(false);
-                      setCompletionData({
-                        serialNumber: '',
-                        amountDonated: '',
-                        expiryDate: ''
-                      });
-                      setCompletionErrors({});
-                    }}
-                    className="records-modal-button records-cancel-button"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSubmitCompletion}
-                    className="records-modal-button records-complete-button"
-                  >
-                    <Award className="w-4 h-4 mr-2 inline" />
-                    Complete Donation
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Reject Modal */}
-        {showRejectModal && rejectingRecord && (
-          <div className="records-modal-overlay">
-            <div className="records-confirm-modal">
-              <div className="records-confirm-icon-container">
-                <XOctagon className="records-confirm-icon text-red-600" />
-              </div>
-              <h3 className="records-confirm-title">Reject Donation</h3>
-              <p className="records-confirm-message">
-                Are you sure you want to reject this donation request?
-              </p>
-              <div className="records-reject-form">
-                <label className="records-form-label">Reason for Rejection (Optional)</label>
-                <textarea
-                  className="records-reject-textarea"
-                  placeholder="Enter reason for rejection..."
-                  value={rejectReason}
-                  onChange={(e) => setRejectReason(e.target.value)}
-                  rows={3}
-                />
-              </div>
-              <div className="records-confirm-actions">
-                <button
-                  onClick={() => setShowRejectModal(false)}
-                  className="records-confirm-button records-confirm-cancel"
+                  className="records-modal-button records-cancel-button"
                 >
                   Cancel
                 </button>
                 <button
-                  onClick={handleSubmitRejection}
-                  className="records-confirm-button records-confirm-reject"
+                  onClick={handleSubmitCompletion}
+                  className="records-modal-button records-complete-button"
                 >
-                  Reject Donation
+                  <Award className="w-4 h-4 mr-2 inline" />
+                  Complete Donation
                 </button>
               </div>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Cancel Modal */}
-        {showCancelModal && cancellingRecord && (
-          <div className="records-modal-overlay">
-            <div className="records-confirm-modal">
-              <div className="records-confirm-icon-container">
-                <Ban className="records-confirm-icon text-gray-600" />
-              </div>
-              <h3 className="records-confirm-title">Cancel Donation</h3>
-              <p className="records-confirm-message">
-                Are you sure you want to cancel this donation?
-              </p>
-              <div className="records-reject-form">
-                <label className="records-form-label">Reason for Cancellation (Optional)</label>
-                <textarea
-                  className="records-reject-textarea"
-                  placeholder="Enter reason for cancellation..."
-                  value={cancelReason}
-                  onChange={(e) => setCancelReason(e.target.value)}
-                  rows={3}
-                />
-              </div>
-              <div className="records-confirm-actions">
-                <button
-                  onClick={() => setShowCancelModal(false)}
-                  className="records-confirm-button records-confirm-cancel"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSubmitCancellation}
-                  className="records-confirm-button records-confirm-cancel-status"
-                >
-                  Cancel Donation
-                </button>
-              </div>
+      {/* Reject Modal */}
+      {showRejectModal && rejectingRecord && (
+        <div className="records-modal-overlay">
+          <div className="records-confirm-modal">
+            <div className="records-confirm-icon-container">
+              <XOctagon className="records-confirm-icon text-red-600" />
+            </div>
+            <h3 className="records-confirm-title">Reject Donation</h3>
+            <p className="records-confirm-message">
+              Are you sure you want to reject this donation request?
+            </p>
+            <div className="records-reject-form">
+              <label className="records-form-label">Reason for Rejection (Optional)</label>
+              <textarea
+                className="records-reject-textarea"
+                placeholder="Enter reason for rejection..."
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                rows={3}
+              />
+            </div>
+            <div className="records-confirm-actions">
+              <button
+                onClick={() => setShowRejectModal(false)}
+                className="records-confirm-button records-confirm-cancel"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitRejection}
+                className="records-confirm-button records-confirm-reject"
+              >
+                Reject Donation
+              </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* No-show Modal */}
-        {showNoShowModal && noShowRecord && (
-          <div className="records-modal-overlay">
-            <div className="records-confirm-modal">
-              <div className="records-confirm-icon-container">
-                <UserX className="records-confirm-icon text-yellow-600" />
-              </div>
-              <h3 className="records-confirm-title">Mark as No-show</h3>
-              <p className="records-confirm-message">
-                Are you sure you want to mark this donation as no-show?
-              </p>
-              <div className="records-reject-form">
-                <label className="records-form-label">Reason for No-show (Optional)</label>
-                <textarea
-                  className="records-reject-textarea"
-                  placeholder="Enter reason for no-show..."
-                  value={noShowReason}
-                  onChange={(e) => setNoShowReason(e.target.value)}
-                  rows={3}
-                />
-              </div>
-              <div className="records-confirm-actions">
-                <button
-                  onClick={() => setShowNoShowModal(false)}
-                  className="records-confirm-button records-confirm-cancel"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSubmitNoShow}
-                  className="records-confirm-button records-confirm-noshow"
-                >
-                  Mark as No-show
-                </button>
-              </div>
+      {/* Cancel Modal */}
+      {showCancelModal && cancellingRecord && (
+        <div className="records-modal-overlay">
+          <div className="records-confirm-modal">
+            <div className="records-confirm-icon-container">
+              <Ban className="records-confirm-icon text-gray-600" />
+            </div>
+            <h3 className="records-confirm-title">Cancel Donation</h3>
+            <p className="records-confirm-message">
+              Are you sure you want to cancel this donation?
+            </p>
+            <div className="records-reject-form">
+              <label className="records-form-label">Reason for Cancellation (Optional)</label>
+              <textarea
+                className="records-reject-textarea"
+                placeholder="Enter reason for cancellation..."
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                rows={3}
+              />
+            </div>
+            <div className="records-confirm-actions">
+              <button
+                onClick={() => setShowCancelModal(false)}
+                className="records-confirm-button records-confirm-cancel"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitCancellation}
+                className="records-confirm-button records-confirm-cancel-status"
+              >
+                Cancel Donation
+              </button>
             </div>
           </div>
-        )}
-      </div>
-    </Layout>
+        </div>
+      )}
+
+      {/* No-show Modal */}
+      {showNoShowModal && noShowRecord && (
+        <div className="records-modal-overlay">
+          <div className="records-confirm-modal">
+            <div className="records-confirm-icon-container">
+              <UserX className="records-confirm-icon text-yellow-600" />
+            </div>
+            <h3 className="records-confirm-title">Mark as No-show</h3>
+            <p className="records-confirm-message">
+              Are you sure you want to mark this donation as no-show?
+            </p>
+            <div className="records-reject-form">
+              <label className="records-form-label">Reason for No-show (Optional)</label>
+              <textarea
+                className="records-reject-textarea"
+                placeholder="Enter reason for no-show..."
+                value={noShowReason}
+                onChange={(e) => setNoShowReason(e.target.value)}
+                rows={3}
+              />
+            </div>
+            <div className="records-confirm-actions">
+              <button
+                onClick={() => setShowNoShowModal(false)}
+                className="records-confirm-button records-confirm-cancel"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitNoShow}
+                className="records-confirm-button records-confirm-noshow"
+              >
+                Mark as No-show
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mark as Used Modal */}
+      {showUsedModal && usingRecord && usingHospital && hospitalBloodStock && (
+        <div className="records-modal-overlay">
+          <div className="records-confirm-modal">
+            <div className="records-confirm-icon-container">
+              <Heart className="records-confirm-icon text-green-600" />
+            </div>
+            <h3 className="records-confirm-title">Mark Blood as Used</h3>
+            <div className="records-used-details">
+              <div className="records-used-detail-row">
+                <span className="records-used-detail-label">Donor:</span>
+                <span className="records-used-detail-value">{usingRecord.name}</span>
+              </div>
+              <div className="records-used-detail-row">
+                <span className="records-used-detail-label">Blood Type:</span>
+                <span className="records-used-detail-value">{hospitalBloodStock.bloodType}</span>
+              </div>
+              <div className="records-used-detail-row">
+                <span className="records-used-detail-label">Hospital:</span>
+                <span className="records-used-detail-value">{usingHospital.name}</span>
+              </div>
+              <div className="records-used-detail-row">
+                <span className="records-used-detail-label">Current Stock:</span>
+                <span className="records-used-detail-value">{hospitalBloodStock.quantity} units</span>
+              </div>
+              <div className="records-used-detail-row">
+                <span className="records-used-detail-label">New Stock:</span>
+                <span className="records-used-detail-value">{hospitalBloodStock.quantity - 1} units</span>
+              </div>
+            </div>
+            <p className="records-confirm-message">
+              This action will mark this blood donation as used and deduct 1 unit from hospital inventory.
+            </p>
+            <div className="records-confirm-actions">
+              <button
+                onClick={() => {
+                  setShowUsedModal(false);
+                  setUsingRecord(null);
+                  setUsingHospital(null);
+                  setHospitalBloodStock(null);
+                }}
+                className="records-confirm-button records-confirm-cancel"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitUsed}
+                className="records-confirm-button records-confirm-used"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

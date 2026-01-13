@@ -694,167 +694,59 @@ const BloodInventory = ({ onNavigate }) => {
   }
 
   return (
-    <Layout onNavigate={onNavigate} currentPage="blood-inventory">
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="inventory-header-container">
-          <h1 className="inventory-header-title">Blood Inventory</h1>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="error-container">
-            <AlertCircle className="error-icon" />
-            <p className="error-text">{error}</p>
-            <button onClick={() => setError('')} className="error-close">
-              <X className="error-close-icon" />
-            </button>
-          </div>
-        )}
-
-
-        {/* Stats Cards */}
-        <div className="inventory-stats-grid">
-          {/* Total Blood Stock */}
-          <div className="inventory-stat-card stat-card-total">
-            <h3 className="stat-number-blue">{stats.total}</h3>
-            <p className="stat-label">Total Blood Stock</p>
+    <>
+      <Layout onNavigate={onNavigate} currentPage="blood-inventory">
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="inventory-header-container">
+            <h1 className="inventory-header-title">Blood Inventory</h1>
           </div>
 
-          {/* Critical Stock */}
-          <div className="inventory-stat-card stat-card-critical">
-            <h3 className="stat-number-red">{stats.critical}</h3>
-            <p className="stat-label">Critical (≤3 days)</p>
-          </div>
-
-          {/* Urgent Stock */}
-          <div className="inventory-stat-card stat-card-urgent">
-            <h3 className="stat-number-orange">{stats.urgent}</h3>
-            <p className="stat-label">Urgent (≤7 days)</p>
-          </div>
-
-          {/* Warning Stock */}
-          <div className="inventory-stat-card stat-card-warning">
-            <h3 className="stat-number-yellow">{stats.warning || donations.filter(d => getExpiryStatus(d.expiry_date).status === 'Warning').length}</h3>
-            <p className="stat-label">Warning (≤14 days)</p>
-          </div>
-        </div>
-
-        {/* Blood Stock by Location */}
-        <div className="location-stock-section">
-          <div className="location-selector-header">
-            <h3 className="location-stock-title">Blood Stock by Location</h3>
-            <select
-              className="location-selector-dropdown"
-              value={locationFilter}
-              onChange={(e) => setLocationFilter(e.target.value)}
-            >
-              {uniqueLocations.map((location, index) => (
-                <option key={index} value={location}>{location}</option>
-              ))}
-            </select>
-          </div>
-
-          {(() => {
-            const selectedLocationName = locationFilter === 'All'
-              ? (hospitals[0]?.name || 'Select Location')
-              : locationFilter;
-
-            // Find hospital by name
-            const selectedHospital = hospitals.find(h => h.name === selectedLocationName);
-
-            if (!selectedHospital) {
-              return (
-                <div className="location-card">
-                  <div className="location-header">
-                    <div className="location-title-section">
-                      <MapPin className="location-icon" />
-                      <h4 className="location-name">{selectedLocationName}</h4>
-                    </div>
-                  </div>
-                  <div className="p-4 text-center text-gray-500">
-                    No hospital data found for this location
-                  </div>
-                </div>
-              );
-            }
-
-            const locationSummary = getBloodTypeSummaryForHospital(selectedHospital.id);
-            const totalStock = Object.values(locationSummary).reduce((sum, count) => sum + count, 0);
-
-            return (
-              <div className="location-card">
-                <div className="location-header">
-                  <div className="location-title-section">
-                    <MapPin className="location-icon" />
-                    <h4 className="location-name">{selectedHospital.name}</h4>
-                  </div>
-                  <div className="location-stats">
-                    <div className="location-stat-item">
-                      <span className="location-stat-value">{totalStock}</span>
-                      <span className="location-stat-label">Total Units</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="location-blood-types">
-                  {Object.entries(locationSummary).map(([type, count]) => {
-                    const stockInfo = bloodStockData[selectedHospital.id]?.[type];
-                    let stockLevel = 'HIGH';
-                    let stockLevelClass = 'high';
-
-                    if (stockInfo) {
-                      if (count <= stockInfo.thresholds?.low) {
-                        stockLevel = 'LOW';
-                        stockLevelClass = 'low';
-                      } else if (count <= stockInfo.thresholds?.medium) {
-                        stockLevel = 'MEDIUM';
-                        stockLevelClass = 'medium';
-                      }
-                    }
-
-                    return (
-                      <div key={type} className={`location-blood-type-card stock-level-${stockLevelClass}`}>
-                        <div className="blood-type-header-compact">
-                          <span className={`blood-type-badge ${type.includes('-') ? 'blood-type-badge-negative' : 'blood-type-badge-positive'}`}>
-                            {type}
-                          </span>
-                          {type === 'O-' && (
-                            <span className="universal-badge-small">Universal</span>
-                          )}
-                        </div>
-                        <div className="blood-type-count-large">{count}</div>
-                        <div className={`stock-level-text stock-level-${stockLevelClass}`}>
-                          {stockLevel}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })()}
-        </div>
-
-        {/* Search and Filters */}
-        <div className="inventory-filters-container">
-          <div className="inventory-filters-grid">
-            <div className="inventory-search-container">
-              <label className="inventory-filter-label">Search Inventory</label>
-              <div className="inventory-search-input-container">
-                <Search className="inventory-search-icon" />
-                <input
-                  type="text"
-                  placeholder="Search by serial number, blood type, donor, or location..."
-                  className="inventory-search-input"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
+          {/* Error Message */}
+          {error && (
+            <div className="error-container">
+              <AlertCircle className="error-icon" />
+              <p className="error-text">{error}</p>
+              <button onClick={() => setError('')} className="error-close">
+                <X className="error-close-icon" />
+              </button>
             </div>
-            <div className="inventory-filter-select-container">
-              <label className="inventory-filter-label">Location</label>
+          )}
+
+
+          {/* Stats Cards */}
+          <div className="inventory-stats-grid">
+            {/* Total Blood Stock */}
+            <div className="inventory-stat-card stat-card-total">
+              <h3 className="stat-number-blue">{stats.total}</h3>
+              <p className="stat-label">Total Blood Stock</p>
+            </div>
+
+            {/* Critical Stock */}
+            <div className="inventory-stat-card stat-card-critical">
+              <h3 className="stat-number-red">{stats.critical}</h3>
+              <p className="stat-label">Critical (≤3 days)</p>
+            </div>
+
+            {/* Urgent Stock */}
+            <div className="inventory-stat-card stat-card-urgent">
+              <h3 className="stat-number-orange">{stats.urgent}</h3>
+              <p className="stat-label">Urgent (≤7 days)</p>
+            </div>
+
+            {/* Warning Stock */}
+            <div className="inventory-stat-card stat-card-warning">
+              <h3 className="stat-number-yellow">{stats.warning || donations.filter(d => getExpiryStatus(d.expiry_date).status === 'Warning').length}</h3>
+              <p className="stat-label">Warning (≤14 days)</p>
+            </div>
+          </div>
+
+          {/* Blood Stock by Location */}
+          <div className="location-stock-section">
+            <div className="location-selector-header">
+              <h3 className="location-stock-title">Blood Stock by Location</h3>
               <select
-                className="inventory-filter-select"
+                className="location-selector-dropdown"
                 value={locationFilter}
                 onChange={(e) => setLocationFilter(e.target.value)}
               >
@@ -863,470 +755,582 @@ const BloodInventory = ({ onNavigate }) => {
                 ))}
               </select>
             </div>
-            <div className="inventory-filter-select-container">
-              <label className="inventory-filter-label">Blood Type</label>
-              <select
-                className="inventory-filter-select"
-                value={bloodTypeFilter}
-                onChange={(e) => setBloodTypeFilter(e.target.value)}
-              >
-                <option value="All">All Types</option>
-                <option value="O-">O- (Universal)</option>
-                <option value="O+">O+</option>
-                <option value="A-">A-</option>
-                <option value="A+">A+</option>
-                <option value="B-">B-</option>
-                <option value="B+">B+</option>
-                <option value="AB-">AB-</option>
-                <option value="AB+">AB+</option>
-              </select>
-            </div>
-            <div className="inventory-filter-select-container">
-              <label className="inventory-filter-label">Expiry Status</label>
-              <select
-                className="inventory-filter-select"
-                value={expiryFilter}
-                onChange={(e) => setExpiryFilter(e.target.value)}
-              >
-                <option value="All">All Status</option>
-                <option value="Critical">Critical (≤3 days)</option>
-                <option value="Urgent">Urgent (≤7 days)</option>
-                <option value="Warning">Warning (≤14 days)</option>
-                <option value="Good">Good (&gt;14 days)</option>
-                <option value="Expired">Expired</option>
-              </select>
-            </div>
-          </div>
-        </div>
 
-        {/* Add Blood Stock Button */}
-        <div className="add-stock-container">
-          <button
-            className="add-stock-button"
-            onClick={() => setShowAddModal(true)}
-          >
-            <Plus size={20} className="mr-2" />
-            Add Blood Stock
-          </button>
-        </div>
+            {(() => {
+              const selectedLocationName = locationFilter === 'All'
+                ? (hospitals[0]?.name || 'Select Location')
+                : locationFilter;
 
-        {/* Blood Inventory Table */}
-        <div className="inventory-table-container">
-          <div className="inventory-table-wrapper">
-            <table className="inventory-table">
-              <thead className="inventory-table-header">
-                <tr>
-                  <th className="inventory-table-header-cell">SERIAL NO.</th>
-                  <th className="inventory-table-header-cell">DONOR</th>
-                  <th className="inventory-table-header-cell">TYPE</th>
-                  <th className="inventory-table-header-cell">LOCATION</th>
-                  <th className="inventory-table-header-cell">EXPIRY DATE</th>
-                  <th className="inventory-table-header-cell">DAYS LEFT</th>
-                  <th className="inventory-table-header-cell">STATUS</th>
-                </tr>
-              </thead>
-              <tbody className="inventory-table-body">
-                {paginatedDonations.map((donation) => {
-                  const expiryInfo = getExpiryStatus(donation.expiry_date);
-                  const location = getLocationFromDonation(donation);
-                  const bloodType = getBloodType(donation);
-                  const serialNumber = getSerialNumber(donation);
-                  const donorName = getDonorName(donation);
-                  const donorIC = getDonorIC(donation);
+              // Find hospital by name
+              const selectedHospital = hospitals.find(h => h.name === selectedLocationName);
 
-                  return (
-                    <tr key={donation.id} className="inventory-table-row">
-                      <td className="inventory-table-cell inventory-id-cell">
-                        <div className="flex items-center gap-2">
-                          <Hash size={14} className="text-gray-400" />
-                          {serialNumber}
+              if (!selectedHospital) {
+                return (
+                  <div className="location-card">
+                    <div className="location-header">
+                      <div className="location-title-section">
+                        <MapPin className="location-icon" />
+                        <h4 className="location-name">{selectedLocationName}</h4>
+                      </div>
+                    </div>
+                    <div className="p-4 text-center text-gray-500">
+                      No hospital data found for this location
+                    </div>
+                  </div>
+                );
+              }
+
+              const locationSummary = getBloodTypeSummaryForHospital(selectedHospital.id);
+              const totalStock = Object.values(locationSummary).reduce((sum, count) => sum + count, 0);
+
+              return (
+                <div className="location-card">
+                  <div className="location-header">
+                    <div className="location-title-section">
+                      <MapPin className="location-icon" />
+                      <h4 className="location-name">{selectedHospital.name}</h4>
+                    </div>
+                    <div className="location-stats">
+                      <div className="location-stat-item">
+                        <span className="location-stat-value">{totalStock}</span>
+                        <span className="location-stat-label">Total Units</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="location-blood-types">
+                    {Object.entries(locationSummary).map(([type, count]) => {
+                      const stockInfo = bloodStockData[selectedHospital.id]?.[type];
+                      let stockLevel = 'HIGH';
+                      let stockLevelClass = 'high';
+
+                      if (stockInfo) {
+                        if (count <= stockInfo.thresholds?.low) {
+                          stockLevel = 'LOW';
+                          stockLevelClass = 'low';
+                        } else if (count <= stockInfo.thresholds?.medium) {
+                          stockLevel = 'MEDIUM';
+                          stockLevelClass = 'medium';
+                        }
+                      }
+
+                      return (
+                        <div key={type} className={`location-blood-type-card stock-level-${stockLevelClass}`}>
+                          <div className="blood-type-header-compact">
+                            <span className={`blood-type-badge ${type.includes('-') ? 'blood-type-badge-negative' : 'blood-type-badge-positive'}`}>
+                              {type}
+                            </span>
+                          </div>
+                          <div className="blood-type-count-large">{count}</div>
+                          <div className={`stock-level-text stock-level-${stockLevelClass}`}>
+                            {stockLevel}
+                          </div>
+                          {type === 'O-' && (
+                            <div className="mt-1">
+                              <span className="universal-badge-small">Universal</span>
+                            </div>
+                          )}
                         </div>
-                      </td>
-                      <td className="inventory-table-cell">
-                        <div className="flex flex-col">
-                          <span className="font-medium">{donorName}</span>
-                          <span className="text-sm text-gray-500">{donorIC}</span>
-                        </div>
-                      </td>
-                      <td className="inventory-table-cell inventory-type-cell">
-                        <span className={`blood-type-badge ${bloodType.includes('-') ? 'blood-type-badge-negative' : 'blood-type-badge-positive'}`}>
-                          {bloodType}
-                        </span>
-                        {bloodType === 'O-' && (
-                          <span className="universal-badge">Universal</span>
-                        )}
-                      </td>
-                      <td className="inventory-table-cell inventory-location-cell">
-                        {location}
-                      </td>
-                      <td className="inventory-table-cell inventory-date-cell">
-                        {formatDate(donation.expiry_date)}
-                      </td>
-                      <td className="inventory-table-cell">
-                        <span className={`days-left ${expiryInfo.days < 0 ? 'days-left-expired' :
-                          expiryInfo.days <= 3 ? 'days-left-critical' :
-                            expiryInfo.days <= 7 ? 'days-left-urgent' :
-                              expiryInfo.days <= 14 ? 'days-left-warning' :
-                                'days-left-good'
-                          }`}>
-                          {expiryInfo.days < 0 ? `${Math.abs(expiryInfo.days)} days ago` : `${expiryInfo.days} days`}
-                        </span>
-                      </td>
-                      <td className="inventory-table-cell">
-                        <span className={`status-badge ${expiryInfo.color}`}>
-                          {expiryInfo.status}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
-          {filteredDonations.length === 0 && !loading && (
-            <div className="inventory-empty-state">
-              <div className="inventory-empty-state-icon">
-                <Search />
+          {/* Search and Filters */}
+          <div className="inventory-filters-container">
+            <div className="inventory-filters-grid">
+              <div className="inventory-search-container">
+                <label className="inventory-filter-label">Search Inventory</label>
+                <div className="inventory-search-input-container">
+                  <Search className="inventory-search-icon" />
+                  <input
+                    type="text"
+                    placeholder="Search by serial number, blood type, donor, or location..."
+                    className="inventory-search-input"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
               </div>
-              <h3 className="inventory-empty-state-title">No blood stock found</h3>
-              <p className="inventory-empty-state-description">
-                Try adjusting your search filters
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Pagination */}
-        {filteredDonations.length > 0 && (
-          <div className="inventory-pagination">
-            <div className="inventory-pagination-info">
-              <span>Items per page:</span>
-              <select
-                value={itemsPerPage}
-                onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                className="inventory-items-per-page-select"
-              >
-                <option value={6}>6</option>
-                <option value={8}>8</option>
-                <option value={12}>12</option>
-                <option value={16}>16</option>
-              </select>
-              <span className="inventory-pagination-range">
-                {startIndex + 1}-{Math.min(endIndex, filteredDonations.length)} of {filteredDonations.length}
-              </span>
-            </div>
-
-            <div className="inventory-pagination-controls">
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="inventory-pagination-btn"
-              >
-                <ChevronLeft size={16} />
-              </button>
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="inventory-pagination-btn"
-              >
-                <ChevronRight size={16} />
-              </button>
+              <div className="inventory-filter-select-container">
+                <label className="inventory-filter-label">Location</label>
+                <select
+                  className="inventory-filter-select"
+                  value={locationFilter}
+                  onChange={(e) => setLocationFilter(e.target.value)}
+                >
+                  {uniqueLocations.map((location, index) => (
+                    <option key={index} value={location}>{location}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="inventory-filter-select-container">
+                <label className="inventory-filter-label">Blood Type</label>
+                <select
+                  className="inventory-filter-select"
+                  value={bloodTypeFilter}
+                  onChange={(e) => setBloodTypeFilter(e.target.value)}
+                >
+                  <option value="All">All Types</option>
+                  <option value="O-">O- (Universal)</option>
+                  <option value="O+">O+</option>
+                  <option value="A-">A-</option>
+                  <option value="A+">A+</option>
+                  <option value="B-">B-</option>
+                  <option value="B+">B+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="AB+">AB+</option>
+                </select>
+              </div>
+              <div className="inventory-filter-select-container">
+                <label className="inventory-filter-label">Expiry Status</label>
+                <select
+                  className="inventory-filter-select"
+                  value={expiryFilter}
+                  onChange={(e) => setExpiryFilter(e.target.value)}
+                >
+                  <option value="All">All Status</option>
+                  <option value="Critical">Critical (≤3 days)</option>
+                  <option value="Urgent">Urgent (≤7 days)</option>
+                  <option value="Warning">Warning (≤14 days)</option>
+                  <option value="Good">Good (&gt;14 days)</option>
+                  <option value="Expired">Expired</option>
+                </select>
+              </div>
             </div>
           </div>
-        )}
 
-        {/* Update Blood Stock Button */}
-        <div className="update-stock-container">
-          <button
-            className="update-stock-button"
-            onClick={() => setShowUpdateModal(true)}
-          >
-            Update Blood Stock
-          </button>
-        </div>
+          {/* Add Blood Stock Button */}
+          <div className="add-stock-container">
+            <button
+              className="add-stock-button"
+              onClick={() => setShowAddModal(true)}
+            >
+              <Plus size={20} className="mr-2" />
+              Add Blood Stock
+            </button>
+          </div>
 
-        {/* Add Blood Stock Modal */}
-        {showAddModal && (
-          <div className="inventory-modal-overlay">
-            <div className="inventory-modal-container">
-              <div className="inventory-modal-header">
-                <h2 className="inventory-modal-title">Add Blood Stock</h2>
-                <button
-                  onClick={() => setShowAddModal(false)}
-                  className="inventory-modal-close"
+          {/* Blood Inventory Table */}
+          <div className="inventory-table-container">
+            <div className="inventory-table-wrapper">
+              <table className="inventory-table">
+                <thead className="inventory-table-header">
+                  <tr>
+                    <th className="inventory-table-header-cell">SERIAL NO.</th>
+                    <th className="inventory-table-header-cell">DONOR</th>
+                    <th className="inventory-table-header-cell">TYPE</th>
+                    <th className="inventory-table-header-cell">LOCATION</th>
+                    <th className="inventory-table-header-cell">EXPIRY DATE</th>
+                    <th className="inventory-table-header-cell">DAYS LEFT</th>
+                    <th className="inventory-table-header-cell">STATUS</th>
+                  </tr>
+                </thead>
+                <tbody className="inventory-table-body">
+                  {paginatedDonations.map((donation) => {
+                    const expiryInfo = getExpiryStatus(donation.expiry_date);
+                    const location = getLocationFromDonation(donation);
+                    const bloodType = getBloodType(donation);
+                    const serialNumber = getSerialNumber(donation);
+                    const donorName = getDonorName(donation);
+                    const donorIC = getDonorIC(donation);
+
+                    return (
+                      <tr key={donation.id} className="inventory-table-row">
+                        <td className="inventory-table-cell inventory-id-cell">
+                          <div className="flex items-center gap-2">
+                            <Hash size={14} className="text-gray-400" />
+                            {serialNumber}
+                          </div>
+                        </td>
+                        <td className="inventory-table-cell">
+                          <div className="flex flex-col">
+                            <span className="font-medium">{donorName}</span>
+                            <span className="text-sm text-gray-500">{donorIC}</span>
+                          </div>
+                        </td>
+                        <td className="inventory-table-cell inventory-type-cell">
+                          <span className={`blood-type-badge ${bloodType.includes('-') ? 'blood-type-badge-negative' : 'blood-type-badge-positive'}`}>
+                            {bloodType}
+                          </span>
+                          {bloodType === 'O-' && (
+                            <span className="universal-badge">Universal</span>
+                          )}
+                        </td>
+                        <td className="inventory-table-cell inventory-location-cell">
+                          {location}
+                        </td>
+                        <td className="inventory-table-cell inventory-date-cell">
+                          {formatDate(donation.expiry_date)}
+                        </td>
+                        <td className="inventory-table-cell">
+                          <span className={`days-left ${expiryInfo.days < 0 ? 'days-left-expired' :
+                            expiryInfo.days <= 3 ? 'days-left-critical' :
+                              expiryInfo.days <= 7 ? 'days-left-urgent' :
+                                expiryInfo.days <= 14 ? 'days-left-warning' :
+                                  'days-left-good'
+                            }`}>
+                            {expiryInfo.days < 0 ? `${Math.abs(expiryInfo.days)} days ago` : `${expiryInfo.days} days`}
+                          </span>
+                        </td>
+                        <td className="inventory-table-cell">
+                          <span className={`status-badge ${expiryInfo.color}`}>
+                            {expiryInfo.status}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {filteredDonations.length === 0 && !loading && (
+              <div className="inventory-empty-state">
+                <div className="inventory-empty-state-icon">
+                  <Search />
+                </div>
+                <h3 className="inventory-empty-state-title">No blood stock found</h3>
+                <p className="inventory-empty-state-description">
+                  Try adjusting your search filters
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Pagination */}
+          {filteredDonations.length > 0 && (
+            <div className="inventory-pagination">
+              <div className="inventory-pagination-info">
+                <span>Items per page:</span>
+                <select
+                  value={itemsPerPage}
+                  onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                  className="inventory-items-per-page-select"
                 >
-                  <X className="inventory-modal-close-icon" />
+                  <option value={6}>6</option>
+                  <option value={8}>8</option>
+                  <option value={12}>12</option>
+                  <option value={16}>16</option>
+                </select>
+                <span className="inventory-pagination-range">
+                  {startIndex + 1}-{Math.min(endIndex, filteredDonations.length)} of {filteredDonations.length}
+                </span>
+              </div>
+
+              <div className="inventory-pagination-controls">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="inventory-pagination-btn"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="inventory-pagination-btn"
+                >
+                  <ChevronRight size={16} />
                 </button>
               </div>
-              <div className="inventory-modal-body">
-                <div className="inventory-modal-form">
-                  {/* Donor Search */}
-                  <div className="inventory-form-group">
-                    <label className="inventory-form-label">Donor Search *</label>
-                    <div className="relative">
-                      <div className="inventory-search-input-container">
-                        <User className="inventory-search-icon" />
-                        <input
-                          type="text"
-                          placeholder="Search donor by name or IC number..."
-                          className="inventory-search-input"
-                          value={donorSearchTerm}
-                          onChange={(e) => setDonorSearchTerm(e.target.value)}
-                          onFocus={() => filteredDonors.length > 0 && setShowDonorDropdown(true)}
-                        />
-                      </div>
-                      {showDonorDropdown && (
-                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                          {filteredDonors.map((donor) => (
-                            <div
-                              key={donor.id}
-                              className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                              onClick={() => handleDonorSelect(donor)}
-                            >
-                              <div className="font-medium">{donor.full_name}</div>
-                              <div className="text-sm text-gray-500">
-                                IC: {donor.id_number} | Blood: {donor.blood_group}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+            </div>
+          )}
+
+          {/* Update Blood Stock Button */}
+          <div className="update-stock-container">
+            <button
+              className="update-stock-button"
+              onClick={() => setShowUpdateModal(true)}
+            >
+              Update Blood Stock
+            </button>
+          </div>
+        </div>
+      </Layout>
+
+      {/* Add Blood Stock Modal */}
+      {showAddModal && (
+        <div className="inventory-modal-overlay">
+          <div className="inventory-modal-container">
+            <div className="inventory-modal-header">
+              <h2 className="inventory-modal-title">Add Blood Stock</h2>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="inventory-modal-close"
+              >
+                <X className="inventory-modal-close-icon" />
+              </button>
+            </div>
+            <div className="inventory-modal-body">
+              <div className="inventory-modal-form">
+                {/* Donor Search */}
+                <div className="inventory-form-group">
+                  <label className="inventory-form-label">Donor Search *</label>
+                  <div className="relative">
+                    <div className="inventory-search-input-container">
+                      <User className="inventory-search-icon" />
+                      <input
+                        type="text"
+                        placeholder="Search donor by name or IC number..."
+                        className="inventory-search-input"
+                        value={donorSearchTerm}
+                        onChange={(e) => setDonorSearchTerm(e.target.value)}
+                        onFocus={() => filteredDonors.length > 0 && setShowDonorDropdown(true)}
+                      />
                     </div>
-                    {selectedDonor && (
-                      <div className="mt-2 p-3 bg-blue-50 rounded-lg">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">{selectedDonor.full_name}</p>
-                            <p className="text-sm text-gray-600">
-                              IC: {selectedDonor.id_number} | Blood Type: {selectedDonor.blood_group}
-                            </p>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedDonor(null);
-                              setDonorSearchTerm('');
-                            }}
-                            className="text-red-500 hover:text-red-700"
+                    {showDonorDropdown && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        {filteredDonors.map((donor) => (
+                          <div
+                            key={donor.id}
+                            className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                            onClick={() => handleDonorSelect(donor)}
                           >
-                            <X size={16} />
-                          </button>
-                        </div>
+                            <div className="font-medium">{donor.full_name}</div>
+                            <div className="text-sm text-gray-500">
+                              IC: {donor.id_number} | Blood: {donor.blood_group}
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
-
-                  {/* Serial Number */}
-                  <div className="inventory-form-group">
-                    <label className="inventory-form-label">Serial Number *</label>
-                    <input
-                      type="text"
-                      className="inventory-form-input"
-                      placeholder="Enter serial number"
-                      value={newSerialNumber}
-                      onChange={(e) => setNewSerialNumber(e.target.value)}
-                    />
-                  </div>
-
-                  {/* Hospital/Location */}
-                  <div className="inventory-form-group">
-                    <label className="inventory-form-label">Location *</label>
-                    <select
-                      className="inventory-form-select"
-                      value={newHospitalId}
-                      onChange={(e) => setNewHospitalId(e.target.value)}
-                    >
-                      <option value="">Select location</option>
-                      {hospitals.map((hospital) => (
-                        <option key={hospital.id} value={hospital.id}>
-                          {hospital.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Expiry Date */}
-                  <div className="inventory-form-group">
-                    <label className="inventory-form-label">Expiry Date *</label>
-                    <input
-                      type="date"
-                      className="inventory-form-input"
-                      value={newExpiryDate}
-                      onChange={(e) => setNewExpiryDate(e.target.value)}
-                    />
-                  </div>
-
-                  {/* Amount (ml) */}
-                  <div className="inventory-form-group">
-                    <label className="inventory-form-label">Amount (ml)</label>
-                    <input
-                      type="number"
-                      className="inventory-form-input"
-                      placeholder="Enter amount in ml"
-                      value={newAmountML}
-                      onChange={(e) => setNewAmountML(e.target.value)}
-                      min="1"
-                      max="1000"
-                    />
-                  </div>
-
-                  {/* Display selected donor's blood type */}
                   {selectedDonor && (
-                    <div className="inventory-form-group">
-                      <label className="inventory-form-label">Blood Type (from donor)</label>
-                      <div className="p-3 bg-gray-50 rounded-lg">
-                        <span className={`blood-type-badge ${selectedDonor.blood_group?.includes('-') ? 'blood-type-badge-negative' : 'blood-type-badge-positive'}`}>
-                          {selectedDonor.blood_group}
-                        </span>
+                    <div className="mt-2 p-3 bg-blue-50 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">{selectedDonor.full_name}</p>
+                          <p className="text-sm text-gray-600">
+                            IC: {selectedDonor.id_number} | Blood Type: {selectedDonor.blood_group}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedDonor(null);
+                            setDonorSearchTerm('');
+                          }}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <X size={16} />
+                        </button>
                       </div>
                     </div>
                   )}
                 </div>
-                <div className="inventory-modal-actions">
-                  <button
-                    onClick={() => setShowAddModal(false)}
-                    className="inventory-modal-button inventory-cancel-button"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleAddBloodStock}
-                    className="inventory-modal-button inventory-save-button"
-                    disabled={!selectedDonor || !newHospitalId || !newExpiryDate || !newSerialNumber}
-                  >
-                    Add Stock
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
-        {/* Update Blood Stock Modal - WITH ADDED MARK AS USED BUTTON */}
-        {showUpdateModal && (
-          <div className="inventory-modal-overlay">
-            <div className="inventory-modal-container">
-              <div className="inventory-modal-header">
-                <h2 className="inventory-modal-title">Update Blood Stock</h2>
+                {/* Serial Number */}
+                <div className="inventory-form-group">
+                  <label className="inventory-form-label">Serial Number *</label>
+                  <input
+                    type="text"
+                    className="inventory-form-input"
+                    placeholder="Enter serial number"
+                    value={newSerialNumber}
+                    onChange={(e) => setNewSerialNumber(e.target.value)}
+                  />
+                </div>
+
+                {/* Hospital/Location */}
+                <div className="inventory-form-group">
+                  <label className="inventory-form-label">Location *</label>
+                  <select
+                    className="inventory-form-select"
+                    value={newHospitalId}
+                    onChange={(e) => setNewHospitalId(e.target.value)}
+                  >
+                    <option value="">Select location</option>
+                    {hospitals.map((hospital) => (
+                      <option key={hospital.id} value={hospital.id}>
+                        {hospital.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Expiry Date */}
+                <div className="inventory-form-group">
+                  <label className="inventory-form-label">Expiry Date *</label>
+                  <input
+                    type="date"
+                    className="inventory-form-input"
+                    value={newExpiryDate}
+                    onChange={(e) => setNewExpiryDate(e.target.value)}
+                  />
+                </div>
+
+                {/* Amount (ml) */}
+                <div className="inventory-form-group">
+                  <label className="inventory-form-label">Amount (ml)</label>
+                  <input
+                    type="number"
+                    className="inventory-form-input"
+                    placeholder="Enter amount in ml"
+                    value={newAmountML}
+                    onChange={(e) => setNewAmountML(e.target.value)}
+                    min="1"
+                    max="1000"
+                  />
+                </div>
+
+                {/* Display selected donor's blood type */}
+                {selectedDonor && (
+                  <div className="inventory-form-group">
+                    <label className="inventory-form-label">Blood Type (from donor)</label>
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <span className={`blood-type-badge ${selectedDonor.blood_group?.includes('-') ? 'blood-type-badge-negative' : 'blood-type-badge-positive'}`}>
+                        {selectedDonor.blood_group}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="inventory-modal-actions">
                 <button
-                  onClick={() => setShowUpdateModal(false)}
-                  className="inventory-modal-close"
+                  onClick={() => setShowAddModal(false)}
+                  className="inventory-modal-button inventory-cancel-button"
                 >
-                  <X className="inventory-modal-close-icon" />
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAddBloodStock}
+                  className="inventory-modal-button inventory-save-button"
+                  disabled={!selectedDonor || !newHospitalId || !newExpiryDate || !newSerialNumber}
+                >
+                  Add Stock
                 </button>
               </div>
-              <div className="inventory-modal-body">
-                <div className="inventory-modal-form">
-                  <div className="inventory-form-group">
-                    <label className="inventory-form-label">Select Blood Stock</label>
-                    <select
-                      className="inventory-form-select"
-                      onChange={(e) => {
-                        const selected = donations.find(d => d.id === e.target.value);
-                        setSelectedDonation(selected);
-                      }}
-                    >
-                      <option value="">Select blood stock to update</option>
-                      {donations.map(donation => {
-                        const location = getLocationFromDonation(donation);
-                        const bloodType = getBloodType(donation);
-                        const serialNumber = getSerialNumber(donation);
-                        const donorName = getDonorName(donation);
+            </div>
+          </div>
+        </div>
+      )}
 
-                        return (
-                          <option key={donation.id} value={donation.id}>
-                            {serialNumber} - {bloodType} ({location})
-                            {donorName && donorName !== 'Unknown Donor' ? ` - ${donorName}` : ''}
-                          </option>
-                        );
-                      })}
-                    </select>
-                  </div>
-                  {selectedDonation && (
-                    <>
-                      <div className="inventory-form-group">
-                        <label className="inventory-form-label">Serial Number</label>
-                        <input
-                          type="text"
-                          className="inventory-form-input"
-                          value={getSerialNumber(selectedDonation)}
-                          onChange={(e) => setSelectedDonation({
-                            ...selectedDonation,
-                            serial_number: e.target.value
-                          })}
-                        />
-                      </div>
-                      <div className="inventory-form-group">
-                        <label className="inventory-form-label">Blood Type</label>
-                        <select
-                          className="inventory-form-select"
-                          value={getBloodType(selectedDonation)}
-                          onChange={(e) => setSelectedDonation({
-                            ...selectedDonation,
-                            blood_type: e.target.value
-                          })}
-                        >
-                          <option value="O-">O- (Universal Donor)</option>
-                          <option value="O+">O+</option>
-                          <option value="A-">A-</option>
-                          <option value="A+">A+</option>
-                          <option value="B-">B-</option>
-                          <option value="B+">B+</option>
-                          <option value="AB-">AB-</option>
-                          <option value="AB+">AB+</option>
-                        </select>
-                      </div>
-                      <div className="inventory-form-group">
-                        <label className="inventory-form-label">Expiry Date</label>
-                        <input
-                          type="date"
-                          className="inventory-form-input"
-                          value={formatDateForInput(selectedDonation.expiry_date)}
-                          onChange={(e) => setSelectedDonation({
-                            ...selectedDonation,
-                            expiry_date: e.target.value
-                          })}
-                        />
-                      </div>
-                    </>
-                  )}
-                </div>
-                <div className="inventory-modal-actions">
-                  <button
-                    onClick={() => {
-                      setShowUpdateModal(false);
-                      setSelectedDonation(null);
+      {/* Update Blood Stock Modal - WITH ADDED MARK AS USED BUTTON */}
+      {showUpdateModal && (
+        <div className="inventory-modal-overlay">
+          <div className="inventory-modal-container">
+            <div className="inventory-modal-header">
+              <h2 className="inventory-modal-title">Update Blood Stock</h2>
+              <button
+                onClick={() => setShowUpdateModal(false)}
+                className="inventory-modal-close"
+              >
+                <X className="inventory-modal-close-icon" />
+              </button>
+            </div>
+            <div className="inventory-modal-body">
+              <div className="inventory-modal-form">
+                <div className="inventory-form-group">
+                  <label className="inventory-form-label">Select Blood Stock</label>
+                  <select
+                    className="inventory-form-select"
+                    onChange={(e) => {
+                      const selected = donations.find(d => d.id === e.target.value);
+                      setSelectedDonation(selected);
                     }}
-                    className="inventory-modal-button inventory-cancel-button"
                   >
-                    Cancel
-                  </button>
+                    <option value="">Select blood stock to update</option>
+                    {donations.map(donation => {
+                      const location = getLocationFromDonation(donation);
+                      const bloodType = getBloodType(donation);
+                      const serialNumber = getSerialNumber(donation);
+                      const donorName = getDonorName(donation);
 
-                  {/* MARK AS USED BUTTON - ADDED HERE */}
-                  <button
-                    onClick={handleMarkAsUsed}
-                    className="inventory-modal-button bg-red-600 hover:bg-red-700 text-white ml-2"
-                    disabled={!selectedDonation}
-                  >
-                    <CheckCircle size={18} className="inline mr-2" />
-                    Mark as Used
-                  </button>
-
-                  <button
-                    onClick={handleUpdateBloodStock}
-                    className="inventory-modal-button inventory-save-button ml-2"
-                    disabled={!selectedDonation}
-                  >
-                    Update Stock
-                  </button>
+                      return (
+                        <option key={donation.id} value={donation.id}>
+                          {serialNumber} - {bloodType} ({location})
+                          {donorName && donorName !== 'Unknown Donor' ? ` - ${donorName}` : ''}
+                        </option>
+                      );
+                    })}
+                  </select>
                 </div>
+                {selectedDonation && (
+                  <>
+                    <div className="inventory-form-group">
+                      <label className="inventory-form-label">Serial Number</label>
+                      <input
+                        type="text"
+                        className="inventory-form-input"
+                        value={getSerialNumber(selectedDonation)}
+                        onChange={(e) => setSelectedDonation({
+                          ...selectedDonation,
+                          serial_number: e.target.value
+                        })}
+                      />
+                    </div>
+                    <div className="inventory-form-group">
+                      <label className="inventory-form-label">Blood Type</label>
+                      <select
+                        className="inventory-form-select"
+                        value={getBloodType(selectedDonation)}
+                        onChange={(e) => setSelectedDonation({
+                          ...selectedDonation,
+                          blood_type: e.target.value
+                        })}
+                      >
+                        <option value="O-">O- (Universal Donor)</option>
+                        <option value="O+">O+</option>
+                        <option value="A-">A-</option>
+                        <option value="A+">A+</option>
+                        <option value="B-">B-</option>
+                        <option value="B+">B+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="AB+">AB+</option>
+                      </select>
+                    </div>
+                    <div className="inventory-form-group">
+                      <label className="inventory-form-label">Expiry Date</label>
+                      <input
+                        type="date"
+                        className="inventory-form-input"
+                        value={formatDateForInput(selectedDonation.expiry_date)}
+                        onChange={(e) => setSelectedDonation({
+                          ...selectedDonation,
+                          expiry_date: e.target.value
+                        })}
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+              <div className="inventory-modal-actions">
+                <button
+                  onClick={() => {
+                    setShowUpdateModal(false);
+                    setSelectedDonation(null);
+                  }}
+                  className="inventory-modal-button inventory-cancel-button"
+                >
+                  Cancel
+                </button>
+
+                {/* MARK AS USED BUTTON - ADDED HERE */}
+                <button
+                  onClick={handleMarkAsUsed}
+                  className="inventory-modal-button bg-green-600 hover:bg-green-700 text-white ml-2"
+                  disabled={!selectedDonation}
+                >
+                  <CheckCircle size={18} className="inline mr-2" />
+                  Mark as Used
+                </button>
+
+                <button
+                  onClick={handleUpdateBloodStock}
+                  className="inventory-modal-button inventory-save-button ml-2"
+                  disabled={!selectedDonation}
+                >
+                  Update Stock
+                </button>
               </div>
             </div>
           </div>
-        )}
-      </div>
-    </Layout>
+        </div>
+      )}
+    </>
   );
 };
 

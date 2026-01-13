@@ -162,7 +162,7 @@ const UserDetailsModal = ({ user, onClose }) => {
 
   return (
     <div className="modal-overlay">
-      <div className="modal-container">
+      <div className="edit-modal-container">
         <div className="modal-header">
           <h2 className="modal-title">User Details</h2>
           <button onClick={onClose} className="modal-close-btn">
@@ -800,685 +800,687 @@ const UserManagement = ({ onNavigate }) => {
      RENDER
      -------------------------------------------------------------- */
   return (
-    <Layout onNavigate={onNavigate} currentPage="user-management">
-      <div className="space-y-6">
-        {/* ---------- Header ---------- */}
-        {!loading && (
-          <div className="user-header-container">
-            <h1 className="user-header-title">User Management</h1>
-            <button className="add-record-button" onClick={handleAddNewMember}>
-              Add New Member
-            </button>
-          </div>
-        )}
-
-        {/* ---------- Loading State ---------- */}
-        {loading && (
-          <div className="loading-container">
-            <div className="loading-content">
-              <div className="loading-spinner"></div>
-              <p className="loading-text">Loading users...</p>
+    <>
+      <Layout onNavigate={onNavigate} currentPage="user-management">
+        <div className="space-y-6">
+          {/* ---------- Header ---------- */}
+          {!loading && (
+            <div className="user-header-container">
+              <h1 className="user-header-title">User Management</h1>
+              <button className="add-record-button" onClick={handleAddNewMember}>
+                Add New Member
+              </button>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* ---------- Search & Filters ---------- */}
-        {!loading && (
-          <>
-            <div className="user-filters-container">
-              <div className="user-filters-row">
-                <div className="user-search-input-container">
-                  <Search className="user-search-icon" />
-                  <input
-                    type="text"
-                    placeholder="Search by name, email, ID, or phone..."
-                    className="user-search-input"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-                <select
-                  className="user-status-filter"
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                  <option value="All">All Status</option>
-                  <option value="New Donor">New Donor</option>
-                  <option value="Regular Donor">Regular Donor</option>
-                </select>
-                <select
-                  className="user-blood-type-filter"
-                  value={bloodTypeFilter}
-                  onChange={(e) => setBloodTypeFilter(e.target.value)}
-                >
-                  <option value="All">All Blood Types</option>
-                  <option value="A+">A+</option>
-                  <option value="A-">A-</option>
-                  <option value="B+">B+</option>
-                  <option value="B-">B-</option>
-                  <option value="AB+">AB+</option>
-                  <option value="AB-">AB-</option>
-                  <option value="O+">O+</option>
-                  <option value="O-">O-</option>
-                </select>
+          {/* ---------- Loading State ---------- */}
+          {loading && (
+            <div className="loading-container">
+              <div className="loading-content">
+                <div className="loading-spinner"></div>
+                <p className="loading-text">Loading users...</p>
               </div>
             </div>
+          )}
 
-            {/* ---------- Users Grid ---------- */}
-            <div className="users-grid">
-              {currentUsers.length === 0 ? (
-                <div className="user-empty-state">
-                  <div className="user-empty-state-icon">
-                    <Search />
+          {/* ---------- Search & Filters ---------- */}
+          {!loading && (
+            <>
+              <div className="user-filters-container">
+                <div className="user-filters-row">
+                  <div className="user-search-input-container">
+                    <Search className="user-search-icon" />
+                    <input
+                      type="text"
+                      placeholder="Search by name, email, ID, or phone..."
+                      className="user-search-input"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                   </div>
-                  <h3 className="user-empty-state-title">No users found</h3>
-                  <p className="user-empty-state-description">
-                    Try adjusting your search or filters
-                  </p>
+                  <select
+                    className="user-status-filter"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                  >
+                    <option value="All">All Status</option>
+                    <option value="New Donor">New Donor</option>
+                    <option value="Regular Donor">Regular Donor</option>
+                  </select>
+                  <select
+                    className="user-blood-type-filter"
+                    value={bloodTypeFilter}
+                    onChange={(e) => setBloodTypeFilter(e.target.value)}
+                  >
+                    <option value="All">All Blood Types</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                  </select>
                 </div>
-              ) : (
-                currentUsers.map((user) => (
-                  <UserCard
-                    key={user.id}
-                    user={user}
-                    onEdit={handleEdit}
-                    onDelete={handleDeleteClick}
-                    onViewDetails={handleViewDetails}
-                  />
-                ))
+              </div>
+
+              {/* ---------- Users Grid ---------- */}
+              <div className="users-grid">
+                {currentUsers.length === 0 ? (
+                  <div className="user-empty-state">
+                    <div className="user-empty-state-icon">
+                      <Search />
+                    </div>
+                    <h3 className="user-empty-state-title">No users found</h3>
+                    <p className="user-empty-state-description">
+                      Try adjusting your search or filters
+                    </p>
+                  </div>
+                ) : (
+                  currentUsers.map((user) => (
+                    <UserCard
+                      key={user.id}
+                      user={user}
+                      onEdit={handleEdit}
+                      onDelete={handleDeleteClick}
+                      onViewDetails={handleViewDetails}
+                    />
+                  ))
+                )}
+              </div>
+
+              {/* ---------- Pagination ---------- */}
+              {filteredUsers.length > 0 && (
+                <Pagination
+                  currentPage={currentPage}
+                  totalItems={filteredUsers.length}
+                  itemsPerPage={itemsPerPage}
+                  onPageChange={handlePageChange}
+                  onItemsPerPageChange={handleItemsPerPageChange}
+                />
               )}
+            </>
+          )}
+        </div>
+      </Layout>
+
+      {/* ---------- Details Modal ---------- */}
+      {selectedUser && !showEditModal && (
+        <UserDetailsModal user={selectedUser} onClose={handleCloseDetails} />
+      )}
+
+      {/* ---------- Edit Modal ---------- */}
+      {showEditModal && selectedUser && (
+        <div className="modal-overlay">
+          <div className="edit-modal-container">
+            <div className="modal-header">
+              <h2 className="modal-title">Edit User</h2>
+              <button onClick={handleCloseEditModal} className="modal-close-btn">
+                <X className="modal-close-icon" />
+              </button>
             </div>
 
-            {/* ---------- Pagination ---------- */}
-            {filteredUsers.length > 0 && (
-              <Pagination
-                currentPage={currentPage}
-                totalItems={filteredUsers.length}
-                itemsPerPage={itemsPerPage}
-                onPageChange={handlePageChange}
-                onItemsPerPageChange={handleItemsPerPageChange}
-              />
-            )}
-          </>
-        )}
+            <div className="modal-content edit-modal-content">
+              <div className="edit-form-grid">
+                {/* Personal Information */}
+                <div className="edit-form-section">
+                  <h3 className="edit-modal-section-title">Personal Information</h3>
 
-        {/* ---------- Details Modal ---------- */}
-        {selectedUser && !showEditModal && (
-          <UserDetailsModal user={selectedUser} onClose={handleCloseDetails} />
-        )}
-
-        {/* ---------- Edit Modal ---------- */}
-        {showEditModal && selectedUser && (
-          <div className="modal-overlay">
-            <div className="edit-modal-container">
-              <div className="modal-header">
-                <h2 className="modal-title">Edit User</h2>
-                <button onClick={handleCloseEditModal} className="modal-close-btn">
-                  <X className="modal-close-icon" />
-                </button>
-              </div>
-
-              <div className="modal-content edit-modal-content">
-                <div className="edit-form-grid">
-                  {/* Personal Information */}
-                  <div className="edit-form-section">
-                    <h3 className="edit-modal-section-title">Personal Information</h3>
-
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Full Name *</label>
-                      <input
-                        type="text"
-                        className="edit-form-input"
-                        value={selectedUser.fullName || ''}
-                        onChange={(e) => setSelectedUser({ ...selectedUser, fullName: e.target.value })}
-                        required
-                      />
-                    </div>
-
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">ID Type *</label>
-                      <select
-                        className="edit-form-select"
-                        value={selectedUser.idType || 'IC Number'}
-                        onChange={(e) => setSelectedUser({ ...selectedUser, idType: e.target.value })}
-                      >
-                        <option value="IC Number">IC Number</option>
-                        <option value="Passport">Passport</option>
-                      </select>
-                    </div>
-
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">ID Number *</label>
-                      <input
-                        type="text"
-                        className="edit-form-input"
-                        value={selectedUser.idNumber || ''}
-                        onChange={(e) => setSelectedUser({ ...selectedUser, idNumber: e.target.value })}
-                        required
-                      />
-                    </div>
-
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Display ID</label>
-                      <input
-                        type="text"
-                        className="edit-form-input"
-                        value={selectedUser.displayId || `DON-${selectedUser.id.substring(0, 7)}`}
-                        readOnly
-                        disabled
-                      />
-                    </div>
-
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Gender *</label>
-                      <select
-                        className="edit-form-select"
-                        value={selectedUser.gender || 'Male'}
-                        onChange={(e) => setSelectedUser({ ...selectedUser, gender: e.target.value })}
-                      >
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                      </select>
-                    </div>
-
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Date of Birth *</label>
-                      <input
-                        type="text"
-                        className="edit-form-input"
-                        value={selectedUser.birthDate || ''}
-                        onChange={(e) => setSelectedUser({ ...selectedUser, birthDate: e.target.value })}
-                        placeholder="DD/MM/YYYY"
-                        required
-                      />
-                    </div>
-
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Email *</label>
-                      <input
-                        type="email"
-                        className="edit-form-input"
-                        value={selectedUser.email || ''}
-                        disabled
-                        readOnly
-                      />
-                      <small className="text-gray-500 text-sm mt-1">
-                        Email cannot be changed
-                      </small>
-                    </div>
-
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Phone Number *</label>
-                      <input
-                        type="tel"
-                        className="edit-form-input"
-                        value={selectedUser.phoneNumber || ''}
-                        onChange={(e) => setSelectedUser({ ...selectedUser, phoneNumber: e.target.value })}
-                        required
-                      />
-                    </div>
-
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Address *</label>
-                      <textarea
-                        className="edit-form-textarea"
-                        value={selectedUser.address || ''}
-                        onChange={(e) => setSelectedUser({ ...selectedUser, address: e.target.value })}
-                        rows="3"
-                        required
-                      />
-                    </div>
-
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">State *</label>
-                      <input
-                        type="text"
-                        className="edit-form-input"
-                        value={selectedUser.state || ''}
-                        onChange={(e) => setSelectedUser({ ...selectedUser, state: e.target.value })}
-                        required
-                      />
-                    </div>
-
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Postcode *</label>
-                      <input
-                        type="text"
-                        className="edit-form-input"
-                        value={selectedUser.postcode || ''}
-                        onChange={(e) => setSelectedUser({ ...selectedUser, postcode: e.target.value })}
-                        required
-                      />
-                    </div>
-
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Blood Bank ID</label>
-                      <input
-                        type="text"
-                        className="edit-form-input"
-                        value={selectedUser.bloodBankId || ''}
-                        onChange={(e) => setSelectedUser({ ...selectedUser, bloodBankId: e.target.value })}
-                        placeholder="e.g., 906-890"
-                      />
-                    </div>
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Full Name *</label>
+                    <input
+                      type="text"
+                      className="edit-form-input"
+                      value={selectedUser.fullName || ''}
+                      onChange={(e) => setSelectedUser({ ...selectedUser, fullName: e.target.value })}
+                      required
+                    />
                   </div>
 
-                  {/* Medical Information */}
-                  <div className="edit-form-section">
-                    <h3 className="edit-modal-section-title">Medical Information</h3>
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">ID Type *</label>
+                    <select
+                      className="edit-form-select"
+                      value={selectedUser.idType || 'IC Number'}
+                      onChange={(e) => setSelectedUser({ ...selectedUser, idType: e.target.value })}
+                    >
+                      <option value="IC Number">IC Number</option>
+                      <option value="Passport">Passport</option>
+                    </select>
+                  </div>
 
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Blood Group *</label>
-                      <select
-                        className="edit-form-select"
-                        value={selectedUser.bloodGroup || 'A+'}
-                        onChange={(e) => setSelectedUser({ ...selectedUser, bloodGroup: e.target.value })}
-                      >
-                        <option value="A+">A+</option>
-                        <option value="A-">A-</option>
-                        <option value="B+">B+</option>
-                        <option value="B-">B-</option>
-                        <option value="AB+">AB+</option>
-                        <option value="AB-">AB-</option>
-                        <option value="O+">O+</option>
-                        <option value="O-">O-</option>
-                      </select>
-                    </div>
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">ID Number *</label>
+                    <input
+                      type="text"
+                      className="edit-form-input"
+                      value={selectedUser.idNumber || ''}
+                      onChange={(e) => setSelectedUser({ ...selectedUser, idNumber: e.target.value })}
+                      required
+                    />
+                  </div>
 
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Rhesus *</label>
-                      <select
-                        className="edit-form-select"
-                        value={selectedUser.rhesus || 'Rh-positive'}
-                        onChange={(e) => setSelectedUser({ ...selectedUser, rhesus: e.target.value })}
-                      >
-                        <option value="Rh-positive">Rh-positive</option>
-                        <option value="Rh-negative">Rh-negative</option>
-                      </select>
-                    </div>
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Display ID</label>
+                    <input
+                      type="text"
+                      className="edit-form-input"
+                      value={selectedUser.displayId || `DON-${selectedUser.id.substring(0, 7)}`}
+                      readOnly
+                      disabled
+                    />
+                  </div>
 
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Height (cm) *</label>
-                      <input
-                        type="number"
-                        className="edit-form-input"
-                        value={selectedUser.height || ''}
-                        onChange={(e) => setSelectedUser({ ...selectedUser, height: e.target.value })}
-                        required
-                      />
-                    </div>
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Gender *</label>
+                    <select
+                      className="edit-form-select"
+                      value={selectedUser.gender || 'Male'}
+                      onChange={(e) => setSelectedUser({ ...selectedUser, gender: e.target.value })}
+                    >
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                    </select>
+                  </div>
 
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Weight (kg) *</label>
-                      <input
-                        type="number"
-                        className="edit-form-input"
-                        value={selectedUser.weight || ''}
-                        onChange={(e) => setSelectedUser({ ...selectedUser, weight: e.target.value })}
-                        required
-                      />
-                    </div>
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Date of Birth *</label>
+                    <input
+                      type="text"
+                      className="edit-form-input"
+                      value={selectedUser.birthDate || ''}
+                      onChange={(e) => setSelectedUser({ ...selectedUser, birthDate: e.target.value })}
+                      placeholder="DD/MM/YYYY"
+                      required
+                    />
+                  </div>
 
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Medical Conditions</label>
-                      <textarea
-                        className="edit-form-textarea"
-                        value={selectedUser.medicalConditions || ''}
-                        onChange={(e) => setSelectedUser({ ...selectedUser, medicalConditions: e.target.value })}
-                        rows="3"
-                        placeholder="None"
-                      />
-                    </div>
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Email *</label>
+                    <input
+                      type="email"
+                      className="edit-form-input"
+                      value={selectedUser.email || ''}
+                      disabled
+                      readOnly
+                    />
+                    <small className="text-gray-500 text-sm mt-1">
+                      Email cannot be changed
+                    </small>
+                  </div>
 
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Allergies</label>
-                      <textarea
-                        className="edit-form-textarea"
-                        value={selectedUser.allergies || ''}
-                        onChange={(e) => setSelectedUser({ ...selectedUser, allergies: e.target.value })}
-                        rows="3"
-                        placeholder="None"
-                      />
-                    </div>
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Phone Number *</label>
+                    <input
+                      type="tel"
+                      className="edit-form-input"
+                      value={selectedUser.phoneNumber || ''}
+                      onChange={(e) => setSelectedUser({ ...selectedUser, phoneNumber: e.target.value })}
+                      required
+                    />
+                  </div>
 
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Donor Status</label>
-                      <input
-                        type="text"
-                        className="edit-form-input"
-                        value={selectedUser.donorStatus || 'New Donor'}
-                        readOnly
-                        disabled
-                      />
-                      <small className="text-gray-500 text-sm mt-1">
-                        Auto-calculated from donations
-                      </small>
-                    </div>
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Address *</label>
+                    <textarea
+                      className="edit-form-textarea"
+                      value={selectedUser.address || ''}
+                      onChange={(e) => setSelectedUser({ ...selectedUser, address: e.target.value })}
+                      rows="3"
+                      required
+                    />
+                  </div>
 
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Total Donations</label>
-                      <input
-                        type="number"
-                        className="edit-form-input"
-                        value={selectedUser.donationCount || 0}
-                        readOnly
-                        disabled
-                      />
-                      <small className="text-gray-500 text-sm mt-1">
-                        Calculated from donations records
-                      </small>
-                    </div>
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">State *</label>
+                    <input
+                      type="text"
+                      className="edit-form-input"
+                      value={selectedUser.state || ''}
+                      onChange={(e) => setSelectedUser({ ...selectedUser, state: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Postcode *</label>
+                    <input
+                      type="text"
+                      className="edit-form-input"
+                      value={selectedUser.postcode || ''}
+                      onChange={(e) => setSelectedUser({ ...selectedUser, postcode: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Blood Bank ID</label>
+                    <input
+                      type="text"
+                      className="edit-form-input"
+                      value={selectedUser.bloodBankId || ''}
+                      onChange={(e) => setSelectedUser({ ...selectedUser, bloodBankId: e.target.value })}
+                      placeholder="e.g., 906-890"
+                    />
                   </div>
                 </div>
 
-                <div className="modal-actions">
-                  <button onClick={handleCloseEditModal} className="cancel-btn">
-                    Cancel
-                  </button>
-                  <button onClick={handleSaveEditUser} className="save-btn">
-                    Save Changes
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+                {/* Medical Information */}
+                <div className="edit-form-section">
+                  <h3 className="edit-modal-section-title">Medical Information</h3>
 
-        {/* ---------- Add Modal ---------- */}
-        {showAddModal && (
-          <div className="modal-overlay">
-            <div className="modal-container">
-              <div className="modal-header">
-                <h2 className="modal-title">Add New Member</h2>
-                <button onClick={() => setShowAddModal(false)} className="modal-close-btn">
-                  <X className="modal-close-icon" />
-                </button>
-              </div>
-
-              <div className="modal-content">
-                <div className="edit-form-grid">
-                  {/* Personal Information */}
-                  <div className="edit-form-section">
-                    <h3 className="edit-modal-section-title">Personal Information</h3>
-
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Email *</label>
-                      <input
-                        type="email"
-                        className="edit-form-input"
-                        value={newUser.email}
-                        onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                        placeholder="Email will be used for login"
-                        required
-                      />
-                    </div>
-
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Full Name *</label>
-                      <input
-                        type="text"
-                        className="edit-form-input"
-                        value={newUser.fullName}
-                        onChange={(e) => setNewUser({ ...newUser, fullName: e.target.value })}
-                        placeholder="Enter full name"
-                        required
-                      />
-                    </div>
-
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">ID Type *</label>
-                      <select
-                        className="edit-form-select"
-                        value={newUser.idType}
-                        onChange={(e) => setNewUser({ ...newUser, idType: e.target.value })}
-                      >
-                        <option value="IC Number">IC Number</option>
-                        <option value="Passport">Passport</option>
-                      </select>
-                    </div>
-
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">ID Number *</label>
-                      <input
-                        type="text"
-                        className="edit-form-input"
-                        value={newUser.idNumber}
-                        onChange={(e) => setNewUser({ ...newUser, idNumber: e.target.value })}
-                        placeholder="Enter IC or passport number"
-                        required
-                      />
-                    </div>
-
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Gender *</label>
-                      <select
-                        className="edit-form-select"
-                        value={newUser.gender}
-                        onChange={(e) => setNewUser({ ...newUser, gender: e.target.value })}
-                      >
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                      </select>
-                    </div>
-
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Date of Birth *</label>
-                      <input
-                        type="date"
-                        className="edit-form-input"
-                        value={newUser.birthDate}
-                        onChange={(e) => setNewUser({ ...newUser, birthDate: e.target.value })}
-                        required
-                      />
-                    </div>
-
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Phone Number *</label>
-                      <input
-                        type="tel"
-                        className="edit-form-input"
-                        value={newUser.phoneNumber}
-                        onChange={(e) => setNewUser({ ...newUser, phoneNumber: e.target.value })}
-                        placeholder="Enter phone number"
-                        required
-                      />
-                    </div>
-
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Address *</label>
-                      <textarea
-                        className="edit-form-textarea"
-                        value={newUser.address}
-                        onChange={(e) => setNewUser({ ...newUser, address: e.target.value })}
-                        placeholder="Enter address"
-                        rows="3"
-                        required
-                      />
-                    </div>
-
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">State *</label>
-                      <input
-                        type="text"
-                        className="edit-form-input"
-                        value={newUser.state}
-                        onChange={(e) => setNewUser({ ...newUser, state: e.target.value })}
-                        placeholder="Enter state"
-                        required
-                      />
-                    </div>
-
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Postcode *</label>
-                      <input
-                        type="text"
-                        className="edit-form-input"
-                        value={newUser.postcode}
-                        onChange={(e) => setNewUser({ ...newUser, postcode: e.target.value })}
-                        placeholder="Enter postcode"
-                        required
-                      />
-                    </div>
-
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Blood Bank ID</label>
-                      <input
-                        type="text"
-                        className="edit-form-input"
-                        value={newUser.bloodBankId}
-                        onChange={(e) => setNewUser({ ...newUser, bloodBankId: e.target.value })}
-                        placeholder="e.g., 906-890 (optional)"
-                      />
-                    </div>
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Blood Group *</label>
+                    <select
+                      className="edit-form-select"
+                      value={selectedUser.bloodGroup || 'A+'}
+                      onChange={(e) => setSelectedUser({ ...selectedUser, bloodGroup: e.target.value })}
+                    >
+                      <option value="A+">A+</option>
+                      <option value="A-">A-</option>
+                      <option value="B+">B+</option>
+                      <option value="B-">B-</option>
+                      <option value="AB+">AB+</option>
+                      <option value="AB-">AB-</option>
+                      <option value="O+">O+</option>
+                      <option value="O-">O-</option>
+                    </select>
                   </div>
 
-                  {/* Medical Information */}
-                  <div className="edit-form-section">
-                    <h3 className="edit-modal-section-title">Medical Information</h3>
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Rhesus *</label>
+                    <select
+                      className="edit-form-select"
+                      value={selectedUser.rhesus || 'Rh-positive'}
+                      onChange={(e) => setSelectedUser({ ...selectedUser, rhesus: e.target.value })}
+                    >
+                      <option value="Rh-positive">Rh-positive</option>
+                      <option value="Rh-negative">Rh-negative</option>
+                    </select>
+                  </div>
 
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Blood Group *</label>
-                      <select
-                        className="edit-form-select"
-                        value={newUser.bloodGroup}
-                        onChange={(e) => setNewUser({ ...newUser, bloodGroup: e.target.value })}
-                      >
-                        <option value="A+">A+</option>
-                        <option value="A-">A-</option>
-                        <option value="B+">B+</option>
-                        <option value="B-">B-</option>
-                        <option value="AB+">AB+</option>
-                        <option value="AB-">AB-</option>
-                        <option value="O+">O+</option>
-                        <option value="O-">O-</option>
-                      </select>
-                    </div>
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Height (cm) *</label>
+                    <input
+                      type="number"
+                      className="edit-form-input"
+                      value={selectedUser.height || ''}
+                      onChange={(e) => setSelectedUser({ ...selectedUser, height: e.target.value })}
+                      required
+                    />
+                  </div>
 
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Rhesus *</label>
-                      <select
-                        className="edit-form-select"
-                        value={newUser.rhesus}
-                        onChange={(e) => setNewUser({ ...newUser, rhesus: e.target.value })}
-                      >
-                        <option value="Rh-positive">Rh-positive</option>
-                        <option value="Rh-negative">Rh-negative</option>
-                      </select>
-                    </div>
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Weight (kg) *</label>
+                    <input
+                      type="number"
+                      className="edit-form-input"
+                      value={selectedUser.weight || ''}
+                      onChange={(e) => setSelectedUser({ ...selectedUser, weight: e.target.value })}
+                      required
+                    />
+                  </div>
 
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Height (cm) *</label>
-                      <input
-                        type="number"
-                        className="edit-form-input"
-                        value={newUser.height}
-                        onChange={(e) => setNewUser({ ...newUser, height: e.target.value })}
-                        placeholder="Enter height"
-                        required
-                      />
-                    </div>
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Medical Conditions</label>
+                    <textarea
+                      className="edit-form-textarea"
+                      value={selectedUser.medicalConditions || ''}
+                      onChange={(e) => setSelectedUser({ ...selectedUser, medicalConditions: e.target.value })}
+                      rows="3"
+                      placeholder="None"
+                    />
+                  </div>
 
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Weight (kg) *</label>
-                      <input
-                        type="number"
-                        className="edit-form-input"
-                        value={newUser.weight}
-                        onChange={(e) => setNewUser({ ...newUser, weight: e.target.value })}
-                        placeholder="Enter weight"
-                        required
-                      />
-                    </div>
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Allergies</label>
+                    <textarea
+                      className="edit-form-textarea"
+                      value={selectedUser.allergies || ''}
+                      onChange={(e) => setSelectedUser({ ...selectedUser, allergies: e.target.value })}
+                      rows="3"
+                      placeholder="None"
+                    />
+                  </div>
 
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Medical Conditions</label>
-                      <textarea
-                        className="edit-form-textarea"
-                        value={newUser.medicalConditions}
-                        onChange={(e) => setNewUser({ ...newUser, medicalConditions: e.target.value })}
-                        placeholder="Enter medical conditions or 'None'"
-                        rows="3"
-                      />
-                    </div>
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Donor Status</label>
+                    <input
+                      type="text"
+                      className="edit-form-input"
+                      value={selectedUser.donorStatus || 'New Donor'}
+                      readOnly
+                      disabled
+                    />
+                    <small className="text-gray-500 text-sm mt-1">
+                      Auto-calculated from donations
+                    </small>
+                  </div>
 
-                    <div className="edit-form-field">
-                      <label className="edit-form-label">Allergies</label>
-                      <textarea
-                        className="edit-form-textarea"
-                        value={newUser.allergies}
-                        onChange={(e) => setNewUser({ ...newUser, allergies: e.target.value })}
-                        placeholder="Enter allergies or 'None'"
-                        rows="3"
-                      />
-                    </div>
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Total Donations</label>
+                    <input
+                      type="number"
+                      className="edit-form-input"
+                      value={selectedUser.donationCount || 0}
+                      readOnly
+                      disabled
+                    />
+                    <small className="text-gray-500 text-sm mt-1">
+                      Calculated from donations records
+                    </small>
                   </div>
                 </div>
+              </div>
 
-                <div className="modal-actions">
-                  <button onClick={() => setShowAddModal(false)} className="cancel-btn">
-                    Cancel
-                  </button>
-                  <button onClick={handleSaveNewUser} className="save-btn">
-                    Add Member
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ---------- Password Display Modal ---------- */}
-        {showPasswordModal && (
-          <div className="modal-overlay">
-            <div className="delete-confirm-modal">
-              <div className="delete-icon-container">
-                <AlertCircle className="delete-icon" />
-              </div>
-              <h3 className="delete-title">User Created Successfully!</h3>
-              <div className="password-display">
-                <p className="password-label">Temporary Password:</p>
-                <div className="password-value">{tempPassword}</div>
-                <p className="password-warning">
-                  Share this password with the user. They should change it on first login.
-                </p>
-              </div>
-              <div className="delete-actions">
-                <button onClick={() => {
-                  setShowPasswordModal(false);
-                  setTempPassword('');
-                }} className="save-btn">
-                  OK
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ---------- Delete Confirmation ---------- */}
-        {showDeleteConfirm && (
-          <div className="modal-overlay">
-            <div className="delete-confirm-modal">
-              <div className="delete-icon-container">
-                <AlertCircle className="delete-icon" />
-              </div>
-              <h3 className="delete-title">Delete User</h3>
-              <p className="delete-message">
-                Are you sure you want to delete this user? This action cannot be undone.
-              </p>
-              <div className="delete-actions">
-                <button onClick={() => setShowDeleteConfirm(false)} className="cancel-btn
-                ">
+              <div className="modal-actions">
+                <button onClick={handleCloseEditModal} className="cancel-btn">
                   Cancel
                 </button>
-                <button onClick={handleDeleteConfirm} className="delete-btn">
-                  Delete
+                <button onClick={handleSaveEditUser} className="save-btn">
+                  Save Changes
                 </button>
               </div>
             </div>
           </div>
-        )}
-      </div>
-    </Layout>
+        </div>
+      )}
+
+      {/* ---------- Add Modal ---------- */}
+      {showAddModal && (
+        <div className="modal-overlay">
+          <div className="edit-modal-container">
+            <div className="modal-header">
+              <h2 className="modal-title">Add New Member</h2>
+              <button onClick={() => setShowAddModal(false)} className="modal-close-btn">
+                <X className="modal-close-icon" />
+              </button>
+            </div>
+
+            <div className="edit-modal-content">
+              <div className="edit-form-grid">
+                {/* Personal Information */}
+                <div className="edit-form-section">
+                  <h3 className="edit-modal-section-title">Personal Information</h3>
+
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Email *</label>
+                    <input
+                      type="email"
+                      className="edit-form-input"
+                      value={newUser.email}
+                      onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                      placeholder="Email will be used for login"
+                      required
+                    />
+                  </div>
+
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Full Name *</label>
+                    <input
+                      type="text"
+                      className="edit-form-input"
+                      value={newUser.fullName}
+                      onChange={(e) => setNewUser({ ...newUser, fullName: e.target.value })}
+                      placeholder="Enter full name"
+                      required
+                    />
+                  </div>
+
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">ID Type *</label>
+                    <select
+                      className="edit-form-select"
+                      value={newUser.idType}
+                      onChange={(e) => setNewUser({ ...newUser, idType: e.target.value })}
+                    >
+                      <option value="IC Number">IC Number</option>
+                      <option value="Passport">Passport</option>
+                    </select>
+                  </div>
+
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">ID Number *</label>
+                    <input
+                      type="text"
+                      className="edit-form-input"
+                      value={newUser.idNumber}
+                      onChange={(e) => setNewUser({ ...newUser, idNumber: e.target.value })}
+                      placeholder="Enter IC or passport number"
+                      required
+                    />
+                  </div>
+
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Gender *</label>
+                    <select
+                      className="edit-form-select"
+                      value={newUser.gender}
+                      onChange={(e) => setNewUser({ ...newUser, gender: e.target.value })}
+                    >
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                    </select>
+                  </div>
+
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Date of Birth *</label>
+                    <input
+                      type="date"
+                      className="edit-form-input"
+                      value={newUser.birthDate}
+                      onChange={(e) => setNewUser({ ...newUser, birthDate: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Phone Number *</label>
+                    <input
+                      type="tel"
+                      className="edit-form-input"
+                      value={newUser.phoneNumber}
+                      onChange={(e) => setNewUser({ ...newUser, phoneNumber: e.target.value })}
+                      placeholder="Enter phone number"
+                      required
+                    />
+                  </div>
+
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Address *</label>
+                    <textarea
+                      className="edit-form-textarea"
+                      value={newUser.address}
+                      onChange={(e) => setNewUser({ ...newUser, address: e.target.value })}
+                      placeholder="Enter address"
+                      rows="3"
+                      required
+                    />
+                  </div>
+
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">State *</label>
+                    <input
+                      type="text"
+                      className="edit-form-input"
+                      value={newUser.state}
+                      onChange={(e) => setNewUser({ ...newUser, state: e.target.value })}
+                      placeholder="Enter state"
+                      required
+                    />
+                  </div>
+
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Postcode *</label>
+                    <input
+                      type="text"
+                      className="edit-form-input"
+                      value={newUser.postcode}
+                      onChange={(e) => setNewUser({ ...newUser, postcode: e.target.value })}
+                      placeholder="Enter postcode"
+                      required
+                    />
+                  </div>
+
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Blood Bank ID</label>
+                    <input
+                      type="text"
+                      className="edit-form-input"
+                      value={newUser.bloodBankId}
+                      onChange={(e) => setNewUser({ ...newUser, bloodBankId: e.target.value })}
+                      placeholder="e.g., 906-890 (optional)"
+                    />
+                  </div>
+                </div>
+
+                {/* Medical Information */}
+                <div className="edit-form-section">
+                  <h3 className="edit-modal-section-title">Medical Information</h3>
+
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Blood Group *</label>
+                    <select
+                      className="edit-form-select"
+                      value={newUser.bloodGroup}
+                      onChange={(e) => setNewUser({ ...newUser, bloodGroup: e.target.value })}
+                    >
+                      <option value="A+">A+</option>
+                      <option value="A-">A-</option>
+                      <option value="B+">B+</option>
+                      <option value="B-">B-</option>
+                      <option value="AB+">AB+</option>
+                      <option value="AB-">AB-</option>
+                      <option value="O+">O+</option>
+                      <option value="O-">O-</option>
+                    </select>
+                  </div>
+
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Rhesus *</label>
+                    <select
+                      className="edit-form-select"
+                      value={newUser.rhesus}
+                      onChange={(e) => setNewUser({ ...newUser, rhesus: e.target.value })}
+                    >
+                      <option value="Rh-positive">Rh-positive</option>
+                      <option value="Rh-negative">Rh-negative</option>
+                    </select>
+                  </div>
+
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Height (cm) *</label>
+                    <input
+                      type="number"
+                      className="edit-form-input"
+                      value={newUser.height}
+                      onChange={(e) => setNewUser({ ...newUser, height: e.target.value })}
+                      placeholder="Enter height"
+                      required
+                    />
+                  </div>
+
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Weight (kg) *</label>
+                    <input
+                      type="number"
+                      className="edit-form-input"
+                      value={newUser.weight}
+                      onChange={(e) => setNewUser({ ...newUser, weight: e.target.value })}
+                      placeholder="Enter weight"
+                      required
+                    />
+                  </div>
+
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Medical Conditions</label>
+                    <textarea
+                      className="edit-form-textarea"
+                      value={newUser.medicalConditions}
+                      onChange={(e) => setNewUser({ ...newUser, medicalConditions: e.target.value })}
+                      placeholder="Enter medical conditions or 'None'"
+                      rows="3"
+                    />
+                  </div>
+
+                  <div className="edit-form-field">
+                    <label className="edit-form-label">Allergies</label>
+                    <textarea
+                      className="edit-form-textarea"
+                      value={newUser.allergies}
+                      onChange={(e) => setNewUser({ ...newUser, allergies: e.target.value })}
+                      placeholder="Enter allergies or 'None'"
+                      rows="3"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-actions">
+                <button onClick={() => setShowAddModal(false)} className="cancel-btn">
+                  Cancel
+                </button>
+                <button onClick={handleSaveNewUser} className="save-btn">
+                  Add Member
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ---------- Password Display Modal ---------- */}
+      {showPasswordModal && (
+        <div className="modal-overlay">
+          <div className="delete-confirm-modal">
+            <div className="delete-icon-container">
+              <AlertCircle className="delete-icon" />
+            </div>
+            <h3 className="delete-title">User Created Successfully!</h3>
+            <div className="password-display">
+              <p className="password-label">Temporary Password:</p>
+              <div className="password-value">{tempPassword}</div>
+              <p className="password-warning">
+                Share this password with the user. They should change it on first login.
+              </p>
+            </div>
+            <div className="delete-actions">
+              <button onClick={() => {
+                setShowPasswordModal(false);
+                setTempPassword('');
+              }} className="save-btn">
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ---------- Delete Confirmation ---------- */}
+      {showDeleteConfirm && (
+        <div className="modal-overlay">
+          <div className="delete-confirm-modal">
+            <div className="delete-icon-container">
+              <AlertCircle className="delete-icon" />
+            </div>
+            <h3 className="delete-title">Delete User</h3>
+            <p className="delete-message">
+              Are you sure you want to delete this user? This action cannot be undone.
+            </p>
+            <div className="delete-actions">
+              <button onClick={() => setShowDeleteConfirm(false)} className="cancel-btn
+                ">
+                Cancel
+              </button>
+              <button onClick={handleDeleteConfirm} className="delete-btn">
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

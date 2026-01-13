@@ -470,20 +470,26 @@ const ReportsContent = () => {
               Showing data from {dateRange.start} to {dateRange.end}
             </p>
             <div className="stats-grid">
-              <div className="stat-card">
-                <h3>Total Donations</h3>
-                <p>{totalDonations}</p>
-                <p className="text-sm text-gray-500 mt-1">{totalVolume} ml total volume</p>
+              <div className="records-stat-card stat-card-total">
+                <div>
+                  <h3 className="stat-number-blue">{totalDonations}</h3>
+                  <p className="stat-label">Total Donations</p>
+                  <p className="text-sm text-gray-500 mt-1">{totalVolume} ml total volume</p>
+                </div>
               </div>
-              <div className="stat-card">
-                <h3>Blood Types Available</h3>
-                <p>{aggregatedInventory.length}</p>
-                <p className="text-sm text-gray-500 mt-1">Across {hospitals.length} hospitals</p>
+              <div className="records-stat-card stat-card-completed">
+                <div>
+                  <h3 className="stat-number-green">{aggregatedInventory.length}</h3>
+                  <p className="stat-label">Blood Types Available</p>
+                  <p className="text-sm text-gray-500 mt-1">Across {hospitals.length} hospitals</p>
+                </div>
               </div>
-              <div className="stat-card">
-                <h3>Recent Donations</h3>
-                <p>{recentDonations.length}</p>
-                <p className="text-sm text-gray-500 mt-1">in last 7 days</p>
+              <div className="records-stat-card stat-card-scheduled">
+                <div>
+                  <h3 className="stat-number-orange">{recentDonations.length}</h3>
+                  <p className="stat-label">Recent Donations</p>
+                  <p className="text-sm text-gray-500 mt-1">in last 7 days</p>
+                </div>
               </div>
             </div>
 

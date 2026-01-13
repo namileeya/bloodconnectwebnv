@@ -2,12 +2,16 @@
 
 /* Floating animation for organic blob shapes */
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px) rotate(0deg);
   }
+
   33% {
     transform: translateY(-15px) rotate(2deg);
   }
+
   66% {
     transform: translateY(8px) rotate(-1deg);
   }
@@ -19,6 +23,7 @@
     opacity: 0;
     transform: translateY(30px) scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -27,10 +32,13 @@
 
 /* Subtle pulse animation for background elements */
 @keyframes bgPulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
     opacity: 0.1;
   }
+
   50% {
     transform: scale(1.05);
     opacity: 0.2;
@@ -207,6 +215,8 @@
 /* Loading spinner */
 .loading-spinner {
   animation: spin 1s linear infinite;
+  position: relative;
+  top: 8px;
 }
 
 /* Responsive enhancements */
@@ -215,7 +225,7 @@
     margin: 1rem;
     padding: 1.5rem;
   }
-  
+
   .bg-shape {
     filter: blur(40px);
   }
@@ -232,11 +242,12 @@
 
 /* Print styles */
 @media print {
+
   .bg-shape,
   .bg-pulse {
     display: none;
   }
-  
+
   .login-card-animated {
     box-shadow: none;
     border: 1px solid #ccc;

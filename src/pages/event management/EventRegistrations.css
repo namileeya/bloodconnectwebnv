@@ -284,7 +284,7 @@
 }
 
 .registration-table-header-cell {
-  @apply px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider;
+  @apply px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider;
 }
 
 .registration-table-body {
@@ -296,7 +296,7 @@
 }
 
 .registration-table-cell {
-  @apply px-6 py-4 text-sm;
+  @apply px-6 py-4 text-sm text-center;
 }
 
 /* Donor Info */
@@ -340,7 +340,7 @@
 
 /* Slot Info */
 .slot-info {
-  @apply flex flex-col;
+  @apply flex flex-col items-center;
 }
 
 .slot-time {
@@ -395,7 +395,7 @@
 
 /* Action Buttons */
 .registration-actions-container {
-  @apply flex items-center gap-2;
+  @apply flex items-center gap-2 justify-center;
 }
 
 .registration-action-button {

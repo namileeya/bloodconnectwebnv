@@ -55,22 +55,20 @@ const ErrorPopup = ({ isVisible, onClose, message }) => {
 };
 
 // Login Component
-// Consolidated imports
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import app from '../../firebase';
-
-// Initialize auth
-const auth = getAuth(app);
-
 const Login = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberPassword, setRememberPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  // Predefined valid credentials
+  const validCredentials = [
+    { email: 'admin@gmail.com', password: 'admin123' },
+    { email: 'user@example.com', password: 'password123' }
+  ];
 
   // Decision logic for login validation
   const validateLogin = () => {
@@ -84,6 +82,25 @@ const Login = ({ onLoginSuccess }) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setErrorMessage('Please enter a valid email address');
+      return false;
+    }
+
+    // Decision 3: Check credentials
+    const isValidCredential = validCredentials.some(
+      cred => cred.email.toLowerCase() === email.toLowerCase() && cred.password === password
+    );
+
+    if (!isValidCredential) {
+      // Decision 4: Provide specific error message
+      const emailExists = validCredentials.some(
+        cred => cred.email.toLowerCase() === email.toLowerCase()
+      );
+
+      if (emailExists) {
+        setErrorMessage('Incorrect password. Please try again.');
+      } else {
+        setErrorMessage('Email not found. Please check your email address.');
+      }
       return false;
     }
 
@@ -102,13 +119,9 @@ const Login = ({ onLoginSuccess }) => {
     // Proceed with login if validation passes
     if (email && password) {
       setIsLoading(true);
-
-      try {
-        // Real Firebase Authentication
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-
-        console.log('Login successful', { email: user.email, uid: user.uid });
+      // Simulate API call
+      setTimeout(() => {
+        console.log('Login successful', { email });
         setIsLoading(false);
         setShowSuccessPopup(true);
 
@@ -119,43 +132,14 @@ const Login = ({ onLoginSuccess }) => {
             onLoginSuccess();
           }
         }, 2000);
-
-      } catch (error) {
-        setIsLoading(false);
-        console.error("Login error:", error.code, error.message);
-
-        let msg = "Login failed. Please try again.";
-
-        // Map Firebase error codes to user-friendly messages
-        switch (error.code) {
-          case 'auth/invalid-credential':
-          case 'auth/user-not-found':
-          case 'auth/wrong-password':
-            msg = "Incorrect email or password.";
-            break;
-          case 'auth/invalid-email':
-            msg = "Invalid email address format.";
-            break;
-          case 'auth/user-disabled':
-            msg = "This account has been disabled.";
-            break;
-          case 'auth/too-many-requests':
-            msg = "Too many failed attempts. Please try again later.";
-            break;
-          default:
-            msg = error.message;
-        }
-
-        setErrorMessage(msg);
-        setShowErrorPopup(true);
-      }
+      }, 1500);
     }
   };
 
   return (
     <>
       <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{
-        backgroundImage: 'url(/images/background.png)',
+        backgroundImage: 'url(src/assets/background.png)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat'
@@ -234,43 +218,22 @@ const Login = ({ onLoginSuccess }) => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember"
-                  type="checkbox"
-                  checked={rememberPassword}
-                  onChange={(e) => setRememberPassword(e.target.checked)}
-                  className="login-checkbox h-4 w-4 rounded border-gray-300 focus:ring-red-500"
-                  disabled={isLoading}
-                />
-                <label htmlFor="remember" className="ml-2 block text-sm text-gray-700">
-                  Remember Password
-                </label>
-              </div>
-              <button
-                type="button"
-                className="login-link text-sm text-gray-600 hover:text-red-600 font-medium"
-                disabled={isLoading}
-              >
-                Forget Password?
-              </button>
-            </div>
+
 
             <button
               type="button"
               onClick={handleSubmit}
-              className="login-button w-full text-white font-semibold py-3 px-4 rounded-xl focus:ring-4 focus:ring-red-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="login-button w-full text-white font-semibold px-4 rounded-xl focus:ring-4 focus:ring-red-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center h-12"
               disabled={isLoading}
             >
               {isLoading ? (
-                <>
-                  <svg className="loading-spinner -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <span className="flex items-center gap-2">
+                  <svg className="loading-spinner h-5 w-5 text-white flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Signing In...
-                </>
+                  <span>Logging In...</span>
+                </span>
               ) : (
                 'Login'
               )}
