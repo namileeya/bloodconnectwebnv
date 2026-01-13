@@ -1,1369 +1,2111 @@
-import React, { useState, useEffect } from 'react';
-import { QrCode, X, Plus, Edit2, Download, Camera, Check, AlertCircle, Search, Trash2, User, Phone, Mail, FileText } from 'lucide-react';
-import Layout from '../../components/Layout';
-import QRCode from 'qrcode';
-import jsQR from 'jsqr';
-import './DigitalDonorCards.css';
+import 'package:flutter/material.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'dart:async';
+import 'donation_page.dart';
+import 'blood_drive_page.dart';
+import 'notification_page.dart';
+import 'find_donors_page.dart';
+import '../widget/digital_donor_card.dart';
+import '../widget/announcement.dart';
+import 'myreward_page.dart';
+import '../widget/bottom_navigation_bar.dart';
+import '../navigation_helper.dart';
+import '../widget/header.dart';
+import 'community_page.dart';
+import 'snapnshare_page.dart';
+import 'donate_now_page.dart';
+import 'status_page.dart';
+import '../widget/raise_awareness.dart';
+import 'package:bloodconnect/user_session.dart';
+import 'package:bloodconnect/blood_stock_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-// Firebase imports
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
-import {
-  getFirestore,
-  collection,
-  doc,
-  getDocs,
-  getDoc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  query,
-  where,
-  orderBy,
-  limit,
-  serverTimestamp,
-  setDoc
-} from 'firebase/firestore';
-import app from '../../firebase';
+// Import the new services
+import '../announcement_data_service.dart';
+import '../event_service.dart';
+import '../team_service.dart';
 
-const auth = getAuth(app);
-const db = getFirestore(app);
+class HomePage extends StatefulWidget {
+  const HomePage({ super.key });
 
-// QR Code Generator Component using qrcode library
-const QRCodeGenerator = ({ value, size = 160 }) => {
-  const canvasRef = React.useRef(null);
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
 
-  useEffect(() => {
-    if (!canvasRef.current || !value) return;
+class _HomePageState extends State<HomePage> {
+  // ----- SESSION START ----- //
+  Map<String, dynamic>?userData;
+  bool isLoading = true;
 
-    QRCode.toCanvas(canvasRef.current, value, {
-      width: size,
-      margin: 2,
-      color: {
-        dark: '#000000',
-        light: '#FFFFFF'
-      }
-    }, (error) => {
-      if (error) console.error('QR Code generation error:', error);
-    });
-  }, [value, size]);
+  // Add state variables for dynamic data
+  List<Map<String, dynamic>> _announcements =[];
+List < Map < String, dynamic >> _upcomingEvents =[];
+List < Map < String, dynamic >> _communityTeams =[];
+  bool _isLoadingAnnouncements = true;
+  bool _isLoadingEvents = true;
+  bool _isLoadingTeams = true;
 
-  return <canvas ref={canvasRef} className="rounded-lg" />;
-};
+@override
+void initState() {
+  super.initState();
 
-const DigitalDonorCards = ({ onNavigate }) => {
-  const [donors, setDonors] = useState([]);
-  const [filteredDonors, setFilteredDonors] = useState([]);
-  const [selectedDonor, setSelectedDonor] = useState(null);
-  const [showCardModal, setShowCardModal] = useState(false);
-  const [showAddEditModal, setShowAddEditModal] = useState(false);
-  const [showVerifyModal, setShowVerifyModal] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [editingDonor, setEditingDonor] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [bloodTypeFilter, setBloodTypeFilter] = useState('All');
-  const [verificationResult, setVerificationResult] = useState(null);
-  const [verificationInput, setVerificationInput] = useState('');
-  const [error, setError] = useState('');
-
-  // New form data matching your database structure
-  const [formData, setFormData] = useState({
-    // User collection fields
-    email: '',
-    phone_number: '',
-
-    // Donor profiles collection fields
-    full_name: '',
-    blood_group: 'A+',
-    gender: 'Male',
-    id_type: 'IC Number',
-    id_number: '',
-    birth_date: '',
-    height: '',
-    weight: '',
-    medical_conditions: 'None',
-    allergies: 'None',
-    blood_bank_id: '',
-
-    // New fields for donor cards
-    emergency_contact_name: '',
-    emergency_contact_phone: '',
+  // Add listeners for page changes to update indicators
+  _announcementController.addListener(() {
+    if (_announcementController.page?.round() != _currentAnnouncementIndex) {
+      setState(() {
+        _currentAnnouncementIndex = _announcementController.page!.round();
+      });
+    }
   });
 
-  const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
-
-  useEffect(() => {
-    loadDonors();
-  }, []);
-
-  useEffect(() => {
-    let filtered = [...donors];
-
-    if (bloodTypeFilter !== 'All') {
-      filtered = filtered.filter(d => d.bloodGroup === bloodTypeFilter);
+  _bloodDriveController.addListener(() {
+    if (_bloodDriveController.page?.round() != _currentBloodDriveIndex) {
+      setState(() {
+        _currentBloodDriveIndex = _bloodDriveController.page!.round();
+      });
     }
+  });
 
-    if (searchQuery) {
-      const searchLower = searchQuery.toLowerCase();
-      filtered = filtered.filter(d =>
-        (d.fullName || '').toLowerCase().includes(searchLower) ||
-        (d.displayId || '').toLowerCase().includes(searchLower) ||
-        (d.bloodGroup || '').toLowerCase().includes(searchLower) ||
-        (d.email || '').toLowerCase().includes(searchLower)
+  // Start auto-sliding timers - FIXED
+  _startAutoSlideTimers();
+
+  // Initialize blood stock data
+  _initializeBloodStock();
+
+  // Get user data
+  getUserData();
+
+  // Fetch dynamic data
+  _fetchAnnouncements();
+  _fetchUpcomingEvents();
+  _fetchCommunityTeams();
+}
+
+// Get user data using helper class
+getUserData() async {
+  Map < String, dynamic >? user = await UserSession.getUser();
+  print('=== USER SESSION DATA ===');
+  print(user);
+  print('==========================');
+
+  setState(() {
+    userData = user;
+    isLoading = false;
+  });
+
+  // Optional: Check if user data exists
+  if (user == null) {
+    // ignore: use_build_context_synchronously
+    ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No user session found')),
       );
-    }
+  }
+}
 
-    setFilteredDonors(filtered);
-  }, [searchQuery, bloodTypeFilter, donors]);
+  // ----- SESSION END ----- //
 
-  const loadDonors = async () => {
-    setLoading(true);
-    try {
-      // 1. Fetch all users from users collection
-      const usersSnapshot = await getDocs(collection(db, 'users'));
-      const donorsData = [];
+  // Add controllers for sliding sections
+  final PageController _announcementController = PageController();
+  final PageController _bloodDriveController = PageController();
+  
+  int _currentAnnouncementIndex = 0;
+  int _currentBloodDriveIndex = 0;
+  int _selectedNavIndex = 0;
 
-      for (const userDoc of usersSnapshot.docs) {
-        const userId = userDoc.id;
-        const userData = userDoc.data();
+  // Add scroll controller for community section
+  final ScrollController _communityScrollController = ScrollController();
+  
+  String get fullName => userData ? ['full_name'] ?? 'Not provided';
+  String get idNumber => userData ? ['id_number'] ?? 'Not provided';
+  String get bloodType => userData ? ['blood_group'] ?? 'Not provided';
+  String get qrCode => userData ? ['qr_code_data'] ?? '';
+  String get userId => userData ? ['user_id'] ??
+  userData ? ['userId'] ??
+    userData ? ['uid'] ??
+      userData ? ['id'] ??
+'';
 
-        // 2. Fetch donor profile
-        let donorProfile = {};
-        try {
-          const donorDoc = await getDoc(doc(db, 'donor_profiles', userId));
-          if (donorDoc.exists()) {
-            donorProfile = donorDoc.data();
-          }
-        } catch (error) {
-          console.error(`Error fetching donor profile for ${userId}:`, error);
-        }
+  // Add timers for auto-sliding
+  // ignore: unused_field
+  late Timer _announcementTimer;
+  late Timer _bloodDriveTimer;
 
-        // 3. Fetch latest eligibility request - IMPROVED QUERY
-        let eligibilityStatus = 'Not Submitted';
-        try {
-          const eligibilityQuery = query(
-            collection(db, 'eligibility_requests'),
-            where('userId', '==', userId)
-          );
-          const eligibilitySnapshot = await getDocs(eligibilityQuery);
+  // Add these new variables for blood stock
+  String _selectedLocation = 'National Blood Center';
+Map < String, dynamic >? _currentBloodStock;
+List < String > _availableLocations =[];
 
-          if (!eligibilitySnapshot.empty) {
-            // Get all requests and find the most recent
-            let latestDate = null;
-            let latestRequest = null;
+  // Add method to get user initials from full name
+  String _getUserInitials() {
+  List < String > nameParts = fullName.trim().split(' ');
 
-            eligibilitySnapshot.forEach(doc => {
-              const requestData = doc.data();
+  if (nameParts.isEmpty) return 'U';
 
-              if (requestData.submittedDate) {
-                const requestDate = requestData.submittedDate.toDate();
-                if (!latestDate || requestDate > latestDate) {
-                  latestDate = requestDate;
-                  latestRequest = requestData;
-                }
-              }
-            });
+  if (nameParts.length == 1) {
+    return nameParts[0].substring(0, 1).toUpperCase();
+  }
 
-            if (latestRequest) {
-              eligibilityStatus = latestRequest.status || 'pending';
-            }
-          }
-        } catch (error) {
-          console.error(`Error fetching eligibility for ${userId}:`, error);
-        }
+    // Take first letter of first name and first letter of last name
+    String firstInitial = nameParts.first.substring(0, 1).toUpperCase();
+    String lastInitial = nameParts.last.substring(0, 1).toUpperCase();
 
-        // 4. Fetch last donation date - IMPROVED QUERY
-        let lastDonation = '';
-        try {
-          const donationsQuery = query(
-            collection(db, 'donations'),
-            where('donor_id', '==', userId)
-          );
-          const donationsSnapshot = await getDocs(donationsQuery);
+  return '$firstInitial$lastInitial';
+}
 
-          if (!donationsSnapshot.empty) {
-            // Get all donations and find the most recent
-            let latestDate = null;
-            let latestDonationData = null;
-
-            donationsSnapshot.forEach(doc => {
-              const donationData = doc.data();
-
-              if (donationData.donation_date) {
-                const donationDate = donationData.donation_date.toDate();
-                if (!latestDate || donationDate > latestDate) {
-                  latestDate = donationDate;
-                  latestDonationData = donationData;
-                }
-              }
-            });
-
-            if (latestDonationData && latestDonationData.donation_date) {
-              lastDonation = latestDonationData.donation_date.toDate().toISOString().split('T')[0];
-            }
-          }
-        } catch (error) {
-          console.error(`Error fetching donations for ${userId}:`, error);
-        }
-
-        // 5. Combine all data for donor card display
-        donorsData.push({
-          id: userId,
-          // From users collection
-          email: userData.email || '',
-          phone: userData.phone_number || '',
-          qrCodeData: userData.qr_code_data || `BLOODCONNECT:USER:${userId}`,
-          // From donor_profiles collection
-          fullName: donorProfile.full_name || '',
-          displayId: donorProfile.display_id || `DON-${userId.substring(0, 7)}`,
-          bloodGroup: donorProfile.blood_group || '',
-          gender: donorProfile.gender || '',
-          medicalConditions: donorProfile.medical_conditions || 'None',
-          allergies: donorProfile.allergies || 'None',
-          // New fields for donor cards
-          emergencyContactName: donorProfile.emergency_contact_name || '',
-          emergencyContactPhone: donorProfile.emergency_contact_phone || '',
-          // Calculated fields
-          eligibilityStatus,
-          lastDonation,
-          // For backward compatibility with existing code
-          name: donorProfile.full_name || '',
-          bloodType: donorProfile.blood_group || '',
-          emergencyContact: donorProfile.emergency_contact_name || '',
-          emergencyPhone: donorProfile.emergency_contact_phone || '',
-          medicalNotes: `${donorProfile.medical_conditions || 'None'}${donorProfile.allergies ? `, Allergies: ${donorProfile.allergies}` : ''}`,
-          isEligible: eligibilityStatus === 'approved',
-          createdAt: donorProfile.created_at?.toDate?.() || new Date(),
-        });
-      }
-
-      setDonors(donorsData);
-      setFilteredDonors(donorsData);
-
-    } catch (err) {
-      console.error('Error loading donors:', err);
-      setError('Failed to load donor cards');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const generateRandomPassword = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let password = '';
-    for (let i = 0; i < 8; i++) {
-      password += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return password;
-  };
-
-  const formatDateToDDMMYYYY = (dateString) => {
-    if (!dateString) return '';
-    if (dateString.includes('/')) return dateString;
-
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return dateString;
-
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const year = date.getFullYear();
-      return `${day}/${month}/${year}`;
-    } catch (error) {
-      return dateString;
-    }
-  };
-
-  const handleCreateUserWithCard = () => {
-    setEditingDonor(null);
-    setFormData({
-      email: '',
-      phone_number: '',
-      full_name: '',
-      blood_group: 'A+',
-      gender: 'Male',
-      id_type: 'IC Number',
-      id_number: '',
-      birth_date: '',
-      height: '',
-      weight: '',
-      medical_conditions: 'None',
-      allergies: 'None',
-      blood_bank_id: '',
-      emergency_contact_name: '',
-      emergency_contact_phone: '',
+// NEW: Fetch announcements from Firestore
+Future < void> _fetchAnnouncements() async {
+  try {
+    setState(() {
+      _isLoadingAnnouncements = true;
     });
-    setShowAddEditModal(true);
-  };
 
-  const handleEditDonor = (donor, e) => {
-    e.stopPropagation();
-    setEditingDonor(donor);
-    setFormData({
-      email: donor.email || '',
-      phone_number: donor.phone || '',
-      full_name: donor.fullName || '',
-      blood_group: donor.bloodGroup || 'A+',
-      gender: donor.gender || 'Male',
-      id_type: 'IC Number',
-      id_number: '',
-      birth_date: '',
-      height: '',
-      weight: '',
-      medical_conditions: donor.medicalConditions || 'None',
-      allergies: donor.allergies || 'None',
-      blood_bank_id: '',
-      emergency_contact_name: donor.emergencyContactName || '',
-      emergency_contact_phone: donor.emergencyContactPhone || '',
+final announcements = await AnnouncementDataService.getActiveAnnouncements();
+
+
+    setState(() {
+      _announcements = announcements;
+      _isLoadingAnnouncements = false;
     });
-    setShowAddEditModal(true);
-  };
+  } catch (e) {
+    print('Error loading announcements: $e');
+    setState(() {
+      _isLoadingAnnouncements = false;
+    });
 
-  const handleDeleteClick = (donor, e) => {
-    e.stopPropagation();
-    setSelectedDonor(donor);
-    setShowDeleteConfirm(true);
-  };
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Failed to load announcements: ${e.toString()}'),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+        ),
+      );
+  }
+}
 
-  const handleDeleteConfirm = async () => {
-    if (!selectedDonor) return;
+// NEW: Fetch upcoming events from Firestore
+Future < void> _fetchUpcomingEvents() async {
+  try {
+    setState(() {
+      _isLoadingEvents = true;
+    });
 
-    try {
-      // Note: Deleting auth user requires backend function
-      // For now, just delete from Firestore collections
-      await deleteDoc(doc(db, 'users', selectedDonor.id));
-      await deleteDoc(doc(db, 'donor_profiles', selectedDonor.id));
+      final events = await EventService.getUpcomingEvents();
 
-      // Update local state
-      const updatedDonors = donors.filter(d => d.id !== selectedDonor.id);
-      setDonors(updatedDonors);
+    setState(() {
+      _upcomingEvents = events;
+      _isLoadingEvents = false;
+    });
+  } catch (e) {
+    print('Error loading events: $e');
+    setState(() {
+      _isLoadingEvents = false;
+    });
 
-      setShowDeleteConfirm(false);
-      setSelectedDonor(null);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Failed to load events: ${e.toString()}'),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+        ),
+      );
+  }
+}
 
-    } catch (err) {
-      console.error('Error deleting donor:', err);
-      setError('Failed to delete donor card');
-    }
-  };
+// NEW: Fetch community teams from Firestore
+Future < void> _fetchCommunityTeams() async {
+  try {
+    setState(() {
+      _isLoadingTeams = true;
+    });
 
-  const handleSubmit = async () => {
-    if (!formData.email.trim()) {
-      setError('Please enter email');
-      return;
-    }
+      final teams = await TeamService.getActiveTeams();
 
-    if (!formData.full_name.trim()) {
-      setError('Please enter full name');
-      return;
-    }
+    setState(() {
+      _communityTeams = teams;
+      _isLoadingTeams = false;
+    });
+  } catch (e) {
+    print('Error loading teams: $e');
+    setState(() {
+      _isLoadingTeams = false;
+    });
 
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      setError('Please enter a valid email address');
-      return;
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Failed to load teams: ${e.toString()}'),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+        ),
+      );
+  }
+}
 
-    try {
-      if (editingDonor) {
-        // Update existing donor - only update donor_profiles (emergency contact, etc.)
-        await updateDoc(doc(db, 'donor_profiles', editingDonor.id), {
-          emergency_contact_name: formData.emergency_contact_name,
-          emergency_contact_phone: formData.emergency_contact_phone,
-          medical_conditions: formData.medical_conditions,
-          allergies: formData.allergies,
-          updated_at: serverTimestamp(),
+void _initializeBloodStock() async {
+  try {
+    print('🩸 Starting blood stock initialization...');
+
+      // Fetch locations from Firebase
+      final locations = await BloodStockService.getAvailableLocations();
+    print('📍 Available locations: $locations');
+    print('📍 Number of locations: ${locations.length}');
+
+    if (locations.isEmpty) {
+      print('⚠️ No locations found in database');
+
+      // Show user-friendly message
+      if (mounted) {
+        setState(() {
+          _availableLocations = [];
+          _selectedLocation = '';
+          _currentBloodStock = null;
         });
 
-        // Reload donors
-        await loadDonors();
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+          content: Text('No blood bank locations available. Please check your connection.'),
+            backgroundColor: Colors.orange,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+      }
+      return;
+    }
 
-        setShowAddEditModal(false);
-        setEditingDonor(null);
+    // Set state with locations first
+    if (mounted) {
+      setState(() {
+        _availableLocations = locations;
+        _selectedLocation = locations[0];
+      });
+    }
 
+    print('✅ Selected location: $_selectedLocation');
+
+    // Add a small delay to ensure UI updates
+    await Future.delayed(const Duration(milliseconds: 100));
+
+      // Fetch blood stock data for the first location
+      final bloodStock = await BloodStockService.getBloodStockByLocation(_selectedLocation);
+    print('🩸 Blood stock data received: ${bloodStock != null ? "YES" : "NO"}');
+
+    if (bloodStock != null) {
+      print('📊 Blood stock keys: ${bloodStock.keys.toList()}');
+      if (bloodStock.containsKey('blood_types')) {
+        print('📊 Blood types in data:');
+          final bloodTypes = bloodStock['blood_types'] as Map<String, dynamic>;
+        bloodTypes.forEach((key, value) {
+          print('   $key: $value');
+        });
       } else {
-        // Create new user (same as User Management)
-        const password = generateRandomPassword();
+        print('⚠️ blood_types key not found in data');
+      }
+    }
 
-        // 1. Create Firebase Auth user
-        const userCredential = await createUserWithEmailAndPassword(
-          auth,
-          formData.email,
-          password
+    if (mounted) {
+      setState(() {
+        _currentBloodStock = bloodStock;
+      });
+    }
+
+    if (bloodStock == null) {
+      print('⚠️ No blood stock data for $_selectedLocation');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('No blood stock data for $_selectedLocation'),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 2),
+            ),
+          );
+      }
+    } else {
+      print('✅ Blood stock loaded successfully!');
+    }
+  } catch (e, stackTrace) {
+    print('❌ Error initializing blood stock: $e');
+    print('Stack trace: $stackTrace');
+
+    if (mounted) {
+      setState(() {
+        _availableLocations = [];
+        _selectedLocation = '';
+        _currentBloodStock = null;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to load blood stock: ${e.toString()}'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 4),
+          ),
         );
-        const userId = userCredential.user.uid;
+    }
+  }
+}
 
-        // Generate display ID and QR code
-        const displayId = `DON-${userId.substring(0, 7)}`;
-        const qrCodeData = `BLOODCONNECT:USER:${userId}`;
+// Add this method to handle location change
+void _onLocationChanged(String ? newLocation) async {
+  if (newLocation != null && newLocation.isNotEmpty) {
+    print('🔄 Location changed to: $newLocation');
 
-        // 2. Create users document
-        await setDoc(doc(db, 'users', userId), {
-          email: formData.email,
-          username: formData.email.split('@')[0],
-          phone_number: formData.phone_number,
-          role: 'blood_donor',
-          qr_code_data: qrCodeData,
-          created_at: serverTimestamp(),
-        });
+    setState(() {
+      _selectedLocation = newLocation;
+      _currentBloodStock = null; // Show loading while fetching
+    });
 
-        // 3. Create donor_profiles document
-        await setDoc(doc(db, 'donor_profiles', userId), {
-          user_id: userId,
-          full_name: formData.full_name,
-          blood_group: formData.blood_group,
-          gender: formData.gender,
-          id_type: formData.id_type,
-          id_number: formData.id_number,
-          birth_date: formData.birth_date ? formatDateToDDMMYYYY(formData.birth_date) : '',
-          height: formData.height,
-          weight: formData.weight,
-          medical_conditions: formData.medical_conditions,
-          allergies: formData.allergies,
-          blood_bank_id: formData.blood_bank_id || 'Not provided',
-          emergency_contact_name: formData.emergency_contact_name,
-          emergency_contact_phone: formData.emergency_contact_phone,
-          display_id: displayId,
-          created_at: serverTimestamp(),
-          updated_at: serverTimestamp(),
-        });
+    try {
+        final newBloodStock = await BloodStockService.getBloodStockByLocation(newLocation);
+      print('📊 Received data for $newLocation: ${newBloodStock != null ? "YES" : "NO"}');
 
-        // Show success message with password
-        alert(`User created successfully! Temporary password: ${password}\nShare this with the user.`);
-
-        // Reload donors
-        await loadDonors();
-
-        setShowAddEditModal(false);
-        setFormData({
-          email: '',
-          phone_number: '',
-          full_name: '',
-          blood_group: 'A+',
-          gender: 'Male',
-          id_type: 'IC Number',
-          id_number: '',
-          birth_date: '',
-          height: '',
-          weight: '',
-          medical_conditions: 'None',
-          allergies: 'None',
-          blood_bank_id: '',
-          emergency_contact_name: '',
-          emergency_contact_phone: '',
+      if (mounted) {
+        setState(() {
+          _currentBloodStock = newBloodStock;
         });
       }
 
-    } catch (error) {
-      console.error('Error saving donor:', error);
-      if (error.code === 'auth/email-already-in-use') {
-        setError('Email already in use');
-      } else {
-        setError(`Error: ${error.message}`);
-      }
-    }
-  };
-
-  const handleViewCard = (donor) => {
-    setSelectedDonor(donor);
-    setShowCardModal(true);
-  };
-
-  const handleDownloadCard = async () => {
-    if (!selectedDonor) return;
-
-    try {
-      const canvas = document.createElement('canvas');
-      canvas.width = 600;
-      canvas.height = 380;
-      const ctx = canvas.getContext('2d');
-
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, 600, 380);
-
-      ctx.fillStyle = '#dc2626';
-      ctx.fillRect(0, 0, 600, 80);
-
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 24px Arial';
-      ctx.fillText('DIGITAL DONOR CARD', 30, 50);
-
-      const qrCanvas = document.createElement('canvas');
-      await QRCode.toCanvas(qrCanvas, selectedDonor.qrCodeData, {
-        width: 140,
-        margin: 1,
-      });
-
-      ctx.drawImage(qrCanvas, 430, 110, 140, 140);
-
-      ctx.fillStyle = '#1f2937';
-      ctx.font = 'bold 18px Arial';
-      ctx.fillText('Name:', 30, 130);
-      ctx.font = '18px Arial';
-      ctx.fillText(selectedDonor.fullName, 30, 155);
-
-      ctx.font = 'bold 16px Arial';
-      ctx.fillText('Donor ID:', 30, 190);
-      ctx.font = '16px Arial';
-      ctx.fillText(selectedDonor.displayId, 30, 210);
-
-      ctx.font = 'bold 16px Arial';
-      ctx.fillText('Blood Type:', 30, 245);
-      ctx.font = 'bold 28px Arial';
-      ctx.fillStyle = '#dc2626';
-      ctx.fillText(selectedDonor.bloodGroup, 30, 275);
-
-      ctx.fillStyle = '#1f2937';
-      ctx.font = 'bold 14px Arial';
-      ctx.fillText('Last Donation:', 30, 310);
-      ctx.font = '14px Arial';
-      ctx.fillText(formatLastDonation(selectedDonor.lastDonation), 30, 330);
-
-      ctx.fillStyle = '#6b7280';
-      ctx.font = '12px Arial';
-      ctx.fillText(`Generated: ${new Date().toLocaleDateString()}`, 30, 360);
-
-      canvas.toBlob((blob) => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `donor-card-${selectedDonor.displayId}.png`;
-        a.click();
-        URL.revokeObjectURL(url);
-      });
-    } catch (error) {
-      console.error('Error generating card:', error);
-      setError('Failed to download card');
-    }
-  };
-
-  const handleVerifyCard = () => {
-    setVerificationInput('');
-    setVerificationResult(null);
-    setShowVerifyModal(true);
-  };
-
-  const verifyDonorCard = async (input) => {
-    const trimmedInput = input.trim();
-    if (!trimmedInput) {
-      setVerificationResult({
-        valid: false,
-        message: 'Please enter a donor ID or scan QR code.',
-      });
-      return;
-    }
-
-    try {
-      let userId;
-
-      // Check if input is QR code format
-      if (trimmedInput.startsWith('BLOODCONNECT:USER:')) {
-        userId = trimmedInput.split(':')[2];
-      } else {
-        // Assume it's a display ID, need to find user
-        const donorsQuery = query(
-          collection(db, 'donor_profiles'),
-          where('display_id', '==', trimmedInput)
-        );
-        const donorSnapshot = await getDocs(donorsQuery);
-
-        if (donorSnapshot.empty) {
-          setVerificationResult({
-            valid: false,
-            message: 'Invalid donor ID. Card not found in system.',
-          });
-          return;
+      if (newBloodStock == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('No blood stock data available for $newLocation'),
+              duration: const Duration(seconds: 2),
+              ),
+            );
         }
-
-        userId = donorSnapshot.docs[0].data().user_id;
       }
-
-      // Fetch user data
-      const userDoc = await getDoc(doc(db, 'users', userId));
-      if (!userDoc.exists()) {
-        setVerificationResult({
-          valid: false,
-          message: 'User not found in system.',
-        });
-        return;
+    } catch (e) {
+      print('❌ Error loading blood stock: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading data: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
-      const userData = userDoc.data();
+    }
+  }
+}
 
-      // Fetch donor profile
-      const donorDoc = await getDoc(doc(db, 'donor_profiles', userId));
-      if (!donorDoc.exists()) {
-        setVerificationResult({
-          valid: false,
-          message: 'Donor profile not found.',
-        });
-        return;
+// Method to start auto-sliding timers
+void _startAutoSlideTimers() {
+  // Only start timers if we have data
+  _bloodDriveTimer = Timer.periodic(const Duration(seconds: 7), (timer) {
+    if (_bloodDriveController.hasClients && _upcomingEvents.isNotEmpty) {
+      if (_currentBloodDriveIndex < _upcomingEvents.length - 1) {
+        _bloodDriveController.animateToPage(
+          _currentBloodDriveIndex + 1,
+          duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          );
+      } else {
+        _bloodDriveController.animateToPage(
+          0,
+          duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          );
       }
-      const donorProfile = donorDoc.data();
+    }
+  });
+}
 
-      // Fetch latest eligibility request
-      let eligibilityStatus = 'Not Submitted';
+@override
+void dispose() {
+  // Only cancel blood drive timer
+  _bloodDriveTimer.cancel();
+
+  // Dispose controllers
+  _announcementController.dispose();
+  _bloodDriveController.dispose();
+  _communityScrollController.dispose();
+
+  super.dispose();
+}
+
+// Simplified navigation handler that updates the selected index
+void _updateNavIndex(int index) {
+  setState(() {
+    _selectedNavIndex = index;
+  });
+}
+
+@override
+  Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: Colors.grey[100],
+    // Replace the inline AppBar with CustomHeader
+    appBar: CustomHeader(
+      appName: 'BloodConnect',
+      userInitials: _getUserInitials(), // Use dynamic initials from profile
+      onRewardsPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const MyRewardPage()),
+        );
+      },
+      onNotificationsPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const NotificationPage()),
+        );
+      },
+      // onProfilePressed can use default behavior from CustomHeader
+    ),
+    body: SafeArea(
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                // Digital Donor Card
+                _buildDonorCard(),
+                const SizedBox(height: 16),
+    // Current Blood Stock
+    _buildBloodStock(),
+                const SizedBox(height: 16),
+    // Announcements - now with dynamic data
+    _buildAnnouncements(),
+                const SizedBox(height: 16),
+    // Upcoming Blood Drive - now with dynamic data
+    _buildUpcomingBloodDrive(),
+                const SizedBox(height: 16),
+    // Action Buttons (First Row)
+    _buildActionButtonsRow1(),
+                const SizedBox(height: 16),
+    // Find Donors, Book Appointment, Status, and Donate Now section
+    _buildFindDonorsAndAppointment(),
+                const SizedBox(height: 16),
+    // Community Section - now with dynamic data
+    _buildCommunity(),
+                // Add padding at the bottom to avoid overlap with bottom navigation bar
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        ),
+      ),
+  bottomNavigationBar: CustomBottomNavigationBar(
+    currentIndex: _selectedNavIndex,
+    onTap: (index) => NavigationHelper.handleNavigation(context, index, _updateNavIndex),
+  ),
+    );
+}
+
+  // ---------------------------------------------------------------------------
+  // SECTION: Digital Donor Card Widget (Home Screen)
+  // ---------------------------------------------------------------------------
+  // This method builds the card seen on the home screen.
+  // It handles the tap event to trigger the detailed popup.
+  Widget _buildDonorCard() {
+  return DigitalDonorCardWidget(
+    showQrCode: true,
+    // When the user taps the card, we call _showDonorCardDetails to open the popup
+    onTap: () {
+      _showDonorCardDetails(context);
+    },
+  );
+}
+
+// ---------------------------------------------------------------------------
+// SECTION: Digital Donor Card Popup Implementation
+// ---------------------------------------------------------------------------
+// This function displays the detailed popup dialog when the card is clicked.
+void _showDonorCardDetails(BuildContext context) async {
+    String lastDonationText = 'No donations yet';
+
+  print('=== DEBUG: Donor Card Clicked ===');
+  print('User data: $userData');
+  print('User ID from getter: $userId');
+
+  // DEBUG: Check all possible ID sources
+  print('=== ID DEBUG INFO ===');
+  print('QR Code: $qrCode');
+  print('User ID from getter: "$userId" (length: ${userId.length})');
+  print('User Data keys: ${userData?.keys.toList()}');
+
+    // Try multiple methods to get user ID
+    String effectiveUserId = '';
+
+  // Method 1: Use the getter (existing method)
+  if (userId.isNotEmpty) {
+    effectiveUserId = userId;
+    print('✅ Using user ID from getter: $effectiveUserId');
+  }
+  // Method 2: Extract from QR code
+  else if (qrCode.isNotEmpty && qrCode.contains('BLOODCONNECT:USER:')) {
+    effectiveUserId = qrCode.replaceFirst('BLOODCONNECT:USER:', '');
+    print('✅ Using user ID from QR code: $effectiveUserId');
+  }
+  // Method 3: Check userData directly for various possible fields
+  else if (userData != null) {
+      // Check all possible field names that might contain the user ID
+      final possibleIdFields = ['user_id', 'userId', 'uid', 'id', 'donor_id'];
+    for (var field in possibleIdFields) {
+      if (userData![field] != null) {
+        effectiveUserId = userData![field].toString();
+        print('✅ Found user ID in $field: $effectiveUserId');
+        break;
+      }
+    }
+  }
+
+  if (effectiveUserId.isEmpty) {
+    print('❌ Could not find any user ID!');
+    print('   QR Code contains: ${qrCode.contains('BLOODCONNECT: USER: ')}');
+    print('   userData is null: ${userData == null}');
+  } else {
+    print('🔍 Will query with effectiveUserId: $effectiveUserId');
+  }
+
+  if (effectiveUserId.isNotEmpty) {
+    try {
+      print('📋 Fetching donations for user ID: $effectiveUserId');
+        final lastDonationDate = await _getLastDonationDate(effectiveUserId);
+
+      if (lastDonationDate != null) {
+        print('✅ Found donation: $lastDonationDate');
+        lastDonationText = '${lastDonationDate.day}/${lastDonationDate.month}/${lastDonationDate.year}';
+      } else {
+        print('❌ No donations found for user ID: $effectiveUserId');
+
+        // Additional debug: Try to find ANY donations for this user
+        try {
+            final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+            final testQuery = await _firestore
+            .collection('donations')
+            .where('donor_id', isEqualTo: effectiveUserId)
+            .get();
+
+          print('🔍 Test query found ${testQuery.docs.length} documents');
+          for (var doc in testQuery.docs) {
+            print('   - Document ID: ${doc.id}');
+            print('     donor_id: ${doc.data()['donor_id']}');
+            print('     status: ${doc.data()['status']}');
+            print('     donation_date: ${doc.data()['donation_date']}');
+          }
+        } catch (e) {
+          print('❌ Error in test query: $e');
+        }
+      }
+    } catch (e) {
+      print('❌ Error fetching last donation: $e');
+      lastDonationText = 'Error loading';
+    }
+  } else {
+    print('❌ No user ID available for donation query');
+  }
+
+  print('📝 Final last donation text: $lastDonationText');
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+          ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+      'Digital Donor Card',
+      style: TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFFDE0D0D),
+      ),
+                ),
+    const SizedBox(height: 20),
+
+      Container(
+        padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+            child: QrImageView(
+              data: qrCode,
+              version: QrVersions.auto,
+              size: 200,
+              backgroundColor: Colors.white,
+              foregroundColor: const Color(0xFFDE0D0D),
+                  ),
+                ),
+    const SizedBox(height: 20),
+
+      Container(
+        padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            borderRadius: BorderRadius.circular(12),
+          ),
+            child: Column(
+              children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                          const Text('Name:', style: TextStyle(fontWeight: FontWeight.bold)),
+    Flexible(
+      child: Text(
+        fullName,
+        textAlign: TextAlign.right,
+        style: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                        ],
+                      ),
+    const SizedBox(height: 8),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+                          const Text('ID:', style: TextStyle(fontWeight: FontWeight.bold)),
+    Text(idNumber),
+                        ],
+                      ),
+    const SizedBox(height: 8),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+                          const Text('Blood Type:', style: TextStyle(fontWeight: FontWeight.bold)),
+    Text(
+      bloodType,
+      style: const TextStyle(color: Color(0xFFDE0D0D), fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+    const SizedBox(height: 8),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+                          const Text('Last Donation:', style: TextStyle(fontWeight: FontWeight.bold)),
+    Text(lastDonationText),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+    const SizedBox(height: 20),
+
+      ElevatedButton(
+        onPressed: () => Navigator.of(context).pop(),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFFDE0D0D),
+            foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+                  ),
+    child: const Text('Close'),
+                ),
+              ],
+            ),
+          ),
+        );
+  },
+    );
+}
+
+Future < DateTime ?> _getLastDonationDate(String userId) async {
+  try {
+      final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+    print('🔍 [GET LAST DONATION] Querying donations for donor_id: "$userId"');
+    print('🔍 User ID length: ${userId.length}');
+    print('🔍 User ID type: ${userId.runtimeType}');
+
+      // First, try a simple query without status filter
+      final testQuery = await _firestore
+      .collection('donations')
+      .where('donor_id', isEqualTo: userId)
+      .get();
+
+    print('🔍 Simple query found ${testQuery.docs.length} documents');
+    if (testQuery.docs.isNotEmpty) {
+      for (var doc in testQuery.docs) {
+          final data = doc.data();
+        print('   📄 Document: ${doc.id}');
+        print('     donor_id: ${data['donor_id']}');
+        print('     status: ${data['status']}');
+        print('     donation_date: ${data['donation_date']}');
+        print('     amount_ml: ${data['amount_ml']}');
+      }
+    } else {
+      print('❌ No documents found with donor_id: "$userId"');
+      print('⚠️ Checking if collection exists...');
+
+        // Check if donations collection has any documents
+        final collectionCheck = await _firestore
+        .collection('donations')
+        .limit(1)
+        .get();
+      print('   Donations collection exists: ${collectionCheck.docs.isNotEmpty}');
+    }
+
+    // Now try the actual query with status filter
+    print('🔍 [MAIN QUERY] Searching with status filter...');
+      final querySnapshot = await _firestore
+      .collection('donations')
+      .where('donor_id', isEqualTo: userId)
+      .where('status', whereIn: ['stored', 'completed'])
+      .orderBy('donation_date', descending: true)
+      .limit(1)
+      .get();
+
+    print('🔍 Main query returned ${querySnapshot.docs.length} documents');
+
+    if (querySnapshot.docs.isEmpty) {
+      print('❌ No donations found with donor_id: "$userId" and status "stored" or "completed"');
+      return null;
+    }
+
+      final donationData = querySnapshot.docs.first.data() as Map<String, dynamic>;
+    print('✅ Found donation data!');
+    print('   Document keys: ${donationData.keys.toList()}');
+      
+      final donationDate = donationData['donation_date'];
+    print('🔍 Donation date field type: ${donationDate.runtimeType}');
+    print('🔍 Donation date value: $donationDate');
+
+    if (donationDate is Timestamp) {
+        final date = donationDate.toDate();
+      print('✅ Converted to DateTime: $date');
+      return date;
+    } else if (donationDate is DateTime) {
+      print('✅ Already DateTime: $donationDate');
+      return donationDate;
+    } else if (donationDate is String) {
+      print('⚠️ Donation date is String, trying to parse');
       try {
-        const eligibilityQuery = query(
-          collection(db, 'eligibility_requests'),
-          where('userId', '==', userId)
-        );
-        const eligibilitySnapshot = await getDocs(eligibilityQuery);
-
-        if (!eligibilitySnapshot.empty) {
-          // Get most recent request
-          let latestDate = null;
-          let latestRequest = null;
-
-          eligibilitySnapshot.forEach(doc => {
-            const requestData = doc.data();
-            if (requestData.submittedDate) {
-              const requestDate = requestData.submittedDate.toDate();
-              if (!latestDate || requestDate > latestDate) {
-                latestDate = requestDate;
-                latestRequest = requestData;
-              }
-            }
-          });
-
-          if (latestRequest) {
-            eligibilityStatus = latestRequest.status || 'pending';
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching eligibility:', error);
+          final date = DateTime.parse(donationDate);
+        print('✅ Parsed from String: $date');
+        return date;
+      } catch (e) {
+        print('❌ Failed to parse date string: $e');
       }
+    }
 
-      // Fetch last donation
-      let lastDonation = '';
-      try {
-        const donationsQuery = query(
-          collection(db, 'donations'),
-          where('donor_id', '==', userId)
+    print('❌ Unexpected date type: ${donationDate.runtimeType}');
+    return null;
+  } catch (e, stackTrace) {
+    print('❌ Error fetching last donation: $e');
+    print('Stack trace: $stackTrace');
+
+    // Check if it's an index error
+    if (e.toString().contains('index')) {
+      print('⚠️ This might be a Firestore index error');
+      print('⚠️ Try creating index for: donations/donor_id/status/donation_date');
+    }
+
+    return null;
+  }
+}
+
+  Widget _buildBloodStock() {
+  return Container(
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      boxShadow: [
+      BoxShadow(
+        color: Colors.grey.withOpacity(0.2),
+        spreadRadius: 1,
+        blurRadius: 3,
+        offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+  padding: const EdgeInsets.all(16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+          const Text(
+    'Current Blood Stock',
+    style: TextStyle(
+      fontWeight: FontWeight.bold,
+      fontSize: 16,
+    ),
+          ),
+  const Text(
+    'Select Location',
+    style: TextStyle(
+      color: Colors.grey,
+      fontSize: 12,
+    ),
+          ),
+  const SizedBox(height: 8),
+
+          // Location dropdown
+          if (_availableLocations.isNotEmpty)
+    Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey.shade300),
+        ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton < String > (
+              value: _selectedLocation.isNotEmpty ? _selectedLocation : null,
+            isExpanded: true,
+            borderRadius: BorderRadius.circular(12),
+            dropdownColor: Colors.white,
+            elevation: 8,
+            hint: const Text('Select a location'),
+              items: _availableLocations.map < DropdownMenuItem < String >> ((String location) {
+    return DropdownMenuItem < String > (
+      value: location,
+        child: Text(
+          location,
+          style: const TextStyle(fontSize: 14),
+            overflow: TextOverflow.ellipsis,
+                      ),
+                    );
+  }).toList(),
+    onChanged: _onLocationChanged,
+      menuMaxHeight: 300,
+                ),
+              ),
+            )
+          else
+  Container(
+    padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+        child: const Center(
+          child: CircularProgressIndicator(
+            color: Color(0xFFDE0D0D),
+                ),
+              ),
+            ),
+
+  const SizedBox(height: 16),
+
+          // Display last updated time
+          if (_currentBloodStock != null && _currentBloodStock!.containsKey('last_updated'))
+    Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+        child: Text(
+          'Last Updated: ${_formatLastUpdated(_currentBloodStock!['last_updated'])}',
+          style: TextStyle(
+            fontSize: 10,
+            color: Colors.grey[600],
+            fontStyle: FontStyle.italic,
+          ),
+        ),
+            ),
+
+  // Blood types grid
+  if (_selectedLocation.isNotEmpty)
+    GridView.count(
+      crossAxisCount: 4,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+        childAspectRatio: 0.75,
+          children: [
+            _bloodTypeStatusFromData('O-'),
+            _bloodTypeStatusFromData('O+'),
+            _bloodTypeStatusFromData('A-'),
+            _bloodTypeStatusFromData('A+'),
+            _bloodTypeStatusFromData('B-'),
+            _bloodTypeStatusFromData('B+'),
+            _bloodTypeStatusFromData('AB-'),
+            _bloodTypeStatusFromData('AB+'),
+          ],
+            )
+          else
+  const Center(
+    child: Padding(
+      padding: EdgeInsets.all(20),
+        child: Text(
+          'Please select a location',
+          style: TextStyle(color: Colors.grey),
+        ),
+              ),
+            ),
+
+  const SizedBox(height: 16),
+
+    // Legend
+    Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+      _stockLegendItem('assets/low.png', 'Low'),
+              const SizedBox(width: 20),
+    _stockLegendItem('assets/medium.png', 'Medium'),
+              const SizedBox(width: 20),
+    _stockLegendItem('assets/high.png', 'Full'),
+            ],
+          ),
+        ],
+      ),
+    );
+}
+
+  Widget _bloodTypeStatusFromData(String bloodType) {
+  // Show loading state
+  if (_currentBloodStock == null) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+      SizedBox(
+        width: 20,
+        height: 20,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: Color(0xFFDE0D0D),
+        ),
+      ),
+          const SizedBox(height: 4),
+      Text(
+        bloodType,
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+          ),
+        ],
+      );
+  }
+
+  // Check if blood_types key exists
+  if (!_currentBloodStock!.containsKey('blood_types')) {
+    print('❌ No blood_types key in _currentBloodStock');
+    print('   Available keys: ${_currentBloodStock!.keys.toList()}');
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+      Icon(Icons.error_outline, color: Colors.orange, size: 30),
+          const SizedBox(height: 4),
+      Text(
+        bloodType,
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+          ),
+    Text(
+      'No data',
+      style: TextStyle(color: Colors.orange, fontSize: 10),
+    ),
+        ],
+      );
+  }
+
+    // Safely cast blood_types to Map<String, dynamic>
+    final bloodTypesRaw = _currentBloodStock!['blood_types'];
+  print('🔍 Raw blood_types type: ${bloodTypesRaw.runtimeType}');
+  print('🔍 Raw blood_types: $bloodTypesRaw');
+    
+    final Map < String, dynamic > bloodTypesMap = Map < String, dynamic >.from(bloodTypesRaw as Map);
+
+  // Check if specific blood type exists
+  if (!bloodTypesMap.containsKey(bloodType)) {
+    print('⚠️ Blood type $bloodType not found in bloodTypesMap');
+    print('   Available blood types: ${bloodTypesMap.keys.toList()}');
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+      Icon(Icons.help_outline, color: Colors.grey, size: 30),
+          const SizedBox(height: 4),
+      Text(
+        bloodType,
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+          ),
+    Text(
+      'N/A',
+      style: TextStyle(color: Colors.grey, fontSize: 10),
+    ),
+        ],
+      );
+  }
+
+  try {
+      final bloodTypeData = bloodTypesMap[bloodType] as Map<String, dynamic>;
+    print('🔍 Blood type data for $bloodType: $bloodTypeData');
+      
+      final status = (bloodTypeData['status'] as String??? 'Medium').toLowerCase();
+      final units = bloodTypeData['units'] as int??? 0;
+
+    // DEBUG: Print the status for troubleshooting
+    print('🔍 Blood type $bloodType: status="$status", units=$units');
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+      // Use getStatusImage from BloodStockService
+      _buildStatusImage(status),
+          const SizedBox(height: 4),
+      Text(
+        bloodType,
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+          ),
+    Text(
+      _formatStatusForDisplay(status),
+      style: TextStyle(
+        color: _getStatusColor(status),
+        fontSize: 10,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+      Text(
+        '$units units',
+        style: TextStyle(
+          color: Colors.grey[600],
+          fontSize: 8,
+        ),
+      ),
+        ],
+      );
+  } catch (e) {
+    print('❌ Error displaying blood type $bloodType: $e');
+    print('   Blood type data: ${bloodTypesMap[bloodType]}');
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+      Icon(Icons.error, color: Colors.red, size: 30),
+          const SizedBox(height: 4),
+      Text(
+        bloodType,
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+          ),
+    Text(
+      'Error',
+      style: TextStyle(color: Colors.red, fontSize: 10),
+    ),
+        ],
+      );
+  }
+}
+
+  Widget _buildStatusImage(String status) {
+  try {
+      // Get the image path from BloodStockService
+      final imagePath = BloodStockService.getStatusImage(status);
+
+    // Try to load the image with better error handling
+    return Image.asset(
+      imagePath,
+      height: 40,
+      width: 40,
+      fit: BoxFit.contain,
+      errorBuilder: (context, error, stackTrace) {
+        print('⚠️ Failed to load image: $imagePath');
+        print('Error: $error');
+
+        // Fallback to colored icon based on status
+        return Icon(
+          Icons.water_drop,
+          size: 40,
+          color: _getStatusColor(status),
         );
-        const donationsSnapshot = await getDocs(donationsQuery);
+      },
+    );
+  } catch (e) {
+    print('❌ Error in _buildStatusImage: $e');
+    return Icon(
+      Icons.error_outline,
+      size: 40,
+      color: Colors.red,
+    );
+  }
+}
 
-        if (!donationsSnapshot.empty) {
-          // Get most recent donation
-          let latestDate = null;
-          let latestDonationData = null;
+  String _formatStatusForDisplay(String status) {
+  switch (status.toLowerCase()) {
+    case 'low':
+      return 'Low';
+    case 'medium':
+      return 'Medium';
+    case 'high':
+    case 'full':
+      return 'Full';
+    case 'very_low':
+      return 'Very Low';
+    case 'empty':
+      return 'Empty';
+    default:
+      return status.capitalize();
+  }
+}
 
-          donationsSnapshot.forEach(doc => {
-            const donationData = doc.data();
-            if (donationData.donation_date) {
-              const donationDate = donationData.donation_date.toDate();
-              if (!latestDate || donationDate > latestDate) {
-                latestDate = donationDate;
-                latestDonationData = donationData;
-              }
-            }
-          });
+  Color _getStatusColor(String status) {
+    final statusLower = status.toLowerCase();
+  switch (statusLower) {
+    case 'low':
+    case 'very_low':
+    case 'empty':
+      return Colors.red;
+    case 'high':
+    case 'full':
+      return Colors.green;
+    case 'medium':
+      return Colors.orange;
+    default:
+      print('⚠️ Unknown status color for: $status');
+      return Colors.grey;
+  }
+}
 
-          if (latestDonationData && latestDonationData.donation_date) {
-            lastDonation = latestDonationData.donation_date.toDate().toISOString().split('T')[0];
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching donations:', error);
-      }
+  Widget _stockLegendItem(String imageAsset, String label) {
+  return Row(
+    children: [
+    Image.asset(imageAsset, height: 20, width: 20),
+        const SizedBox(width: 4),
+    Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+      ],
+    );
+}
 
-      setVerificationResult({
-        valid: true,
-        donor: {
-          id: userId,
-          fullName: donorProfile.full_name || '',
-          displayId: donorProfile.display_id || `DON-${userId.substring(0, 7)}`,
-          bloodGroup: donorProfile.blood_group || '',
-          email: userData.email || '',
-          phone: userData.phone_number || '',
-          emergencyContactName: donorProfile.emergency_contact_name || '',
-          emergencyContactPhone: donorProfile.emergency_contact_phone || '',
-          eligibilityStatus,
-          lastDonation,
-          isEligible: eligibilityStatus === 'approved',
-        },
-      });
+  String _formatLastUpdated(String isoString) {
+  try {
+      final DateTime dateTime = DateTime.parse(isoString);
+      final DateTime now = DateTime.now();
+      final Duration difference = now.difference(dateTime);
 
-    } catch (error) {
-      console.error('Verification error:', error);
-      setVerificationResult({
-        valid: false,
-        message: 'Error verifying card. Please try again.',
-      });
+    if (difference.inMinutes < 60) {
+      return '${difference.inMinutes} min ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours} hour${difference.inHours > 1 ? 's' : ''} ago';
+    } else {
+      return '${difference.inDays} day${difference.inDays > 1 ? 's' : ''} ago';
     }
-  };
+  } catch (e) {
+    return 'Recently updated';
+  }
+}
 
-  const handleQRImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  Widget _buildAnnouncements() {
+  if (_isLoadingAnnouncements) {
+    return _buildLoadingSection('Loading announcements...');
+  }
 
-    try {
-      const img = document.createElement('img');
-      const reader = new FileReader();
-
-      reader.onload = (event) => {
-        img.onload = async () => {
-          const canvas = document.createElement('canvas');
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0);
-
-          try {
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const code = jsQR(imageData.data, imageData.width, imageData.height);
-
-            if (code && code.data) {
-              setVerificationInput(code.data);
-              await verifyDonorCard(code.data);
-            } else {
-              setError('Could not detect QR code in image. Please try a clearer photo or enter the ID manually.');
-            }
-          } catch (err) {
-            setError('Error processing QR code. Please enter the ID manually.');
-          }
-        };
-        img.src = event.target.result;
-      };
-
-      reader.readAsDataURL(file);
-    } catch (err) {
-      setError('Error uploading image. Please try again.');
-    }
-  };
-
-  const formatLastDonation = (date) => {
-    if (!date) return 'No donations yet';
-    try {
-      const d = new Date(date);
-      return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-    } catch (error) {
-      return 'Invalid date';
-    }
-  };
-
-  const stats = {
-    total: donors.length,
-    aPositive: donors.filter(d => d.bloodGroup === 'A+').length,
-    oPositive: donors.filter(d => d.bloodGroup === 'O+').length,
-    rare: donors.filter(d => ['AB-', 'B-', 'A-', 'O-'].includes(d.bloodGroup)).length,
-    eligible: donors.filter(d => d.isEligible).length,
-  };
-
-  if (loading) {
-    return (
-      <Layout onNavigate={onNavigate} currentPage="digital-donor-cards">
-        <div className="loading-container">
-          <div className="loading-content">
-            <div className="loading-spinner"></div>
-            <p className="loading-text">Loading donor cards...</p>
-          </div>
-        </div>
-      </Layout>
+  if (_announcements.isEmpty) {
+    return _buildEmptySection(
+      'No announcements',
+      'Check back later for updates',
+      Icons.announcement,
     );
   }
 
-  return (
-    <>
-      <Layout onNavigate={onNavigate} currentPage="digital-donor-cards">
-        <div className="space-y-6">
-          {/* Header */}
-          <div className="donor-cards-header-container">
-            <h1 className="donor-cards-header-title">Digital Donor Cards</h1>
-          </div>
+  return Container(
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      boxShadow: [
+      BoxShadow(
+        color: Colors.grey.withOpacity(0.2),
+        spreadRadius: 1,
+        blurRadius: 3,
+        offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+  padding: const EdgeInsets.all(16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+      Row(
+        children: const [
+          Icon(Icons.announcement, color: Color(0xFFDE0D0D), size: 22),
+  SizedBox(width: 6),
+    Text(
+      'Announcements',
+      style: TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 16,
+      ),
+    ),
+            ],
+          ),
+  const SizedBox(height: 12),
+    SizedBox(
+      height: 120,
+      child: PageView.builder(
+        controller: _announcementController,
+        itemCount: _announcements.length,
+        itemBuilder: (context, index) {
+                final announcement = _announcements[index];
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+            Text(
+              announcement['title'] ?? 'No Title',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Color(0xFFDE0D0D),
+                      ),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+    ),
+                    const SizedBox(height: 8),
+    Expanded(
+      child: Text(
+        announcement['content'] ?? 'No content',
+        style: const TextStyle(fontSize: 14),
+          maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+  const SizedBox(height: 8),
+    Text(
+      _formatDate(announcement['date']),
+      style: TextStyle(
+        fontSize: 12,
+        color: Colors.grey[600],
+        fontStyle: FontStyle.italic,
+      ),
+    ),
+                  ],
+                );
+},
+            ),
+          ),
+const SizedBox(height: 12),
+  Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+              for (int i = 0; i < _announcements.length; i++)
+Container(
+  width: 8,
+  height: 8,
+  margin: const EdgeInsets.symmetric(horizontal: 4),
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: _currentAnnouncementIndex == i
+      ? const Color(0xFFDE0D0D)
+                        : Colors.grey[300],
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
-          {/* Error Message */}
-          {error && (
-            <div className="error-container">
-              <AlertCircle className="error-icon" />
-              <p className="error-text">{error}</p>
-              <button onClick={() => setError('')} className="error-close">
-                <X className="error-close-icon" />
-              </button>
-            </div>
-          )}
+  Widget _buildUpcomingBloodDrive() {
+  if (_isLoadingEvents) {
+    return _buildLoadingSection('Loading blood drives...', isRed: true);
+  }
 
-          {/* Stats Cards */}
-          <div className="donor-cards-stats-grid">
-            <div className="donor-stat-card stat-card-total">
-              <QrCode className="stat-icon text-blue-600" />
-              <div>
-                <h3 className="stat-number-blue">{stats.total}</h3>
-                <p className="stat-label">Total Donor Cards</p>
-              </div>
-            </div>
-            <div className="donor-stat-card stat-card-rare">
-              <AlertCircle className="stat-icon text-purple-600" />
-              <div>
-                <h3 className="stat-number-purple">{stats.rare}</h3>
-                <p className="stat-label">Rare Blood Types</p>
-              </div>
-            </div>
-            <div className="donor-stat-card stat-card-eligible">
-              <Check className="stat-icon text-green-600" />
-              <div>
-                <h3 className="stat-number-green">{stats.eligible}</h3>
-                <p className="stat-label">Eligible Donors</p>
-              </div>
-            </div>
-          </div>
+  if (_upcomingEvents.isEmpty) {
+    return _buildEmptySection(
+      'No upcoming blood drives',
+      'Check back for scheduled events',
+      Icons.event,
+      isRed: true,
+    );
+  }
 
-          {/* Action Buttons & Filters */}
-          <div className="donor-cards-actions-container">
-            <div className="donor-cards-button-group">
-              <button onClick={handleCreateUserWithCard} className="donor-action-btn add-btn">
-                <Plus size={20} />
-                Create User with Card
-              </button>
-              <button onClick={handleVerifyCard} className="donor-action-btn verify-btn">
-                <Camera size={20} />
-                Verify Card
-              </button>
-            </div>
-
-            <div className="donor-cards-filters-row">
-              <div className="donor-search-input-container">
-                <Search className="donor-search-icon" />
-                <input
-                  type="text"
-                  placeholder="Search by name, ID, email, or blood type..."
-                  className="donor-search-input"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <select
-                className="donor-bloodtype-filter"
-                value={bloodTypeFilter}
-                onChange={(e) => setBloodTypeFilter(e.target.value)}
-              >
-                <option value="All">All Blood Types</option>
-                {bloodTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Donor Cards Grid */}
-          <div className="donor-list-section">
-            <div className="donor-list-header">
-              <h2 className="donor-list-title">Registered Donors</h2>
-              <div className="donor-count-badge">{filteredDonors.length} donors</div>
-            </div>
-
-            <div className="donor-cards-grid">
-              {filteredDonors.map((donor) => (
-                <div key={donor.id} className="donor-card-wrapper" onClick={() => handleViewCard(donor)}>
-                  <div className="donor-card-actions">
-                    <button
-                      onClick={(e) => handleEditDonor(donor, e)}
-                      className="donor-action-button donor-edit-button"
-                      title="Edit"
-                    >
-                      <Edit2 className="donor-action-icon" />
-                    </button>
-                    <button
-                      onClick={(e) => handleDeleteClick(donor, e)}
-                      className="donor-action-button donor-delete-button"
-                      title="Delete"
-                    >
-                      <Trash2 className="donor-action-icon" />
-                    </button>
-                  </div>
-
-                  <div className="donor-card-content">
-                    <div className="donor-qr-container">
-                      <div className="donor-qr-badge">
-                        <QrCode size={64} strokeWidth={2} />
-                      </div>
-                    </div>
-
-                    <div className="donor-info">
-                      <h3 className="donor-name">{donor.fullName}</h3>
-                      <div className="donor-status">
-                        <span className="blood-type">{donor.bloodGroup}</span>
-                        <span className="separator">•</span>
-                        <span className="donor-id">ID: {donor.displayId}</span>
-                      </div>
-                      <div className="donor-meta">
-                        <p className="donor-last-donation">
-                          Last Donation: {formatLastDonation(donor.lastDonation)}
-                        </p>
-                        <p className="donor-eligibility">
-                          Eligibility: <span className={`eligibility-badge ${donor.isEligible ? 'eligible' : 'not-eligible'}`}>
-                            {donor.eligibilityStatus}
-                          </span>
-                        </p>
-                      </div>
-
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleViewCard(donor);
-                        }}
-                        className="view-details-btn"
-                      >
-                        View Full Card
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {filteredDonors.length === 0 && (
-              <div className="donor-empty-state">
-                <div className="donor-empty-state-icon">
-                  <QrCode />
-                </div>
-                <h3 className="donor-empty-state-title">No donor cards found</h3>
-                <p className="donor-empty-state-description">
-                  Try adjusting your search or add a new donor card
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      </Layout>
-
-      {/* Full Card Modal */}
-      {showCardModal && selectedDonor && (
-        <div className="card-modal-overlay" onClick={() => setShowCardModal(false)}>
-          <div className="card-modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-card">
-              <div className="modal-card-header">
-                <h2>Digital Donor Card</h2>
-                <button onClick={() => setShowCardModal(false)} className="modal-close-btn">
-                  <X size={24} />
-                </button>
-              </div>
-
-              <div className="modal-qr-section">
-                <div className="modal-qr-code">
-                  <QRCodeGenerator value={selectedDonor.qrCodeData} size={160} />
-                </div>
-              </div>
-
-              <div className="modal-card-details">
-                <div className="modal-detail-row">
-                  <span className="detail-label">Name:</span>
-                  <span className="detail-value">{selectedDonor.fullName}</span>
-                </div>
-                <div className="modal-detail-row">
-                  <span className="detail-label">Display ID:</span>
-                  <span className="detail-value">{selectedDonor.displayId}</span>
-                </div>
-                <div className="modal-detail-row">
-                  <span className="detail-label">User ID:</span>
-                  <span className="detail-value small-text">{selectedDonor.id}</span>
-                </div>
-                <div className="modal-detail-row">
-                  <span className="detail-label">Blood Type:</span>
-                  <span className="blood-type-large">{selectedDonor.bloodGroup}</span>
-                </div>
-                <div className="modal-detail-row">
-                  <span className="detail-label">Email:</span>
-                  <span className="detail-value">{selectedDonor.email || 'Not provided'}</span>
-                </div>
-                <div className="modal-detail-row">
-                  <span className="detail-label">Phone:</span>
-                  <span className="detail-value">{selectedDonor.phone || 'Not provided'}</span>
-                </div>
-                <div className="modal-detail-row">
-                  <span className="detail-label">Last Donation:</span>
-                  <span className="detail-value">{formatLastDonation(selectedDonor.lastDonation)}</span>
-                </div>
-                <div className="modal-detail-row">
-                  <span className="detail-label">Eligibility Status:</span>
-                  <span className={`detail-badge ${selectedDonor.isEligible ? 'badge-eligible' : 'badge-ineligible'}`}>
-                    {selectedDonor.eligibilityStatus}
-                  </span>
-                </div>
-                {selectedDonor.emergencyContactName && (
-                  <div className="modal-detail-row">
-                    <span className="detail-label">Emergency Contact:</span>
-                    <span className="detail-value">{selectedDonor.emergencyContactName}</span>
-                  </div>
-                )}
-                {selectedDonor.emergencyContactPhone && (
-                  <div className="modal-detail-row">
-                    <span className="detail-label">Emergency Phone:</span>
-                    <span className="detail-value">{selectedDonor.emergencyContactPhone}</span>
-                  </div>
-                )}
-                <div className="modal-detail-row">
-                  <span className="detail-label">Medical Conditions:</span>
-                  <span className="detail-value">{selectedDonor.medicalConditions}</span>
-                </div>
-                {selectedDonor.allergies && selectedDonor.allergies !== 'None' && (
-                  <div className="modal-detail-row">
-                    <span className="detail-label">Allergies:</span>
-                    <span className="detail-value">{selectedDonor.allergies}</span>
-                  </div>
-                )}
-                <div className="modal-detail-row">
-                  <span className="detail-label">QR Code Data:</span>
-                  <span className="detail-value small-text">{selectedDonor.qrCodeData}</span>
-                </div>
-              </div>
-
-              <div className="modal-actions">
-                <button onClick={handleDownloadCard} className="modal-download-button">
-                  <Download size={20} />
-                  Download Card
-                </button>
-                <button onClick={() => setShowCardModal(false)} className="modal-close-button">
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Add/Edit Modal */}
-      {showAddEditModal && (
-        <div className="card-modal-overlay" onClick={() => setShowAddEditModal(false)}>
-          <div className="card-modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-card">
-              <div className="modal-card-header">
-                <h2>{editingDonor ? 'Edit Donor Card' : 'Create User with Card'}</h2>
-                <button onClick={() => setShowAddEditModal(false)} className="modal-close-btn">
-                  <X size={24} />
-                </button>
-              </div>
-
-              <div className="modal-form-content">
-                {!editingDonor && (
-                  <>
-                    <div className="modal-section-divider">
-                      <span className="modal-section-title">Account Information</span>
-                    </div>
-                    <div className="modal-form-group">
-                      <label className="modal-form-label">Email *</label>
-                      <input
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="modal-form-input"
-                        placeholder="email@example.com"
-                        required
-                      />
-                    </div>
-                  </>
-                )}
-
-                <div className="modal-section-divider">
-                  <span className="modal-section-title">Personal Information</span>
-                </div>
-
-                <div className="modal-form-group">
-                  <label className="modal-form-label">Full Name *</label>
-                  <input
-                    type="text"
-                    value={formData.full_name}
-                    onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                    className="modal-form-input"
-                    placeholder="Enter full name"
-                    required
-                  />
-                </div>
-
-                <div className="modal-form-row">
-                  <div className="modal-form-group">
-                    <label className="modal-form-label">Blood Group *</label>
-                    <select
-                      value={formData.blood_group}
-                      onChange={(e) => setFormData({ ...formData, blood_group: e.target.value })}
-                      className="modal-form-select"
-                    >
-                      {bloodTypes.map(type => (
-                        <option key={type} value={type}>{type}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="modal-form-group">
-                    <label className="modal-form-label">Gender</label>
-                    <select
-                      value={formData.gender}
-                      onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                      className="modal-form-select"
-                    >
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="modal-form-row">
-                  <div className="modal-form-group">
-                    <label className="modal-form-label">Phone Number</label>
-                    <input
-                      type="tel"
-                      value={formData.phone_number}
-                      onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-                      className="modal-form-input"
-                      placeholder="+60123456789"
-                    />
-                  </div>
-
-                  {!editingDonor && (
-                    <div className="modal-form-group">
-                      <label className="modal-form-label">Date of Birth</label>
-                      <input
-                        type="date"
-                        value={formData.birth_date}
-                        onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
-                        className="modal-form-input"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div className="modal-section-divider">
-                  <span className="modal-section-title">Emergency Contact</span>
-                </div>
-
-                <div className="modal-form-row">
-                  <div className="modal-form-group">
-                    <label className="modal-form-label">Contact Name</label>
-                    <input
-                      type="text"
-                      value={formData.emergency_contact_name}
-                      onChange={(e) => setFormData({ ...formData, emergency_contact_name: e.target.value })}
-                      className="modal-form-input"
-                      placeholder="Enter emergency contact name"
-                    />
-                  </div>
-
-                  <div className="modal-form-group">
-                    <label className="modal-form-label">Contact Phone</label>
-                    <input
-                      type="tel"
-                      value={formData.emergency_contact_phone}
-                      onChange={(e) => setFormData({ ...formData, emergency_contact_phone: e.target.value })}
-                      className="modal-form-input"
-                      placeholder="+60123456789"
-                    />
-                  </div>
-                </div>
-
-                <div className="modal-section-divider">
-                  <span className="modal-section-title">Medical Information</span>
-                </div>
-
-                <div className="modal-form-group">
-                  <label className="modal-form-label">Medical Conditions</label>
-                  <textarea
-                    value={formData.medical_conditions}
-                    onChange={(e) => setFormData({ ...formData, medical_conditions: e.target.value })}
-                    className="modal-form-textarea"
-                    rows="2"
-                    placeholder="Enter any medical conditions or 'None'"
-                  />
-                </div>
-
-                <div className="modal-form-group">
-                  <label className="modal-form-label">Allergies</label>
-                  <textarea
-                    value={formData.allergies}
-                    onChange={(e) => setFormData({ ...formData, allergies: e.target.value })}
-                    className="modal-form-textarea"
-                    rows="2"
-                    placeholder="Enter any allergies or 'None'"
-                  />
-                </div>
-
-                {!editingDonor && (
-                  <>
-                    <div className="modal-section-divider">
-                      <span className="modal-section-title">Additional Information</span>
-                    </div>
-                    <div className="modal-form-row">
-                      <div className="modal-form-group">
-                        <label className="modal-form-label">Height (cm)</label>
-                        <input
-                          type="number"
-                          value={formData.height}
-                          onChange={(e) => setFormData({ ...formData, height: e.target.value })}
-                          className="modal-form-input"
-                          placeholder="Enter height"
-                        />
-                      </div>
-
-                      <div className="modal-form-group">
-                        <label className="modal-form-label">Weight (kg)</label>
-                        <input
-                          type="number"
-                          value={formData.weight}
-                          onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-                          className="modal-form-input"
-                          placeholder="Enter weight"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="modal-form-group">
-                      <label className="modal-form-label">Blood Bank ID</label>
-                      <input
-                        type="text"
-                        value={formData.blood_bank_id}
-                        onChange={(e) => setFormData({ ...formData, blood_bank_id: e.target.value })}
-                        className="modal-form-input"
-                        placeholder="e.g., 906-890 (optional)"
-                      />
-                    </div>
-                  </>
-                )}
-              </div>
-
-              <div className="modal-form-actions">
-                <button
-                  onClick={() => setShowAddEditModal(false)}
-                  className="modal-cancel-button"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSubmit}
-                  className="modal-save-button"
-                >
-                  {editingDonor ? 'Update Card' : 'Create User & Card'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Verify Modal */}
-      {showVerifyModal && (
-        <div className="card-modal-overlay" onClick={() => setShowVerifyModal(false)}>
-          <div className="card-modal-content verify-modal-width" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-card">
-              <div className="modal-card-header verify-header">
-                <h2>Verify Donor Card</h2>
-                <button onClick={() => setShowVerifyModal(false)} className="modal-close-btn">
-                  <X size={24} />
-                </button>
-              </div>
-
-              <div className="modal-form-content">
-                <p className="verify-description">Enter the donor ID/display ID from the card or upload/scan a QR code to verify authenticity.</p>
-
-                <div className="modal-form-group">
-                  <label className="modal-form-label">Donor ID / Display ID / QR Code Data</label>
-                  <input
-                    type="text"
-                    value={verificationInput}
-                    onChange={(e) => setVerificationInput(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && verifyDonorCard(verificationInput)}
-                    className="modal-form-input"
-                    placeholder="e.g., DON-9MW4SEL or BLOODCONNECT:USER:9MW4SELaQibhaXDatRgRkegBzHG3"
-                  />
-                </div>
-
-                <div className="verify-divider">
-                  <span>OR</span>
-                </div>
-
-                <div className="modal-form-group">
-                  <label className="modal-form-label">Upload QR Code Image</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleQRImageUpload}
-                    className="modal-form-file-input"
-                  />
-                  <p className="file-input-hint">Upload a screenshot or photo of the QR code</p>
-                </div>
-
-                <button
-                  onClick={() => verifyDonorCard(verificationInput)}
-                  className="verify-button"
-                  disabled={!verificationInput.trim()}
-                >
-                  Verify Card
-                </button>
-
-                {verificationResult && (
-                  <div className={`verification-result ${verificationResult.valid ? 'result-valid' : 'result-invalid'}`}>
-                    <div className="verification-result-header">
-                      {verificationResult.valid ? (
-                        <Check className="verification-icon valid-icon" size={24} />
-                      ) : (
-                        <AlertCircle className="verification-icon invalid-icon" size={24} />
-                      )}
-                      <h3 className="verification-result-title">
-                        {verificationResult.valid ? 'Valid Card ✓' : 'Invalid Card ✗'}
-                      </h3>
-                    </div>
-                    {verificationResult.valid ? (
-                      <div className="verification-details">
-                        <p><strong>Name:</strong> {verificationResult.donor.fullName}</p>
-                        <p><strong>Display ID:</strong> {verificationResult.donor.displayId}</p>
-                        <p><strong>Blood Type:</strong> {verificationResult.donor.bloodGroup}</p>
-                        <p><strong>Email:</strong> {verificationResult.donor.email || 'Not provided'}</p>
-                        <p><strong>Phone:</strong> {verificationResult.donor.phone || 'Not provided'}</p>
-                        <p><strong>Last Donation:</strong> {formatLastDonation(verificationResult.donor.lastDonation)}</p>
-                        <p><strong>Eligibility Status:</strong>
-                          <span className={`verification-status ${verificationResult.donor.isEligible ? 'status-eligible' : 'status-ineligible'}`}>
-                            {verificationResult.donor.eligibilityStatus}
-                          </span>
-                        </p>
-                        {verificationResult.donor.emergencyContactName && (
-                          <p><strong>Emergency Contact:</strong> {verificationResult.donor.emergencyContactName}</p>
-                        )}
-                        {verificationResult.donor.emergencyContactPhone && (
-                          <p><strong>Emergency Phone:</strong> {verificationResult.donor.emergencyContactPhone}</p>
-                        )}
-                      </div>
-                    ) : (
-                      <p className="verification-error-message">{verificationResult.message}</p>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && selectedDonor && (
-        <div className="modal-overlay">
-          <div className="delete-confirm-modal">
-            <div className="delete-icon-container">
-              <Trash2 className="delete-icon" />
-            </div>
-            <h3 className="delete-title">Delete Donor Card</h3>
-            <p className="delete-message">
-              Are you sure you want to delete the donor card for <strong>{selectedDonor.fullName}</strong>? This will also delete the user account. This action cannot be undone.
-            </p>
-            <div className="delete-details">
-              <p><strong>Display ID:</strong> {selectedDonor.displayId}</p>
-              <p><strong>Blood Type:</strong> {selectedDonor.bloodGroup}</p>
-              <p><strong>Email:</strong> {selectedDonor.email}</p>
-            </div>
-            <div className="delete-actions">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="cancel-btn"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDeleteConfirm}
-                className="delete-btn"
-              >
-                Delete Card & User
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
+  return Container(
+    decoration: BoxDecoration(
+      color: const Color(0xFFDE0D0D),
+        borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFDE0D0D).withOpacity(0.3),
+                spreadRadius: 1,
+                  blurRadius: 4,
+                    offset: const Offset(0, 2),
+        ),
+      ],
+    ),
+  padding: const EdgeInsets.all(16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Row(
+        children: [
+          Icon(
+            Icons.event,
+          color: Colors.white,
+          size: 22,
+            ),
+    SizedBox(width: 6),
+    Text(
+      'Upcoming Blood Drive',
+      style: TextStyle(
+        color: Colors.white,
+        fontWeight: FontWeight.bold,
+        fontSize: 16,
+      ),
+    ),
+          ],
+        ),
+  const SizedBox(height: 10),
+    // PageView for sliding blood drives - Now shows ONLY upcoming events
+    SizedBox(
+      height: 130,
+      child: PageView.builder(
+        controller: _bloodDriveController,
+        itemCount: _upcomingEvents.length,
+        itemBuilder: (context, index) {
+              final bloodDrive = _upcomingEvents[index];
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+            Text(
+              bloodDrive['title'] ?? 'No Title',
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+                maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+    _bloodDriveInfoRow(Icons.calendar_month, bloodDrive['displayDate'] ?? 'Date not set'),
+                  const SizedBox(height: 4),
+    _bloodDriveInfoRow(Icons.location_on, bloodDrive['location'] ?? 'Location not set'),
+                  const SizedBox(height: 4),
+    _bloodDriveInfoRow(Icons.access_time, bloodDrive['displayTime'] ?? 'Time not set'),
+                  const SizedBox(height: 4),
+    _bloodDriveInfoRow(Icons.local_hospital, bloodDrive['organizers'] ?? 'Organizer not set'),
+                ],
+              );
+},
+          ),
+        ),
+const SizedBox(height: 8),
+  Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+    Row(
+      children: [
+                for (int i = 0; i < _upcomingEvents.length; i++)
+GestureDetector(
+  onTap: () {
+    _bloodDriveController.animateToPage(
+      i,
+      duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+                      );
+                    },
+child: Container(
+  width: 8,
+  height: 8,
+  margin: const EdgeInsets.symmetric(horizontal: 4),
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: _currentBloodDriveIndex == i
+      ? Colors.white
+      : Colors.white.withOpacity(0.5),
+    ),
+                    ),
+                  ),
+              ],
+            ),
+InkWell(
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const BloodDrivePage()),
+    );
+  },
+  child: Container(
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+        child: const Text(
+          'See All',
+          style: TextStyle(
+            color: Color(0xFFDE0D0D),
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
   );
-};
+}
 
-export default DigitalDonorCards;
+  Widget _bloodDriveInfoRow(IconData icon, String text) {
+  return Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+    Icon(
+      icon,
+      color: Colors.white,
+      size: 16,
+    ),
+        const SizedBox(width: 6),
+    Expanded(
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 12,
+        ),
+          maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+}
+
+  Widget _buildActionButtonsRow1() {
+  return Container(
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      boxShadow: [
+      BoxShadow(
+        color: Colors.grey.withOpacity(0.2),
+        spreadRadius: 1,
+        blurRadius: 3,
+        offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+      // Snap and Share Button
+      InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const SnapAndSharePage()),
+          );
+        },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+          Container(
+            width: 54,
+            height: 54,
+            decoration: BoxDecoration(
+              color: const Color(0xFFDE0D0D).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                  ),
+  child: const Center(
+    child: Icon(
+      Icons.camera_alt,
+      color: Color(0xFFDE0D0D),
+        size: 26,
+                    ),
+                  ),
+                ),
+  const SizedBox(height: 6),
+                const Text(
+    'Snap and\nShare',
+    style: TextStyle(
+      fontSize: 10,
+      fontWeight: FontWeight.bold,
+    ),
+      textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+
+  // Raise Awareness Button - NOW USES NATIVE SHARE
+  InkWell(
+    onTap: () {
+      RaiseAwarenessHelper.showRaiseAwarenessShareSheet(context);
+    },
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+      Container(
+        width: 54,
+        height: 54,
+        decoration: BoxDecoration(
+          color: const Color(0xFFDE0D0D).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+                  ),
+  child: const Center(
+    child: Icon(
+      Icons.campaign,
+      color: Color(0xFFDE0D0D),
+        size: 26,
+                    ),
+                  ),
+                ),
+  const SizedBox(height: 6),
+                const Text(
+    'Raise\nAwareness',
+    style: TextStyle(
+      fontSize: 10,
+      fontWeight: FontWeight.bold,
+    ),
+      textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+
+  // Community Button
+  InkWell(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const CommunityPage()),
+      );
+    },
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+      Container(
+        width: 54,
+        height: 54,
+        decoration: BoxDecoration(
+          color: const Color(0xFFDE0D0D).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+                  ),
+  child: const Center(
+    child: Icon(
+      Icons.people,
+      color: Color(0xFFDE0D0D),
+        size: 26,
+                    ),
+                  ),
+                ),
+  const SizedBox(height: 6),
+                const Text(
+    'Community\n',
+    style: TextStyle(
+      fontSize: 10,
+      fontWeight: FontWeight.bold,
+    ),
+      textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+  // Status Button
+  InkWell(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const StatusPage()),
+      );
+    },
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+      Container(
+        width: 54,
+        height: 54,
+        decoration: BoxDecoration(
+          color: const Color(0xFFDE0D0D).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+                  ),
+  child: const Center(
+    child: Icon(
+      Icons.assignment,
+      color: Color(0xFFDE0D0D),
+        size: 26,
+                    ),
+                  ),
+                ),
+  const SizedBox(height: 6),
+                const Text(
+    'Status\n',
+    style: TextStyle(
+      fontSize: 10,
+      fontWeight: FontWeight.bold,
+    ),
+      textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+}
+
+  Widget _buildFindDonorsAndAppointment() {
+  return Container(
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      boxShadow: [
+      BoxShadow(
+        color: Colors.grey.withOpacity(0.2),
+        spreadRadius: 1,
+        blurRadius: 3,
+        offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+      // Book Appointment Button
+      InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const DonationPage()),
+          );
+        },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+          Container(
+            width: 54,
+            height: 54,
+            decoration: BoxDecoration(
+              color: const Color(0xFFDE0D0D).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                  ),
+  child: const Center(
+    child: Icon(
+      Icons.medical_services,
+      color: Color(0xFFDE0D0D),
+        size: 26,
+                    ),
+                  ),
+                ),
+  const SizedBox(height: 6),
+                const Text(
+    'Book\nAppointment',
+    style: TextStyle(
+      fontSize: 10,
+      fontWeight: FontWeight.bold,
+    ),
+      textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+  // Find Donors Button
+  InkWell(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const FindDonorsPage()),
+      );
+    },
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+      Container(
+        width: 54,
+        height: 54,
+        decoration: BoxDecoration(
+          color: const Color(0xFFDE0D0D).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+                  ),
+  child: const Center(
+    child: Icon(
+      Icons.search,
+      color: Color(0xFFDE0D0D),
+        size: 26,
+                    ),
+                  ),
+                ),
+  const SizedBox(height: 6),
+                const Text(
+    'Find\nDonors',
+    style: TextStyle(
+      fontSize: 10,
+      fontWeight: FontWeight.bold,
+    ),
+      textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+  // Donate Now Button
+  InkWell(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const DonateNowPage()),
+      );
+    },
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+      Container(
+        width: 54,
+        height: 54,
+        decoration: BoxDecoration(
+          color: const Color(0xFFDE0D0D).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+                  ),
+  child: const Center(
+    child: Icon(
+      Icons.volunteer_activism,
+      color: Color(0xFFDE0D0D),
+        size: 26,
+                    ),
+                  ),
+                ),
+  const SizedBox(height: 6),
+                const Text(
+    'Donate\nNow',
+    style: TextStyle(
+      fontSize: 10,
+      fontWeight: FontWeight.bold,
+    ),
+      textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+  // Blood Drive Button with updated icon
+  InkWell(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const BloodDrivePage()),
+      );
+    },
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+      Container(
+        width: 54,
+        height: 54,
+        decoration: BoxDecoration(
+          color: const Color(0xFFDE0D0D).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+                  ),
+  child: const Center(
+    child: Icon(
+      Icons.bloodtype,
+      color: Color(0xFFDE0D0D),
+        size: 26,
+                    ),
+                  ),
+                ),
+  const SizedBox(height: 6),
+                const Text(
+    'Blood\nDrive',
+    style: TextStyle(
+      fontSize: 10,
+      fontWeight: FontWeight.bold,
+    ),
+      textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+}
+
+  Widget _buildCommunity() {
+  if (_isLoadingTeams) {
+    return _buildLoadingSection('Loading community teams...');
+  }
+
+  if (_communityTeams.isEmpty) {
+    return _buildEmptySection(
+      'No active teams',
+      'Join or create a team in the Community section',
+      Icons.people,
+    );
+  }
+
+  return Container(
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      boxShadow: [
+      BoxShadow(
+        color: Colors.grey.withOpacity(0.2),
+        spreadRadius: 1,
+        blurRadius: 3,
+        offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+  padding: const EdgeInsets.all(16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+        Row(
+          children: const [
+            Icon(
+              Icons.people,
+              size: 24,
+                color: Color(0xFFDE0D0D),
+                  ),
+  SizedBox(width: 6),
+    Text(
+      'Community',
+      style: TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 16,
+      ),
+    ),
+                ],
+              ),
+  InkWell(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const CommunityPage(initialTabIndex: 1),
+                    ),
+      );
+    },
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: const Color(0xFFDE0D0D),
+            borderRadius: BorderRadius.circular(16),
+                  ),
+  child: const Text(
+    'See All',
+    style: TextStyle(
+      color: Colors.white,
+      fontWeight: FontWeight.bold,
+      fontSize: 12,
+    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+  const SizedBox(height: 12),
+          const Text(
+    'Teams',
+    style: TextStyle(
+      fontSize: 14,
+      color: Colors.grey,
+    ),
+          ),
+  const SizedBox(height: 8),
+    SizedBox(
+      height: 100,
+      child: Row(
+        children: [
+        IconButton(
+          icon: const Icon(Icons.arrow_back_ios, size: 16, color: Color(0xFFDE0D0D)),
+  onPressed: () {
+                    final double currentPosition = _communityScrollController.position.pixels;
+                    final double newPosition = currentPosition - 100;
+    _communityScrollController.animateTo(
+      newPosition < 0 ? 0 : newPosition,
+      duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+                    );
+  },
+                ),
+  Expanded(
+    child: ListView(
+      controller: _communityScrollController,
+      scrollDirection: Axis.horizontal,
+      children: _communityTeams.map((team) {
+        return _communityItemClickable(
+          team['name'] ?? 'Unknown Team',
+          team['icon'] ?? Icons.group,
+          team['memberCount'] ?? 0,
+        );
+      }).toList(),
+    ),
+  ),
+    IconButton(
+      icon: const Icon(Icons.arrow_forward_ios, size: 16, color: Color(0xFFDE0D0D)),
+  onPressed: () {
+                    final double currentPosition = _communityScrollController.position.pixels;
+                    final double maxPosition = _communityScrollController.position.maxScrollExtent;
+                    final double newPosition = currentPosition + 100;
+    _communityScrollController.animateTo(
+      newPosition > maxPosition ? maxPosition : newPosition,
+      duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+                    );
+  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+}
+
+  Widget _communityItemClickable(String title, IconData icon, int memberCount) {
+  return GestureDetector(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const CommunityPage(initialTabIndex: 1),
+          ),
+      );
+    },
+    child: Container(
+      width: 85,
+      margin: const EdgeInsets.symmetric(horizontal: 6),
+        child: Column(
+          children: [
+          Container(
+            height: 60,
+            alignment: Alignment.center,
+            child: Container(
+              padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFDE0D0D).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(25),
+                ),
+  child: Icon(
+    icon,
+    color: const Color(0xFFDE0D0D),
+      size: 24,
+                ),
+              ),
+            ),
+  const SizedBox(height: 8),
+    Text(
+      title,
+      style: const TextStyle(
+        fontSize: 10,
+        fontWeight: FontWeight.bold,
+      ),
+        textAlign: TextAlign.center,
+          maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            ),
+  Text(
+    '$memberCount members',
+    style: TextStyle(
+      fontSize: 8,
+      color: Colors.grey[600],
+    ),
+  ),
+          ],
+        ),
+      ),
+    );
+}
+
+  // Helper methods for loading/empty states
+  Widget _buildLoadingSection(String message, { bool isRed = false }) {
+  return Container(
+    decoration: BoxDecoration(
+      color: isRed ? const Color(0xFFDE0D0D) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 1,
+              blurRadius: 3,
+              offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+  padding: const EdgeInsets.all(16),
+    child: Center(
+      child: Column(
+        children: [
+        CircularProgressIndicator(
+          color: isRed ? Colors.white : const Color(0xFFDE0D0D),
+            ),
+  const SizedBox(height: 12),
+    Text(
+      message,
+      style: TextStyle(
+        color: isRed ? Colors.white : Colors.grey[600],
+      ),
+    ),
+          ],
+        ),
+      ),
+    );
+}
+
+  Widget _buildEmptySection(String title, String subtitle, IconData icon, { bool isRed = false }) {
+  return Container(
+    decoration: BoxDecoration(
+      color: isRed ? const Color(0xFFDE0D0D) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 1,
+              blurRadius: 3,
+              offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+  padding: const EdgeInsets.all(16),
+    child: Center(
+      child: Column(
+        children: [
+        Icon(
+          icon,
+          color: isRed ? Colors.white : const Color(0xFFDE0D0D),
+            size: 40,
+            ),
+  const SizedBox(height: 12),
+    Text(
+      title,
+      style: TextStyle(
+        color: isRed ? Colors.white : Colors.grey[800],
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+            const SizedBox(height: 6),
+    Text(
+      subtitle,
+      style: TextStyle(
+        color: isRed ? Colors.white.withOpacity(0.8) : Colors.grey[600],
+        fontSize: 12,
+      ),
+      textAlign: TextAlign.center,
+    ),
+          ],
+        ),
+      ),
+    );
+}
+
+  String _formatDate(dynamic date) {
+  try {
+    if (date is Timestamp) {
+        final DateTime dateTime = date.toDate();
+      return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+    } else if (date is String) {
+      return date;
+    }
+    return 'Date not available';
+  } catch (e) {
+    return 'Date not available';
+  }
+}
+}
+
+// String extension for capitalization
+extension StringExtension on String {
+  String capitalize() {
+    if (isEmpty) return this;
+    return this[0].toUpperCase() + substring(1).toLowerCase();
+  }
+}
