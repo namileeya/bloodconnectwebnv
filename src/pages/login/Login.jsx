@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { CheckCircle, X, AlertCircle } from 'lucide-react';
 import './Login.css'; // Import the custom CSS styles
+import backgroundImage from '../../assets/background.png'; // Import background image
 
 // Success Popup Component
 const SuccessPopup = ({ isVisible, onClose }) => {
@@ -139,7 +140,7 @@ const Login = ({ onLoginSuccess }) => {
   return (
     <>
       <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{
-        backgroundImage: 'url(src/assets/background.png)',
+        backgroundImage: `url(${backgroundImage})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat'
