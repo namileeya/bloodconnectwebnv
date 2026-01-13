@@ -4,7 +4,7 @@
 @tailwind utilities;
 
 /* Remove container padding since Layout handles it */
-.space-y-6 > * + * {
+.space-y-6>*+* {
   @apply mt-6;
 }
 
@@ -82,6 +82,10 @@
 
 .stat-card-rare {
   @apply border-l-4 border-purple-500;
+}
+
+.stat-card-eligible {
+  @apply border-l-4 border-green-500;
 }
 
 .stat-icon {
@@ -182,6 +186,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -225,31 +230,73 @@
 }
 
 .donor-name {
-  @apply text-lg font-semibold text-gray-800 mb-1 line-clamp-2;
+  @apply text-lg font-semibold text-gray-800 mb-2;
+  line-height: 1.4;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .donor-status {
-  @apply flex items-center justify-center gap-2 mb-2;
+  @apply flex items-center justify-center gap-2 mb-3;
+  line-height: 1.5 !important;
+  align-items: baseline !important;
 }
 
 .blood-type {
   @apply text-sm font-medium text-red-600;
+  line-height: 1.5 !important;
+  display: inline-flex !important;
+  align-items: baseline !important;
+  vertical-align: baseline !important;
 }
 
 .separator {
   @apply text-gray-400;
+  line-height: 1.5 !important;
+  display: inline-flex !important;
+  align-items: baseline !important;
+  vertical-align: baseline !important;
 }
 
 .donor-id {
   @apply text-sm text-gray-500;
+  line-height: 1.5 !important;
+  display: inline-flex !important;
+  align-items: baseline !important;
+  vertical-align: baseline !important;
+}
+
+.donor-meta {
+  @apply space-y-1 mb-4;
 }
 
 .donor-last-donation {
-  @apply text-sm text-gray-600 mb-4;
+  @apply text-sm text-gray-600;
+  line-height: 1.5;
+}
+
+.donor-eligibility {
+  @apply text-sm text-gray-600;
+  line-height: 1.5;
+}
+
+.eligibility-badge {
+  @apply px-2 py-0.5 rounded-full text-xs font-semibold;
+  display: inline-flex;
+  align-items: center;
+}
+
+.eligible {
+  @apply bg-green-100 text-green-800;
+}
+
+.not-eligible {
+  @apply bg-gray-100 text-gray-600;
 }
 
 .view-details-btn {
   @apply w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors;
+  margin-top: auto;
 }
 
 /* Empty State */
@@ -275,7 +322,8 @@
 
 /* Modal Overlay */
 .card-modal-overlay {
-  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4;
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4;
+  z-index: 9999;
 }
 
 /* Modal Container */
@@ -592,7 +640,7 @@
   .donor-cards-grid {
     @apply grid-cols-1;
   }
-  
+
   .modal-form-row {
     @apply grid-cols-1;
   }

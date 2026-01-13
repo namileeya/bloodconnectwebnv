@@ -22,11 +22,16 @@
 
 /* Header */
 .inventory-header-container {
-  @apply flex justify-between items-center;
+  @apply flex justify-between items-center mb-4;
 }
 
 .inventory-header-title {
-  @apply text-3xl font-bold text-gray-800;
+  @apply text-3xl font-bold text-gray-800 mb-0;
+}
+
+/* Page spacing improvement */
+.space-y-6 {
+  @apply -mt-6;
 }
 
 /* Search and Filters */
@@ -136,7 +141,7 @@
 
 .add-stock-button,
 .update-stock-button {
-  @apply px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-semibold;
+  @apply flex items-center gap-2 px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-semibold;
 }
 
 /* Table */
@@ -215,7 +220,7 @@
 
 /* Modal */
 .inventory-modal-overlay {
-  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4;
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4;
 }
 
 .inventory-modal-container {
@@ -330,90 +335,54 @@
   }
 }
 
-/* Stats Cards Grid */
-.stats-cards-grid {
-  @apply grid grid-cols-1 md:grid-cols-3 gap-6;
+/* Stats Cards Grid - Matching Donation Records */
+.inventory-stats-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6;
 }
 
-.stat-card {
-  @apply bg-white rounded-xl shadow-sm p-6;
+.inventory-stat-card {
+  @apply bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow;
 }
 
-.stat-card-blue {
-  @apply border-l-4 border-blue-400;
+.stat-card-total {
+  @apply border-l-4 border-blue-500;
 }
 
-.stat-card-red {
-  @apply border-l-4 border-red-400;
+.stat-card-critical {
+  @apply border-l-4 border-red-500;
 }
 
-.stat-card-orange {
-  @apply border-l-4 border-orange-400;
+.stat-card-urgent {
+  @apply border-l-4 border-orange-500;
 }
 
-.stat-card-content {
-  @apply flex items-center justify-between;
+.stat-card-warning {
+  @apply border-l-4 border-yellow-500;
 }
 
-.stat-card-info {
-  @apply flex-1;
+.stat-number-blue {
+  @apply text-3xl font-bold text-blue-600 mb-2;
 }
 
-.stat-card-label {
-  @apply text-gray-600 text-sm font-medium mb-2;
+.stat-number-red {
+  @apply text-3xl font-bold text-red-600 mb-2;
 }
 
-.stat-card-number {
-  @apply text-5xl font-bold text-gray-800 mb-3;
+.stat-number-orange {
+  @apply text-3xl font-bold text-orange-600 mb-2;
 }
 
-.stat-card-number-red {
-  @apply text-red-600;
+.stat-number-yellow {
+  @apply text-3xl font-bold text-yellow-600 mb-2;
 }
 
-.stat-card-number-orange {
-  @apply text-orange-600;
-}
-
-.stat-card-trend {
-  @apply flex items-center gap-2;
-}
-
-.trend-icon-red {
-  @apply w-5 h-5 text-red-600;
-}
-
-.trend-icon-orange {
-  @apply w-5 h-5 text-orange-600;
-}
-
-.trend-text-red {
-  @apply text-red-600 text-sm font-semibold;
-}
-
-.trend-text-orange {
-  @apply text-orange-600 text-sm font-semibold;
-}
-
-.stat-card-icon {
-  @apply p-4 rounded-full;
-}
-
-.stat-card-icon-blue {
-  @apply bg-blue-100;
-}
-
-.stat-card-icon-red {
-  @apply bg-red-100;
-}
-
-.stat-card-icon-orange {
-  @apply bg-orange-100;
+.stat-label {
+  @apply text-gray-600 text-sm font-medium;
 }
 
 /* Location Stock Section */
 .location-stock-section {
-  @apply space-y-4;
+  @apply space-y-4 mt-5;
 }
 
 .location-selector-header {

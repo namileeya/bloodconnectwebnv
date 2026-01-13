@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { QrCode, X, Plus, Edit2, Download, Camera, Check, AlertCircle, Search, Trash2, User, Phone, Mail, FileText } from 'lucide-react';
+import { QrCode, X, Plus, Edit2, Download, Camera, Check, AlertCircle, Search, Trash2 } from 'lucide-react';
 import Layout from '../../components/Layout';
 import QRCode from 'qrcode';
 import jsQR from 'jsqr';
@@ -7,14 +7,13 @@ import './DigitalDonorCards.css';
 
 // Firebase imports
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
-import { 
-  getFirestore, 
-  collection, 
-  doc, 
-  getDocs, 
-  getDoc, 
-  addDoc, 
-  updateDoc, 
+import {
+  getFirestore,
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  updateDoc,
   deleteDoc,
   query,
   where,
@@ -71,7 +70,7 @@ const DigitalDonorCards = ({ onNavigate }) => {
     // User collection fields
     email: '',
     phone_number: '',
-    
+
     // Donor profiles collection fields
     full_name: '',
     blood_group: 'A+',
@@ -84,7 +83,7 @@ const DigitalDonorCards = ({ onNavigate }) => {
     medical_conditions: 'None',
     allergies: 'None',
     blood_bank_id: '',
-    
+
     // New fields for donor cards
     emergency_contact_name: '',
     emergency_contact_phone: '',
@@ -116,17 +115,108 @@ const DigitalDonorCards = ({ onNavigate }) => {
     setFilteredDonors(filtered);
   }, [searchQuery, bloodTypeFilter, donors]);
 
+  // Get the actual status from all possible fields in priority order
+  const getEligibilityStatus = (requestData) => {
+    if (!requestData) return 'Not Submitted';
+
+    // Priority 1: admin_decision (admin's final decision)
+    if (requestData.admin_decision && requestData.admin_decision !== '') {
+      return requestData.admin_decision;
+    }
+
+    // Priority 2: adminStatus (admin's system status)
+    if (requestData.adminStatus && requestData.adminStatus !== '') {
+      return requestData.adminStatus;
+    }
+
+    // Priority 3: status (original submission status)
+    if (requestData.status && requestData.status !== '') {
+      return requestData.status;
+    }
+
+    // Priority 4: autoStatus (auto-calculated status)
+    if (requestData.autoStatus && requestData.autoStatus !== '') {
+      return requestData.autoStatus;
+    }
+
+    return 'Submitted (Pending Review)';
+  };
+
+  // Determine if status indicates eligibility
+  const isEligible = (status) => {
+    if (!status || status === 'Not Submitted') return false;
+
+    const statusLower = status.toLowerCase().trim();
+
+    // Eligible statuses
+    const eligibleStatuses = [
+      'approved',
+      'approved_permanent',
+      'eligible',
+      'eligible_permanent',
+      'cleared',
+      'passed'
+    ];
+
+    return eligibleStatuses.includes(statusLower);
+  };
+
+  // Format status for display (make it user-friendly)
+  const formatEligibilityStatus = (status) => {
+    if (!status || status === 'Not Submitted') return 'Not Submitted';
+
+    const statusLower = status.toLowerCase().trim();
+
+    // Map status to user-friendly display names
+    const statusMap = {
+      // Approved/Eligible statuses
+      'approved': 'Approved',
+      'approved_permanent': 'Approved (Permanent)',
+      'eligible': 'Eligible',
+      'eligible_permanent': 'Eligible (Permanent)',
+      'cleared': 'Cleared',
+      'passed': 'Passed',
+
+      // Pending/Review statuses
+      'pending': 'Pending Review',
+      'pending_review': 'Pending Review',
+      'under_review': 'Under Review',
+      'review_in_progress': 'Review in Progress',
+      'submitted (pending review)': 'Submitted (Pending Review)',
+      'submitted': 'Submitted',
+
+      // Deferred statuses
+      'deferred': 'Deferred',
+      'deferred_temporary': 'Temporarily Deferred',
+      'deferred_permanent': 'Permanently Deferred',
+
+      // Ineligible/Rejected statuses
+      'ineligible': 'Ineligible',
+      'ineligible_temporary': 'Temporarily Ineligible',
+      'ineligible_permanent': 'Permanently Ineligible',
+      'rejected': 'Rejected',
+      'failed': 'Failed',
+
+      // Other statuses
+      'cancelled': 'Cancelled',
+      'expired': 'Expired',
+      'not_submitted': 'Not Submitted'
+    };
+
+    return statusMap[statusLower] || status;
+  };
+
   const loadDonors = async () => {
     setLoading(true);
     try {
       // 1. Fetch all users from users collection
       const usersSnapshot = await getDocs(collection(db, 'users'));
       const donorsData = [];
-      
+
       for (const userDoc of usersSnapshot.docs) {
         const userId = userDoc.id;
         const userData = userDoc.data();
-        
+
         // 2. Fetch donor profile
         let donorProfile = {};
         try {
@@ -137,75 +227,131 @@ const DigitalDonorCards = ({ onNavigate }) => {
         } catch (error) {
           console.error(`Error fetching donor profile for ${userId}:`, error);
         }
-        
-        // 3. Fetch latest eligibility request - IMPROVED QUERY
+
+        // 3. Fetch LATEST eligibility request (sorted by submittedDate)
         let eligibilityStatus = 'Not Submitted';
+        let isEligibleFlag = false;
+        let eligibilityDetails = null;
+        let hasEligibilityRequest = false;
+
         try {
-          const eligibilityQuery = query(
-            collection(db, 'eligibility_requests'),
-            where('userId', '==', userId)
-          );
-          const eligibilitySnapshot = await getDocs(eligibilityQuery);
-          
-          if (!eligibilitySnapshot.empty) {
-            // Get all requests and find the most recent
-            let latestDate = null;
-            let latestRequest = null;
-            
-            eligibilitySnapshot.forEach(doc => {
-              const requestData = doc.data();
-              
-              if (requestData.submittedDate) {
-                const requestDate = requestData.submittedDate.toDate();
-                if (!latestDate || requestDate > latestDate) {
-                  latestDate = requestDate;
-                  latestRequest = requestData;
+          // First check if the eligibility_requests collection exists
+          const eligibilityCollection = collection(db, 'eligibility_requests');
+
+          // Try to query with proper error handling
+          try {
+            const eligibilityQuery = query(
+              eligibilityCollection,
+              where('userId', '==', userId),
+              orderBy('submittedDate', 'desc'),
+              limit(1)
+            );
+
+            const eligibilitySnapshot = await getDocs(eligibilityQuery);
+
+            if (!eligibilitySnapshot.empty) {
+              hasEligibilityRequest = true;
+              const latestDoc = eligibilitySnapshot.docs[0];
+              const requestData = latestDoc.data();
+
+              // Get the actual status from all possible fields
+              eligibilityStatus = getEligibilityStatus(requestData);
+              isEligibleFlag = isEligible(eligibilityStatus);
+
+              // Store details for debugging
+              eligibilityDetails = {
+                admin_decision: requestData.admin_decision,
+                adminStatus: requestData.adminStatus,
+                status: requestData.status,
+                autoStatus: requestData.autoStatus,
+                finalStatus: eligibilityStatus,
+                isEligible: isEligibleFlag,
+                hasRequest: true
+              };
+
+              console.log(`Eligibility status for ${userId}:`, eligibilityStatus);
+            } else {
+              // No eligibility request found
+              console.log(`No eligibility request found for ${userId}`);
+              eligibilityDetails = {
+                hasRequest: false,
+                message: 'No eligibility request submitted'
+              };
+            }
+          } catch (queryError) {
+            // Handle query errors (e.g., missing index)
+            console.warn(`Query error for ${userId}:`, queryError.message);
+
+            // Try a simpler query without orderBy
+            try {
+              const simpleQuery = query(
+                eligibilityCollection,
+                where('userId', '==', userId)
+              );
+              const simpleSnapshot = await getDocs(simpleQuery);
+
+              if (!simpleSnapshot.empty) {
+                hasEligibilityRequest = true;
+                // Find the latest document manually
+                let latestDoc = null;
+                let latestDate = null;
+
+                simpleSnapshot.forEach(doc => {
+                  const data = doc.data();
+                  if (data.submittedDate) {
+                    const docDate = data.submittedDate.toDate();
+                    if (!latestDate || docDate > latestDate) {
+                      latestDate = docDate;
+                      latestDoc = { id: doc.id, data: data };
+                    }
+                  }
+                });
+
+                if (latestDoc) {
+                  eligibilityStatus = getEligibilityStatus(latestDoc.data);
+                  isEligibleFlag = isEligible(eligibilityStatus);
+
+                  eligibilityDetails = {
+                    admin_decision: latestDoc.data.admin_decision,
+                    adminStatus: latestDoc.data.adminStatus,
+                    status: latestDoc.data.status,
+                    autoStatus: latestDoc.data.autoStatus,
+                    finalStatus: eligibilityStatus,
+                    isEligible: isEligibleFlag,
+                    hasRequest: true
+                  };
                 }
               }
-            });
-            
-            if (latestRequest) {
-              eligibilityStatus = latestRequest.status || 'pending';
+            } catch (simpleError) {
+              console.error(`Simple query also failed for ${userId}:`, simpleError);
             }
           }
         } catch (error) {
-          console.error(`Error fetching eligibility for ${userId}:`, error);
+          console.error(`General error fetching eligibility for ${userId}:`, error);
+          // Don't set error status, just use default
         }
-        
-        // 4. Fetch last donation date - IMPROVED QUERY
+
+        // 4. Fetch last donation date
         let lastDonation = '';
         try {
           const donationsQuery = query(
             collection(db, 'donations'),
-            where('donor_id', '==', userId)
+            where('donor_id', '==', userId),
+            orderBy('donation_date', 'desc'),
+            limit(1)
           );
           const donationsSnapshot = await getDocs(donationsQuery);
-          
+
           if (!donationsSnapshot.empty) {
-            // Get all donations and find the most recent
-            let latestDate = null;
-            let latestDonationData = null;
-            
-            donationsSnapshot.forEach(doc => {
-              const donationData = doc.data();
-              
-              if (donationData.donation_date) {
-                const donationDate = donationData.donation_date.toDate();
-                if (!latestDate || donationDate > latestDate) {
-                  latestDate = donationDate;
-                  latestDonationData = donationData;
-                }
-              }
-            });
-            
-            if (latestDonationData && latestDonationData.donation_date) {
-              lastDonation = latestDonationData.donation_date.toDate().toISOString().split('T')[0];
+            const latestDonation = donationsSnapshot.docs[0].data();
+            if (latestDonation.donation_date) {
+              lastDonation = latestDonation.donation_date.toDate().toISOString().split('T')[0];
             }
           }
         } catch (error) {
           console.error(`Error fetching donations for ${userId}:`, error);
         }
-        
+
         // 5. Combine all data for donor card display
         donorsData.push({
           id: userId,
@@ -225,29 +371,32 @@ const DigitalDonorCards = ({ onNavigate }) => {
           emergencyContactPhone: donorProfile.emergency_contact_phone || '',
           // Calculated fields
           eligibilityStatus,
+          eligibilityDetails, // For debugging
+          hasEligibilityRequest,
           lastDonation,
-          // For backward compatibility with existing code
+          isEligible: isEligibleFlag,
+          // For backward compatibility
           name: donorProfile.full_name || '',
           bloodType: donorProfile.blood_group || '',
           emergencyContact: donorProfile.emergency_contact_name || '',
           emergencyPhone: donorProfile.emergency_contact_phone || '',
           medicalNotes: `${donorProfile.medical_conditions || 'None'}${donorProfile.allergies ? `, Allergies: ${donorProfile.allergies}` : ''}`,
-          isEligible: eligibilityStatus === 'approved',
           createdAt: donorProfile.created_at?.toDate?.() || new Date(),
         });
       }
-      
+
       setDonors(donorsData);
       setFilteredDonors(donorsData);
-      
+
     } catch (err) {
       console.error('Error loading donors:', err);
-      setError('Failed to load donor cards');
+      setError('Failed to load donor cards: ' + err.message);
     } finally {
       setLoading(false);
     }
   };
 
+  // Rest of the functions remain the same...
   const generateRandomPassword = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let password = '';
@@ -260,11 +409,11 @@ const DigitalDonorCards = ({ onNavigate }) => {
   const formatDateToDDMMYYYY = (dateString) => {
     if (!dateString) return '';
     if (dateString.includes('/')) return dateString;
-    
+
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return dateString;
-      
+
       const day = String(date.getDate()).padStart(2, '0');
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const year = date.getFullYear();
@@ -327,20 +476,19 @@ const DigitalDonorCards = ({ onNavigate }) => {
 
   const handleDeleteConfirm = async () => {
     if (!selectedDonor) return;
-    
+
     try {
-      // Note: Deleting auth user requires backend function
-      // For now, just delete from Firestore collections
+      // Delete from Firestore collections
       await deleteDoc(doc(db, 'users', selectedDonor.id));
       await deleteDoc(doc(db, 'donor_profiles', selectedDonor.id));
-      
+
       // Update local state
       const updatedDonors = donors.filter(d => d.id !== selectedDonor.id);
       setDonors(updatedDonors);
-      
+
       setShowDeleteConfirm(false);
       setSelectedDonor(null);
-      
+
     } catch (err) {
       console.error('Error deleting donor:', err);
       setError('Failed to delete donor card');
@@ -365,7 +513,7 @@ const DigitalDonorCards = ({ onNavigate }) => {
 
     try {
       if (editingDonor) {
-        // Update existing donor - only update donor_profiles (emergency contact, etc.)
+        // Update existing donor
         await updateDoc(doc(db, 'donor_profiles', editingDonor.id), {
           emergency_contact_name: formData.emergency_contact_name,
           emergency_contact_phone: formData.emergency_contact_phone,
@@ -373,29 +521,29 @@ const DigitalDonorCards = ({ onNavigate }) => {
           allergies: formData.allergies,
           updated_at: serverTimestamp(),
         });
-        
+
         // Reload donors
         await loadDonors();
-        
+
         setShowAddEditModal(false);
         setEditingDonor(null);
-        
+
       } else {
-        // Create new user (same as User Management)
+        // Create new user
         const password = generateRandomPassword();
-        
+
         // 1. Create Firebase Auth user
         const userCredential = await createUserWithEmailAndPassword(
-          auth, 
-          formData.email, 
+          auth,
+          formData.email,
           password
         );
         const userId = userCredential.user.uid;
-        
+
         // Generate display ID and QR code
         const displayId = `DON-${userId.substring(0, 7)}`;
         const qrCodeData = `BLOODCONNECT:USER:${userId}`;
-        
+
         // 2. Create users document
         await setDoc(doc(db, 'users', userId), {
           email: formData.email,
@@ -405,7 +553,7 @@ const DigitalDonorCards = ({ onNavigate }) => {
           qr_code_data: qrCodeData,
           created_at: serverTimestamp(),
         });
-        
+
         // 3. Create donor_profiles document
         await setDoc(doc(db, 'donor_profiles', userId), {
           user_id: userId,
@@ -426,13 +574,13 @@ const DigitalDonorCards = ({ onNavigate }) => {
           created_at: serverTimestamp(),
           updated_at: serverTimestamp(),
         });
-        
+
         // Show success message with password
         alert(`User created successfully! Temporary password: ${password}\nShare this with the user.`);
-        
+
         // Reload donors
         await loadDonors();
-        
+
         setShowAddEditModal(false);
         setFormData({
           email: '',
@@ -452,7 +600,7 @@ const DigitalDonorCards = ({ onNavigate }) => {
           emergency_contact_phone: '',
         });
       }
-      
+
     } catch (error) {
       console.error('Error saving donor:', error);
       if (error.code === 'auth/email-already-in-use') {
@@ -554,7 +702,7 @@ const DigitalDonorCards = ({ onNavigate }) => {
 
     try {
       let userId;
-      
+
       // Check if input is QR code format
       if (trimmedInput.startsWith('BLOODCONNECT:USER:')) {
         userId = trimmedInput.split(':')[2];
@@ -565,7 +713,7 @@ const DigitalDonorCards = ({ onNavigate }) => {
           where('display_id', '==', trimmedInput)
         );
         const donorSnapshot = await getDocs(donorsQuery);
-        
+
         if (donorSnapshot.empty) {
           setVerificationResult({
             valid: false,
@@ -573,7 +721,7 @@ const DigitalDonorCards = ({ onNavigate }) => {
           });
           return;
         }
-        
+
         userId = donorSnapshot.docs[0].data().user_id;
       }
 
@@ -599,37 +747,65 @@ const DigitalDonorCards = ({ onNavigate }) => {
       }
       const donorProfile = donorDoc.data();
 
-      // Fetch latest eligibility request
+      // Fetch LATEST eligibility request
       let eligibilityStatus = 'Not Submitted';
+      let isEligibleFlag = false;
+      let hasEligibilityRequest = false;
+
       try {
-        const eligibilityQuery = query(
-          collection(db, 'eligibility_requests'),
-          where('userId', '==', userId)
-        );
-        const eligibilitySnapshot = await getDocs(eligibilityQuery);
-        
-        if (!eligibilitySnapshot.empty) {
-          // Get most recent request
-          let latestDate = null;
-          let latestRequest = null;
-          
-          eligibilitySnapshot.forEach(doc => {
-            const requestData = doc.data();
-            if (requestData.submittedDate) {
-              const requestDate = requestData.submittedDate.toDate();
-              if (!latestDate || requestDate > latestDate) {
-                latestDate = requestDate;
-                latestRequest = requestData;
+        // Try complex query first
+        try {
+          const eligibilityQuery = query(
+            collection(db, 'eligibility_requests'),
+            where('userId', '==', userId),
+            orderBy('submittedDate', 'desc'),
+            limit(1)
+          );
+          const eligibilitySnapshot = await getDocs(eligibilityQuery);
+
+          if (!eligibilitySnapshot.empty) {
+            hasEligibilityRequest = true;
+            const latestDoc = eligibilitySnapshot.docs[0];
+            const requestData = latestDoc.data();
+
+            eligibilityStatus = getEligibilityStatus(requestData);
+            isEligibleFlag = isEligible(eligibilityStatus);
+          }
+        } catch (complexError) {
+          // Fallback to simple query
+          console.warn('Complex query failed, trying simple query:', complexError.message);
+          const simpleQuery = query(
+            collection(db, 'eligibility_requests'),
+            where('userId', '==', userId)
+          );
+          const simpleSnapshot = await getDocs(simpleQuery);
+
+          if (!simpleSnapshot.empty) {
+            hasEligibilityRequest = true;
+            // Find latest manually
+            let latestDoc = null;
+            let latestDate = null;
+
+            simpleSnapshot.forEach(doc => {
+              const data = doc.data();
+              if (data.submittedDate) {
+                const docDate = data.submittedDate.toDate();
+                if (!latestDate || docDate > latestDate) {
+                  latestDate = docDate;
+                  latestDoc = data;
+                }
               }
+            });
+
+            if (latestDoc) {
+              eligibilityStatus = getEligibilityStatus(latestDoc);
+              isEligibleFlag = isEligible(eligibilityStatus);
             }
-          });
-          
-          if (latestRequest) {
-            eligibilityStatus = latestRequest.status || 'pending';
           }
         }
       } catch (error) {
         console.error('Error fetching eligibility:', error);
+        // Keep default "Not Submitted" status
       }
 
       // Fetch last donation
@@ -637,28 +813,16 @@ const DigitalDonorCards = ({ onNavigate }) => {
       try {
         const donationsQuery = query(
           collection(db, 'donations'),
-          where('donor_id', '==', userId)
+          where('donor_id', '==', userId),
+          orderBy('donation_date', 'desc'),
+          limit(1)
         );
         const donationsSnapshot = await getDocs(donationsQuery);
-        
+
         if (!donationsSnapshot.empty) {
-          // Get most recent donation
-          let latestDate = null;
-          let latestDonationData = null;
-          
-          donationsSnapshot.forEach(doc => {
-            const donationData = doc.data();
-            if (donationData.donation_date) {
-              const donationDate = donationData.donation_date.toDate();
-              if (!latestDate || donationDate > latestDate) {
-                latestDate = donationDate;
-                latestDonationData = donationData;
-              }
-            }
-          });
-          
-          if (latestDonationData && latestDonationData.donation_date) {
-            lastDonation = latestDonationData.donation_date.toDate().toISOString().split('T')[0];
+          const latestDonation = donationsSnapshot.docs[0].data();
+          if (latestDonation.donation_date) {
+            lastDonation = latestDonation.donation_date.toDate().toISOString().split('T')[0];
           }
         }
       } catch (error) {
@@ -676,9 +840,10 @@ const DigitalDonorCards = ({ onNavigate }) => {
           phone: userData.phone_number || '',
           emergencyContactName: donorProfile.emergency_contact_name || '',
           emergencyContactPhone: donorProfile.emergency_contact_phone || '',
-          eligibilityStatus,
+          eligibilityStatus: formatEligibilityStatus(eligibilityStatus),
           lastDonation,
-          isEligible: eligibilityStatus === 'approved',
+          isEligible: isEligibleFlag,
+          hasEligibilityRequest,
         },
       });
 
@@ -767,7 +932,6 @@ const DigitalDonorCards = ({ onNavigate }) => {
         {/* Header */}
         <div className="donor-cards-header-container">
           <h1 className="donor-cards-header-title">Digital Donor Cards</h1>
-          <p className="donor-cards-header-subtitle">Generate, view, and verify digital donor identity cards</p>
         </div>
 
         {/* Error Message */}
@@ -890,7 +1054,7 @@ const DigitalDonorCards = ({ onNavigate }) => {
                       </p>
                       <p className="donor-eligibility">
                         Eligibility: <span className={`eligibility-badge ${donor.isEligible ? 'eligible' : 'not-eligible'}`}>
-                          {donor.eligibilityStatus}
+                          {formatEligibilityStatus(donor.eligibilityStatus)}
                         </span>
                       </p>
                     </div>
@@ -973,9 +1137,32 @@ const DigitalDonorCards = ({ onNavigate }) => {
                   <div className="modal-detail-row">
                     <span className="detail-label">Eligibility Status:</span>
                     <span className={`detail-badge ${selectedDonor.isEligible ? 'badge-eligible' : 'badge-ineligible'}`}>
-                      {selectedDonor.eligibilityStatus}
+                      {formatEligibilityStatus(selectedDonor.eligibilityStatus)}
                     </span>
                   </div>
+
+                  {/* Debug information - can be removed in production */}
+                  {selectedDonor.eligibilityDetails && (
+                    <div className="modal-detail-row debug-info">
+                      <span className="detail-label">Status Details:</span>
+                      <div className="detail-value small-text">
+                        <div>Has Eligibility Request: {selectedDonor.hasEligibilityRequest ? 'Yes' : 'No'}</div>
+                        {selectedDonor.eligibilityDetails.admin_decision && (
+                          <div>Admin Decision: {selectedDonor.eligibilityDetails.admin_decision}</div>
+                        )}
+                        {selectedDonor.eligibilityDetails.adminStatus && (
+                          <div>Admin Status: {selectedDonor.eligibilityDetails.adminStatus}</div>
+                        )}
+                        {selectedDonor.eligibilityDetails.status && (
+                          <div>Status: {selectedDonor.eligibilityDetails.status}</div>
+                        )}
+                        {selectedDonor.eligibilityDetails.autoStatus && (
+                          <div>Auto Status: {selectedDonor.eligibilityDetails.autoStatus}</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   {selectedDonor.emergencyContactName && (
                     <div className="modal-detail-row">
                       <span className="detail-label">Emergency Contact:</span>
@@ -1304,11 +1491,12 @@ const DigitalDonorCards = ({ onNavigate }) => {
                           <p><strong>Email:</strong> {verificationResult.donor.email || 'Not provided'}</p>
                           <p><strong>Phone:</strong> {verificationResult.donor.phone || 'Not provided'}</p>
                           <p><strong>Last Donation:</strong> {formatLastDonation(verificationResult.donor.lastDonation)}</p>
-                          <p><strong>Eligibility Status:</strong> 
+                          <p><strong>Eligibility Status:</strong>
                             <span className={`verification-status ${verificationResult.donor.isEligible ? 'status-eligible' : 'status-ineligible'}`}>
                               {verificationResult.donor.eligibilityStatus}
                             </span>
                           </p>
+                          <p><strong>Eligibility Request:</strong> {verificationResult.donor.hasEligibilityRequest ? 'Submitted' : 'Not Submitted'}</p>
                           {verificationResult.donor.emergencyContactName && (
                             <p><strong>Emergency Contact:</strong> {verificationResult.donor.emergencyContactName}</p>
                           )}

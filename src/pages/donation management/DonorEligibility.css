@@ -5,7 +5,7 @@
 
 /* Page Container */
 .eligibility-page {
-  @apply space-y-8 p-6;
+  @apply space-y-4 -m-6 -mt-16 p-6 pb-6;
 }
 
 /* Loading */
@@ -19,44 +19,73 @@
 
 /* Header */
 .eligibility-header-container {
-  @apply flex justify-between items-center mb-2;
+  @apply mb-2;
 }
 
 .eligibility-header-title {
-  @apply text-3xl font-bold text-gray-900;
+  @apply text-3xl font-bold text-gray-900 mb-1;
+}
+
+.eligibility-header-subtitle {
+  @apply text-sm text-gray-600 font-medium;
+}
+
+/* View Mode Tabs */
+.view-mode-tabs {
+  @apply flex gap-3 mb-2;
+}
+
+.tab-btn {
+  @apply flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all border-2;
+}
+
+.tab-btn:not(.active) {
+  @apply bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:border-gray-300;
+}
+
+.tab-btn.active {
+  @apply bg-red-600 text-white border-red-600 shadow-md;
 }
 
 /* Stats */
 .eligibility-stats-grid {
-  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5;
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-2;
 }
 
 .eligibility-stat-card {
-  @apply bg-white p-6 rounded-xl shadow-sm border-l-4 transition-all hover:shadow-md;
+  @apply bg-white p-5 rounded-xl shadow-sm border-l-4 transition-all hover:shadow-md;
 }
 
-.eligibility-stat-card.total { 
-  @apply border-blue-500; 
+.eligibility-stat-card.total {
+  @apply border-blue-500;
 }
 
-.eligibility-stat-card.eligible { 
-  @apply border-green-500; 
+.eligibility-stat-card.pending {
+  @apply border-orange-500;
+}
+
+.eligibility-stat-card.pending .stat-number {
+  @apply text-orange-600;
+}
+
+.eligibility-stat-card.eligible {
+  @apply border-green-500;
 }
 
 .eligibility-stat-card.eligible .stat-number {
   @apply text-green-600;
 }
 
-.eligibility-stat-card.deferred { 
-  @apply border-yellow-500; 
+.eligibility-stat-card.deferred {
+  @apply border-yellow-500;
 }
 
 .eligibility-stat-card.deferred .stat-number {
   @apply text-yellow-600;
 }
 
-.eligibility-stat-card.ineligible { 
-  @apply border-red-500; 
+.eligibility-stat-card.ineligible {
+  @apply border-red-500;
 }
 
 .eligibility-stat-card.ineligible .stat-number {
@@ -161,6 +190,14 @@
   @apply bg-red-50 text-red-700 border-red-300;
 }
 
+.eligibility-pending {
+  @apply bg-orange-50 text-orange-700 border-orange-300;
+}
+
+.eligibility-unknown {
+  @apply bg-gray-50 text-gray-700 border-gray-300;
+}
+
 .eligibility-icon {
   @apply w-3.5 h-3.5;
 }
@@ -257,7 +294,7 @@
 
 /* Modal */
 .eligibility-modal-overlay {
-  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm;
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4 backdrop-blur-sm;
 }
 
 .eligibility-modal,
@@ -352,6 +389,80 @@
   @apply px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors shadow-sm hover:shadow;
 }
 
+/* Meta Items */
+.eligibility-meta {
+  @apply space-y-2 pb-4 border-b border-gray-200;
+}
+
+.meta-item {
+  @apply flex justify-between items-center text-sm;
+}
+
+.meta-label {
+  @apply text-gray-500 font-medium;
+}
+
+.meta-value {
+  @apply text-gray-900 font-semibold;
+}
+
+/* Questionnaire Summary */
+.questionnaire-summary {
+  @apply bg-gray-50 p-4 rounded-lg border border-gray-200;
+}
+
+/* Admin Notes */
+.admin-notes {
+  @apply bg-blue-50 p-4 rounded-lg border border-blue-200 mt-4;
+}
+
+.notes-label {
+  @apply block text-sm font-semibold text-blue-900 mb-1;
+}
+
+.notes-value {
+  @apply text-sm text-blue-800;
+}
+
+/* Modal Sections */
+.medical-info-section,
+.questionnaire-section,
+.decision-form {
+  @apply space-y-3;
+}
+
+.section-title {
+  @apply text-base font-bold text-gray-900 mb-3 pb-2 border-b border-gray-200;
+}
+
+.medical-grid {
+  @apply grid grid-cols-2 gap-3;
+}
+
+.full-questionnaire {
+  @apply space-y-2;
+}
+
+.notification-preview {
+  @apply bg-blue-50 p-4 rounded-lg border border-blue-200 mt-4;
+}
+
+.preview-title {
+  @apply text-sm font-semibold text-blue-900 mb-2;
+}
+
+.preview-content {
+  @apply text-sm text-blue-800;
+}
+
+.form-hint {
+  @apply text-xs text-gray-500 mt-1;
+}
+
+.save-btn:disabled {
+  @apply opacity-50 cursor-not-allowed hover:bg-red-600;
+}
+
 /* Responsive Adjustments */
 @media (max-width: 768px) {
   .eligibility-page {
@@ -360,6 +471,18 @@
 
   .eligibility-header-title {
     @apply text-2xl;
+  }
+
+  .eligibility-stats-grid {
+    @apply grid-cols-2;
+  }
+
+  .view-mode-tabs {
+    @apply flex-col;
+  }
+
+  .tab-btn {
+    @apply w-full justify-center;
   }
 
   .eligibility-filters-grid {
@@ -378,6 +501,10 @@
   .pagination-info {
     @apply flex-wrap;
   }
+
+  .medical-grid {
+    @apply grid-cols-1;
+  }
 }
 
 /* Animation */
@@ -386,6 +513,7 @@
     opacity: 0;
     transform: scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: scale(1);

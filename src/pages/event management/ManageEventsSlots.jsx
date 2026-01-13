@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, Plus, X, MapPin, Clock, Users, AlertCircle, Trash2, Edit3, User, Search, ChevronDown, Building } from 'lucide-react';
-import { 
-  collection, 
-  getDocs, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  doc, 
-  query, 
+import {
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  query,
   where,
-  Timestamp 
+  Timestamp
 } from 'firebase/firestore';
 import { db } from '../../firebase';
 import Layout from '../../components/Layout';
@@ -18,18 +18,18 @@ import './ManageEventsSlots.css';
 const ManageEventsSlots = ({ onNavigate }) => {
   const [events, setEvents] = useState([]);
   const [hospitals, setHospitals] = useState([]);
-  
+
   // For Destination Hospital (Compulsary)
   const [filteredHospitals, setFilteredHospitals] = useState([]);
   const [showDestinationDropdown, setShowDestinationDropdown] = useState(false);
   const [destinationSearch, setDestinationSearch] = useState('');
-  
+
   // For Event Location (Optional hospital search)
   const [filteredLocationHospitals, setFilteredLocationHospitals] = useState([]);
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const [locationSearch, setLocationSearch] = useState('');
   const [isEventAtHospital, setIsEventAtHospital] = useState(false);
-  
+
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState('month');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -39,14 +39,14 @@ const ManageEventsSlots = ({ onNavigate }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  
+
   const [showSlotsModal, setShowSlotsModal] = useState(false);
   const [selectedEventForSlots, setSelectedEventForSlots] = useState(null);
   const [slotBookings, setSlotBookings] = useState([]);
   const [donorDetails, setDonorDetails] = useState({});
   const [timeSlots, setTimeSlots] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
-  
+
   const [formData, setFormData] = useState({
     title: '',
     startDate: '',
@@ -71,7 +71,7 @@ const ManageEventsSlots = ({ onNavigate }) => {
   const usersRef = collection(db, 'users');
   const donorProfilesRef = collection(db, 'donor_profiles');
   const hospitalsRef = collection(db, 'hospitals');
-  
+
   // Refs for dropdown click outside
   const destinationDropdownRef = useRef(null);
   const locationDropdownRef = useRef(null);
@@ -105,16 +105,16 @@ const ManageEventsSlots = ({ onNavigate }) => {
     if (!timeStr) return '';
     const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)?/i);
     if (!match) return '';
-    
+
     let hours = parseInt(match[1]);
     const minutes = match[2];
     const period = match[3];
-    
+
     if (period) {
       if (period.toUpperCase() === 'PM' && hours !== 12) hours += 12;
       if (period.toUpperCase() === 'AM' && hours === 12) hours = 0;
     }
-    
+
     return `${hours.toString().padStart(2, '0')}:${minutes}`;
   };
 
@@ -134,14 +134,14 @@ const ManageEventsSlots = ({ onNavigate }) => {
     try {
       const querySnapshot = await getDocs(hospitalsRef);
       const hospitalsData = [];
-      
+
       querySnapshot.forEach((doc) => {
         hospitalsData.push({
           id: doc.id,
           ...doc.data()
         });
       });
-      
+
       setHospitals(hospitalsData);
       setFilteredHospitals(hospitalsData);
       setFilteredLocationHospitals(hospitalsData);
@@ -156,7 +156,7 @@ const ManageEventsSlots = ({ onNavigate }) => {
       setFilteredHospitals(hospitals);
       return;
     }
-    
+
     const lowerSearch = searchTerm.toLowerCase();
     const filtered = hospitals.filter(hospital =>
       hospital.name.toLowerCase().includes(lowerSearch) ||
@@ -164,7 +164,7 @@ const ManageEventsSlots = ({ onNavigate }) => {
       hospital.state.toLowerCase().includes(lowerSearch) ||
       hospital.address.toLowerCase().includes(lowerSearch)
     );
-    
+
     setFilteredHospitals(filtered);
   };
 
@@ -174,7 +174,7 @@ const ManageEventsSlots = ({ onNavigate }) => {
       setFilteredLocationHospitals(hospitals);
       return;
     }
-    
+
     const lowerSearch = searchTerm.toLowerCase();
     const filtered = hospitals.filter(hospital =>
       hospital.name.toLowerCase().includes(lowerSearch) ||
@@ -182,7 +182,7 @@ const ManageEventsSlots = ({ onNavigate }) => {
       hospital.state.toLowerCase().includes(lowerSearch) ||
       hospital.address.toLowerCase().includes(lowerSearch)
     );
-    
+
     setFilteredLocationHospitals(filtered);
   };
 
@@ -255,15 +255,15 @@ const ManageEventsSlots = ({ onNavigate }) => {
       ...prev,
       location: value
     }));
-    
+
     // If user types in location, check if it starts with hospital-related words
-    if (value.toLowerCase().includes('hospital') || 
-        value.toLowerCase().includes('clinic') ||
-        value.toLowerCase().includes('medical') ||
-        value.toLowerCase().includes('health')) {
+    if (value.toLowerCase().includes('hospital') ||
+      value.toLowerCase().includes('clinic') ||
+      value.toLowerCase().includes('medical') ||
+      value.toLowerCase().includes('health')) {
       setIsEventAtHospital(true);
       setFormData(prev => ({ ...prev, locationType: 'hospital' }));
-      
+
       // Show hospital suggestions
       filterLocationHospitals(value);
       if (value.trim() && !showLocationDropdown) {
@@ -298,7 +298,7 @@ const ManageEventsSlots = ({ onNavigate }) => {
     try {
       const querySnapshot = await getDocs(eventsRef);
       const eventsData = [];
-      
+
       querySnapshot.forEach((doc) => {
         const data = doc.data();
         eventsData.push({
@@ -308,7 +308,7 @@ const ManageEventsSlots = ({ onNavigate }) => {
           endDateObj: parseDateString(data.endDate)
         });
       });
-      
+
       setEvents(eventsData);
     } catch (error) {
       console.error('Error loading events:', error);
@@ -324,14 +324,14 @@ const ManageEventsSlots = ({ onNavigate }) => {
       const q = query(bookingsRef, where('eventId', '==', eventId));
       const querySnapshot = await getDocs(q);
       const bookings = [];
-      
+
       querySnapshot.forEach((doc) => {
         bookings.push({
           id: doc.id,
           ...doc.data()
         });
       });
-      
+
       return bookings;
     } catch (error) {
       console.error('Error loading bookings:', error);
@@ -342,24 +342,24 @@ const ManageEventsSlots = ({ onNavigate }) => {
   // Load donor details for bookings
   const loadDonorDetails = async (bookings) => {
     const details = {};
-    
+
     for (const booking of bookings) {
       if (!details[booking.userId]) {
         try {
           const userQuery = query(usersRef, where('__name__', '==', booking.userId));
           const userSnapshot = await getDocs(userQuery);
-          
+
           const donorQuery = query(donorProfilesRef, where('user_id', '==', booking.userId));
           const donorSnapshot = await getDocs(donorQuery);
-          
+
           if (!userSnapshot.empty) {
             const userData = userSnapshot.docs[0].data();
             let donorData = {};
-            
+
             if (!donorSnapshot.empty) {
               donorData = donorSnapshot.docs[0].data();
             }
-            
+
             details[booking.userId] = {
               user: userData,
               donor: donorData
@@ -370,26 +370,26 @@ const ManageEventsSlots = ({ onNavigate }) => {
         }
       }
     }
-    
+
     setDonorDetails(details);
   };
 
   // Get events for a specific date - FIXED VERSION
   const getEventsForDate = (date) => {
     if (!date || !events.length) return [];
-    
+
     const targetDate = new Date(date);
     targetDate.setHours(0, 0, 0, 0);
-    
+
     return events.filter(event => {
       if (!event.startDateObj || !event.endDateObj) return false;
-      
+
       const eventStart = new Date(event.startDateObj);
       eventStart.setHours(0, 0, 0, 0);
-      
+
       const eventEnd = new Date(event.endDateObj);
       eventEnd.setHours(23, 59, 59, 999);
-      
+
       return targetDate >= eventStart && targetDate <= eventEnd;
     });
   };
@@ -397,29 +397,29 @@ const ManageEventsSlots = ({ onNavigate }) => {
   // NEW FUNCTION: Generate time slots with specific bookings data
   const generateTimeSlotsForEvent = (event, bookings) => {
     if (!event.startTime || !event.endTime) return [];
-    
+
     const timeToMinutes = (timeStr) => {
       if (!timeStr) return 0;
-      
+
       const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)?/i);
       if (!match) return 0;
-      
+
       let hours = parseInt(match[1]);
       const minutes = parseInt(match[2]);
       const period = match[3];
-      
+
       if (period) {
         if (period.toUpperCase() === 'PM' && hours !== 12) hours += 12;
         if (period.toUpperCase() === 'AM' && hours === 12) hours = 0;
       }
-      
+
       return hours * 60 + minutes;
     };
-    
+
     const startMinutes = timeToMinutes(event.startTime);
     const endMinutes = timeToMinutes(event.endTime);
     const slots = [];
-    
+
     // Generate slots every 30 minutes
     for (let time = startMinutes; time < endMinutes; time += 30) {
       const hours = Math.floor(time / 60);
@@ -428,23 +428,23 @@ const ManageEventsSlots = ({ onNavigate }) => {
       const displayHours = hours % 12 || 12;
       const timeStr = `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
       const timeKey = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-      
+
       const endTime = time + 30;
       const endHours = Math.floor(endTime / 60);
       const endMinutesVal = endTime % 60;
       const endPeriod = endHours >= 12 ? 'PM' : 'AM';
       const endDisplayHours = endHours % 12 || 12;
       const endTimeStr = `${endDisplayHours}:${endMinutesVal.toString().padStart(2, '0')} ${endPeriod}`;
-      
+
       // Count bookings for this slot using the provided bookings array
       const bookedCount = bookings.filter(
         booking => booking.selectedTime === timeKey
       ).length;
-      
+
       // FIX: Proper capacity check - only show full if capacity > 0 and booked >= capacity
       const capacity = parseInt(event.slotCapacity) || 0;
       const isFull = capacity > 0 && bookedCount >= capacity;
-      
+
       slots.push({
         time: timeKey,
         displayTime: `${timeStr} - ${endTimeStr}`,
@@ -455,7 +455,7 @@ const ManageEventsSlots = ({ onNavigate }) => {
         bookings: bookings.filter(b => b.selectedTime === timeKey)
       });
     }
-    
+
     return slots;
   };
 
@@ -514,25 +514,25 @@ const ManageEventsSlots = ({ onNavigate }) => {
   const handleOpenSlotsModal = async (event) => {
     console.log('Opening slots modal for event:', event.title);
     setSelectedEventForSlots(event);
-    
+
     try {
       // Load bookings for this specific event
       const bookings = await loadEventBookings(event.id);
       console.log('Bookings loaded:', bookings.length);
-      
+
       // Set the slot bookings state
       setSlotBookings(bookings);
-      
+
       // Load donor details asynchronously
       loadDonorDetails(bookings);
-      
+
       // Generate slots using the bookings we just loaded
       const slots = generateTimeSlotsForEvent(event, bookings);
       console.log('Generated slots:', slots.length);
       console.log('Total bookings across all slots:', slots.reduce((sum, slot) => sum + slot.bookedCount, 0));
-      
+
       setTimeSlots(slots);
-      
+
       setShowSlotsModal(true);
     } catch (error) {
       console.error('Error opening slots modal:', error);
@@ -541,9 +541,9 @@ const ManageEventsSlots = ({ onNavigate }) => {
   };
 
   const handleAddEvent = async () => {
-    if (!formData.title || !formData.startDate || !formData.startTime || 
-        !formData.endDate || !formData.endTime || !formData.slotCapacity || 
-        !formData.assignedHospitalId) {
+    if (!formData.title || !formData.startDate || !formData.startTime ||
+      !formData.endDate || !formData.endTime || !formData.slotCapacity ||
+      !formData.assignedHospitalId) {
       alert('Please fill all required fields including Destination Hospital');
       return;
     }
@@ -577,14 +577,14 @@ const ManageEventsSlots = ({ onNavigate }) => {
       };
 
       const docRef = await addDoc(eventsRef, newEvent);
-      
+
       setEvents(prev => [...prev, {
         id: docRef.id,
         ...newEvent,
         startDateObj: parseDateString(newEvent.startDate),
         endDateObj: parseDateString(newEvent.endDate)
       }]);
-      
+
       setShowAddModal(false);
       resetForm();
       alert('Event created successfully!');
@@ -622,9 +622,9 @@ const ManageEventsSlots = ({ onNavigate }) => {
   };
 
   const handleSaveEdit = async () => {
-    if (!formData.title || !formData.startDate || !formData.startTime || 
-        !formData.endDate || !formData.endTime || !formData.slotCapacity ||
-        !formData.assignedHospitalId) {
+    if (!formData.title || !formData.startDate || !formData.startTime ||
+      !formData.endDate || !formData.endTime || !formData.slotCapacity ||
+      !formData.assignedHospitalId) {
       alert('Please fill all required fields including Destination Hospital');
       return;
     }
@@ -656,18 +656,18 @@ const ManageEventsSlots = ({ onNavigate }) => {
 
       const eventRef = doc(db, 'blood_drive_events', selectedEvent.id);
       await updateDoc(eventRef, updatedEvent);
-      
-      setEvents(prev => prev.map(e => 
-        e.id === selectedEvent.id 
+
+      setEvents(prev => prev.map(e =>
+        e.id === selectedEvent.id
           ? {
-              ...e,
-              ...updatedEvent,
-              startDateObj: parseDateString(updatedEvent.startDate),
-              endDateObj: parseDateString(updatedEvent.endDate)
-            }
+            ...e,
+            ...updatedEvent,
+            startDateObj: parseDateString(updatedEvent.startDate),
+            endDateObj: parseDateString(updatedEvent.endDate)
+          }
           : e
       ));
-      
+
       setShowEditModal(false);
       setSelectedEvent(null);
       resetForm();
@@ -680,23 +680,23 @@ const ManageEventsSlots = ({ onNavigate }) => {
 
   const handleDeleteEvent = async () => {
     if (!selectedEvent) return;
-    
+
     try {
       const bookingsQuery = query(bookingsRef, where('eventId', '==', selectedEvent.id));
       const bookingsSnapshot = await getDocs(bookingsQuery);
-      
+
       if (!bookingsSnapshot.empty) {
         if (!confirm('This event has bookings. Deleting it will also delete all associated bookings. Continue?')) {
           return;
         }
-        
+
         const deletePromises = bookingsSnapshot.docs.map(doc => deleteDoc(doc.ref));
         await Promise.all(deletePromises);
       }
-      
+
       const eventRef = doc(db, 'blood_drive_events', selectedEvent.id);
       await deleteDoc(eventRef);
-      
+
       setEvents(prev => prev.filter(e => e.id !== selectedEvent.id));
       setShowDeleteConfirm(false);
       setShowEventDetails(false);
@@ -747,11 +747,11 @@ const ManageEventsSlots = ({ onNavigate }) => {
         totalBookedInSlots: 0
       };
     }
-    
+
     const availableSlots = timeSlots.filter(s => !s.isFull).length;
     const fullSlots = timeSlots.filter(s => s.isFull).length;
     const totalBookedInSlots = timeSlots.reduce((sum, slot) => sum + slot.bookedCount, 0);
-    
+
     return {
       totalSlots: timeSlots.length,
       availableSlots,
@@ -765,7 +765,7 @@ const ManageEventsSlots = ({ onNavigate }) => {
   const renderDayView = () => {
     const dayEvents = getEventsForDate(currentDate);
     const today = new Date();
-    const isToday = 
+    const isToday =
       currentDate.getDate() === today.getDate() &&
       currentDate.getMonth() === today.getMonth() &&
       currentDate.getFullYear() === today.getFullYear();
@@ -840,7 +840,7 @@ const ManageEventsSlots = ({ onNavigate }) => {
       const date = new Date(startOfWeek);
       date.setDate(startOfWeek.getDate() + i);
       const dayEvents = getEventsForDate(date);
-      const isToday = 
+      const isToday =
         date.getDate() === today.getDate() &&
         date.getMonth() === today.getMonth() &&
         date.getFullYear() === today.getFullYear();
@@ -904,11 +904,11 @@ const ManageEventsSlots = ({ onNavigate }) => {
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
       const dayEvents = getEventsForDate(date);
-      const isToday = 
+      const isToday =
         date.getDate() === today.getDate() &&
         date.getMonth() === today.getMonth() &&
         date.getFullYear() === today.getFullYear();
-      const isSelected = 
+      const isSelected =
         selectedDate &&
         date.getDate() === selectedDate.getDate() &&
         date.getMonth() === selectedDate.getMonth() &&
@@ -996,6 +996,11 @@ const ManageEventsSlots = ({ onNavigate }) => {
   return (
     <Layout onNavigate={onNavigate} currentPage="manage-events-slots">
       <div className="manage-events-slots-wrapper">
+        {/* Header */}
+        <div className="header-container">
+          <h1 className="header-title">Manage Events & Slots</h1>
+        </div>
+
         {/* Calendar Section */}
         <div className="event-calendar-section">
           <div className="calendar-controls">
@@ -1094,7 +1099,7 @@ const ManageEventsSlots = ({ onNavigate }) => {
                             </div>
                           )}
                           <div className="text-sm text-gray-500 mt-1">
-                            Registered: {event.currentParticipants || 0}/{event.expectedCapacity} • 
+                            Registered: {event.currentParticipants || 0}/{event.expectedCapacity} •
                             Slot Capacity: {event.slotCapacity || 0}
                           </div>
                         </div>
@@ -1225,7 +1230,7 @@ const ManageEventsSlots = ({ onNavigate }) => {
                           <ChevronDown className="w-4 h-4" />
                         </button>
                       </div>
-                      
+
                       {showDestinationDropdown && filteredHospitals.length > 0 && (
                         <div className="hospital-dropdown">
                           <div className="hospital-dropdown-header">
@@ -1274,7 +1279,7 @@ const ManageEventsSlots = ({ onNavigate }) => {
                   {/* EVENT LOCATION (Optional with hospital search) */}
                   <div className="form-group" ref={locationDropdownRef}>
                     <label className="form-label">Event Location</label>
-                    
+
                     {/* Location Type Toggle */}
                     <div className="flex gap-2 mb-3">
                       <button
@@ -1334,7 +1339,7 @@ const ManageEventsSlots = ({ onNavigate }) => {
                             <ChevronDown className="w-4 h-4" />
                           </button>
                         </div>
-                        
+
                         {showLocationDropdown && filteredLocationHospitals.length > 0 && (
                           <div className="hospital-dropdown">
                             <div className="hospital-dropdown-header">
@@ -1385,8 +1390,8 @@ const ManageEventsSlots = ({ onNavigate }) => {
                       />
                     )}
                     <p className="capacity-info">
-                      {isEventAtHospital 
-                        ? "Select a hospital if event is held at a hospital/clinic" 
+                      {isEventAtHospital
+                        ? "Select a hospital if event is held at a hospital/clinic"
                         : "Enter venue details for non-hospital locations"}
                     </p>
                   </div>
@@ -1567,7 +1572,7 @@ const ManageEventsSlots = ({ onNavigate }) => {
                           <ChevronDown className="w-4 h-4" />
                         </button>
                       </div>
-                      
+
                       {showDestinationDropdown && filteredHospitals.length > 0 && (
                         <div className="hospital-dropdown">
                           <div className="hospital-dropdown-header">
@@ -1608,7 +1613,7 @@ const ManageEventsSlots = ({ onNavigate }) => {
                   {/* EVENT LOCATION in Edit Modal */}
                   <div className="form-group" ref={locationDropdownRef}>
                     <label className="form-label">Event Location</label>
-                    
+
                     <div className="flex gap-2 mb-3">
                       <button
                         type="button"
@@ -1666,7 +1671,7 @@ const ManageEventsSlots = ({ onNavigate }) => {
                             <ChevronDown className="w-4 h-4" />
                           </button>
                         </div>
-                        
+
                         {showLocationDropdown && filteredLocationHospitals.length > 0 && (
                           <div className="hospital-dropdown">
                             <div className="hospital-dropdown-list">
@@ -1978,7 +1983,7 @@ const ManageEventsSlots = ({ onNavigate }) => {
                   <p className="text-sm text-gray-500 mb-4">
                     Auto-generated slots within event duration. Each slot allows maximum {selectedEventForSlots.slotCapacity} donors.
                   </p>
-                  
+
                   {timeSlots.length === 0 ? (
                     <div className="no-slots">
                       <Clock className="no-slots-icon" />
@@ -1997,7 +2002,7 @@ const ManageEventsSlots = ({ onNavigate }) => {
                               {slot.isFull ? 'FULL' : 'AVAILABLE'}
                             </span>
                           </div>
-                          
+
                           <div className="slot-details">
                             <div className="slot-capacity">
                               <Users className="slot-detail-icon" />
@@ -2006,7 +2011,7 @@ const ManageEventsSlots = ({ onNavigate }) => {
                             <div className="text-xs text-gray-600 mt-1">
                               Available: {slot.availableSlots} slots
                             </div>
-                            
+
                             {slot.bookedCount > 0 && (
                               <button
                                 className="view-donors-button"
@@ -2018,11 +2023,11 @@ const ManageEventsSlots = ({ onNavigate }) => {
                               </button>
                             )}
                           </div>
-                          
+
                           <div className="slot-progress">
-                            <div 
+                            <div
                               className="slot-progress-bar"
-                              style={{ 
+                              style={{
                                 width: `${Math.min((slot.bookedCount / slot.capacity) * 100, 100)}%`,
                                 backgroundColor: slot.isFull ? '#ef4444' : '#3b82f6'
                               }}
@@ -2112,7 +2117,7 @@ const ManageEventsSlots = ({ onNavigate }) => {
                 </div>
 
                 <div className="event-modal-actions mt-6">
-                  <button 
+                  <button
                     className="modal-button save-button"
                     onClick={() => setShowSlotsModal(false)}
                   >

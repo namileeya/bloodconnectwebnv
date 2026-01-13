@@ -55,6 +55,13 @@ const ErrorPopup = ({ isVisible, onClose, message }) => {
 };
 
 // Login Component
+// Consolidated imports
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import app from '../../firebase';
+
+// Initialize auth
+const auth = getAuth(app);
+
 const Login = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -64,12 +71,6 @@ const Login = ({ onLoginSuccess }) => {
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-
-  // Predefined valid credentials
-  const validCredentials = [
-    { email: 'admin@gmail.com', password: 'admin123' },
-    { email: 'user@example.com', password: 'password123' }
-  ];
 
   // Decision logic for login validation
   const validateLogin = () => {
@@ -83,25 +84,6 @@ const Login = ({ onLoginSuccess }) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setErrorMessage('Please enter a valid email address');
-      return false;
-    }
-
-    // Decision 3: Check credentials
-    const isValidCredential = validCredentials.some(
-      cred => cred.email.toLowerCase() === email.toLowerCase() && cred.password === password
-    );
-
-    if (!isValidCredential) {
-      // Decision 4: Provide specific error message
-      const emailExists = validCredentials.some(
-        cred => cred.email.toLowerCase() === email.toLowerCase()
-      );
-
-      if (emailExists) {
-        setErrorMessage('Incorrect password. Please try again.');
-      } else {
-        setErrorMessage('Email not found. Please check your email address.');
-      }
       return false;
     }
 
@@ -120,9 +102,13 @@ const Login = ({ onLoginSuccess }) => {
     // Proceed with login if validation passes
     if (email && password) {
       setIsLoading(true);
-      // Simulate API call
-      setTimeout(() => {
-        console.log('Login successful', { email, rememberPassword });
+
+      try {
+        // Real Firebase Authentication
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        console.log('Login successful', { email: user.email, uid: user.uid });
         setIsLoading(false);
         setShowSuccessPopup(true);
 
@@ -133,7 +119,36 @@ const Login = ({ onLoginSuccess }) => {
             onLoginSuccess();
           }
         }, 2000);
-      }, 1500);
+
+      } catch (error) {
+        setIsLoading(false);
+        console.error("Login error:", error.code, error.message);
+
+        let msg = "Login failed. Please try again.";
+
+        // Map Firebase error codes to user-friendly messages
+        switch (error.code) {
+          case 'auth/invalid-credential':
+          case 'auth/user-not-found':
+          case 'auth/wrong-password':
+            msg = "Incorrect email or password.";
+            break;
+          case 'auth/invalid-email':
+            msg = "Invalid email address format.";
+            break;
+          case 'auth/user-disabled':
+            msg = "This account has been disabled.";
+            break;
+          case 'auth/too-many-requests':
+            msg = "Too many failed attempts. Please try again later.";
+            break;
+          default:
+            msg = error.message;
+        }
+
+        setErrorMessage(msg);
+        setShowErrorPopup(true);
+      }
     }
   };
 

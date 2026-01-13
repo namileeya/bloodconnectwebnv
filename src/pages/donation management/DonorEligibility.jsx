@@ -19,13 +19,13 @@ import './DonorEligibility.css';
 
 // Firebase imports
 import { getAuth } from 'firebase/auth';
-import { 
-  getFirestore, 
-  collection, 
-  doc, 
-  getDocs, 
-  getDoc, 
-  updateDoc, 
+import {
+  getFirestore,
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  updateDoc,
   deleteDoc,
   query,
   where,
@@ -86,7 +86,7 @@ const DonorEligibility = ({ onNavigate }) => {
 
   useEffect(() => {
     loadDonors();
-    
+
     // Set up real-time listener for eligibility requests
     const unsubscribe = onSnapshot(
       query(collection(db, 'eligibility_requests'), orderBy('submittedDate', 'desc')),
@@ -125,16 +125,16 @@ const DonorEligibility = ({ onNavigate }) => {
     setLoading(true);
     try {
       console.log('Loading donors...');
-      
+
       // Always get all requests first
       const allRequestsQuery = query(
         collection(db, 'eligibility_requests'),
         orderBy('submittedDate', 'desc')
       );
       const allSnapshot = await getDocs(allRequestsQuery);
-      
+
       console.log(`Total requests in collection: ${allSnapshot.size}`);
-      
+
       const donorsData = [];
 
       for (const eligibilityDoc of allSnapshot.docs) {
@@ -144,12 +144,12 @@ const DonorEligibility = ({ onNavigate }) => {
         // Filter for pending view
         if (viewMode === 'pending') {
           // Check if this request already has a decision
-          const hasDecision = eligibilityData.admin_decision && 
+          const hasDecision = eligibilityData.admin_decision &&
             ['approved', 'deferred', 'rejected'].includes(eligibilityData.admin_decision);
-          
-          const hasDisplayStatus = eligibilityData.display_status && 
+
+          const hasDisplayStatus = eligibilityData.display_status &&
             ['Eligible', 'Temporarily Deferred', 'Permanently Ineligible'].includes(eligibilityData.display_status);
-          
+
           // If it already has a decision, skip it in pending view
           if (hasDecision || hasDisplayStatus) {
             continue;
@@ -205,13 +205,13 @@ const DonorEligibility = ({ onNavigate }) => {
         if (eligibilityData.answers) {
           Object.entries(eligibilityData.answers).forEach(([question, answer]) => {
             const isPositive = isPositiveQuestion(question);
-            
+
             // For "Are you feeling well today?": true = GOOD, false = BAD
             // For all other questions: true = BAD, false = GOOD
             if ((!isPositive && answer === true) || (isPositive && answer === false)) {
               // Shorten long questions for display
-              const shortQuestion = question.length > 50 
-                ? question.substring(0, 47) + '...' 
+              const shortQuestion = question.length > 50
+                ? question.substring(0, 47) + '...'
                 : question;
               concerningAnswers.push(shortQuestion);
             }
@@ -300,7 +300,7 @@ const DonorEligibility = ({ onNavigate }) => {
   const handleEdit = async (donor) => {
     setSelectedDonor(donor);
     setQuestionnaireAnswers(donor.answers || {});
-    
+
     // Set initial admin decision values
     setAdminDecision({
       admin_decision: donor.admin_decision || '',
@@ -308,7 +308,7 @@ const DonorEligibility = ({ onNavigate }) => {
       admin_notes: donor.admin_notes || '',
       decision_date: donor.decision_date || null,
     });
-    
+
     setShowEditModal(true);
   };
 
@@ -358,7 +358,7 @@ const DonorEligibility = ({ onNavigate }) => {
 
       // Reload donors
       await loadDonors();
-      
+
       setShowEditModal(false);
       setSelectedDonor(null);
       setAdminDecision({
@@ -406,7 +406,7 @@ const DonorEligibility = ({ onNavigate }) => {
 
       // Reload donors
       await loadDonors();
-      
+
       setShowDeleteConfirm(false);
       setDeletingId(null);
       alert('Eligibility request archived successfully.');
@@ -444,11 +444,11 @@ const DonorEligibility = ({ onNavigate }) => {
 
     const trueAnswers = [];
     const falseAnswers = [];
-    
+
     // Separate answers based on whether they're concerning or not
     Object.entries(answers).forEach(([question, answer]) => {
       const isPositive = isPositiveQuestion(question);
-      
+
       if ((!isPositive && answer === true) || (isPositive && answer === false)) {
         // This is a concerning answer
         trueAnswers.push(question);
@@ -481,7 +481,7 @@ const DonorEligibility = ({ onNavigate }) => {
             <p className="text-green-600 text-sm">No concerning answers ✓</p>
           )}
         </div>
-        
+
         <div>
           <h4 className="font-semibold text-green-600 mb-2">
             Safe Answers ({falseAnswers.length})
@@ -506,7 +506,7 @@ const DonorEligibility = ({ onNavigate }) => {
           {Object.entries(answers).map(([question, answer], index) => {
             const isPositive = isPositiveQuestion(question);
             const isConcerning = (!isPositive && answer === true) || (isPositive && answer === false);
-            
+
             return (
               <div key={index} className={`p-3 rounded ${isConcerning ? 'bg-red-50 border border-red-200' : 'bg-green-50 border border-green-200'}`}>
                 <div className="flex justify-between items-start">
@@ -534,7 +534,7 @@ const DonorEligibility = ({ onNavigate }) => {
     try {
       const querySnapshot = await getDocs(collection(db, 'eligibility_requests'));
       console.log(`Total documents: ${querySnapshot.size}`);
-      
+
       querySnapshot.forEach((doc) => {
         const data = doc.data();
         console.log(`Document ${doc.id}:`, {
@@ -550,7 +550,7 @@ const DonorEligibility = ({ onNavigate }) => {
           feelingWellAnswer: data.answers ? data.answers['Are you feeling well today?'] : null
         });
       });
-      
+
       alert(`Check console for database details. Found ${querySnapshot.size} eligibility requests.`);
     } catch (error) {
       console.error('Debug error:', error);
@@ -581,7 +581,7 @@ const DonorEligibility = ({ onNavigate }) => {
     <Layout onNavigate={onNavigate} currentPage="donor-eligibility">
       <div className="eligibility-page">
         {/* Debug Button */}
-        <button 
+        <button
           onClick={debugCheckDatabase}
           className="debug-button"
           style={{
@@ -605,7 +605,6 @@ const DonorEligibility = ({ onNavigate }) => {
         {/* Header */}
         <div className="eligibility-header-container">
           <h1 className="eligibility-header-title">Donor Eligibility Management</h1>
-          <p className="eligibility-header-subtitle">Review and update donor eligibility status</p>
         </div>
 
         {/* View Mode Tabs */}
@@ -689,7 +688,7 @@ const DonorEligibility = ({ onNavigate }) => {
               <Search className="empty-icon" />
               <h3>No {viewMode === 'pending' ? 'pending ' : ''}donors found</h3>
               <p>Try adjusting your search or filters</p>
-              <button 
+              <button
                 onClick={debugCheckDatabase}
                 className="debug-link"
                 style={{
@@ -759,7 +758,7 @@ const DonorEligibility = ({ onNavigate }) => {
 
                 <div className="eligibility-card-actions">
                   <button onClick={() => handleEdit(donor)} className="action-btn edit-btn">
-                    <Edit2 size={16} /> 
+                    <Edit2 size={16} />
                     {donor.admin_decision ? 'Update Decision' : 'Review Eligibility'}
                   </button>
                   {viewMode === 'pending' && (
@@ -809,7 +808,7 @@ const DonorEligibility = ({ onNavigate }) => {
                   <X size={20} />
                 </button>
               </div>
-              
+
               <div className="modal-body">
                 {/* Donor Info */}
                 <div className="donor-header">
@@ -853,7 +852,7 @@ const DonorEligibility = ({ onNavigate }) => {
                 {/* Admin Decision Form */}
                 <div className="decision-form">
                   <h4 className="section-title">Make Decision</h4>
-                  
+
                   <div className="form-group">
                     <label>Eligibility Status *</label>
                     <select
@@ -908,8 +907,8 @@ const DonorEligibility = ({ onNavigate }) => {
 
               <div className="modal-actions">
                 <button onClick={() => setShowEditModal(false)} className="cancel-btn">Cancel</button>
-                <button 
-                  onClick={handleSaveEligibility} 
+                <button
+                  onClick={handleSaveEligibility}
                   className="save-btn"
                   disabled={!adminDecision.admin_decision || !adminDecision.admin_notes.trim()}
                 >

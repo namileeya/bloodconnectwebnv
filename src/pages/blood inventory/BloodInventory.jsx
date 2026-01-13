@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Package, TrendingUp, MapPin, Calendar, AlertCircle, X, Plus, ChevronLeft, ChevronRight, AlertTriangle, Clock, User, Hash, Droplets, ExternalLink, CheckCircle } from 'lucide-react';
 import Layout from '../../components/Layout';
-import { 
-  collection, 
-  getDocs, 
-  addDoc, 
-  updateDoc, 
-  doc, 
-  query, 
-  where, 
+import {
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  doc,
+  query,
+  where,
   orderBy,
   Timestamp,
   onSnapshot,
@@ -26,7 +26,7 @@ const BloodInventory = ({ onNavigate }) => {
   const [users, setUsers] = useState([]);
   const [donorProfiles, setDonorProfiles] = useState([]);
   const [bloodDriveEvents, setBloodDriveEvents] = useState([]);
-  
+
   // UI state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -35,16 +35,16 @@ const BloodInventory = ({ onNavigate }) => {
   const [bloodTypeFilter, setBloodTypeFilter] = useState('All');
   const [expiryFilter, setExpiryFilter] = useState('All');
   const [sortBy, setSortBy] = useState('expiry');
-  
+
   // Modal states
   const [showAddModal, setShowAddModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [selectedDonation, setSelectedDonation] = useState(null);
-  
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(6);
-  
+
   // Add form state
   const [donorSearchTerm, setDonorSearchTerm] = useState('');
   const [selectedDonor, setSelectedDonor] = useState(null);
@@ -58,14 +58,14 @@ const BloodInventory = ({ onNavigate }) => {
   // Calculate expiry status with current date
   const getExpiryStatus = (expiryDate) => {
     if (!expiryDate) return { status: 'Unknown', days: 0, color: 'bg-gray-100 text-gray-800 border-gray-200' };
-    
+
     const today = new Date();
     const expiry = expiryDate.toDate ? expiryDate.toDate() : new Date(expiryDate);
-    
+
     if (isNaN(expiry.getTime())) {
       return { status: 'Unknown', days: 0, color: 'bg-gray-100 text-gray-800 border-gray-200' };
     }
-    
+
     const daysUntilExpiry = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
 
     if (daysUntilExpiry < 0) return { status: 'Expired', days: Math.abs(daysUntilExpiry), color: 'bg-red-100 text-red-800 border-red-200' };
@@ -78,7 +78,7 @@ const BloodInventory = ({ onNavigate }) => {
   // Format date for display
   const formatDate = (date) => {
     if (!date) return 'N/A';
-    
+
     try {
       const d = date.toDate ? date.toDate() : new Date(date);
       if (isNaN(d.getTime())) return 'Invalid Date';
@@ -91,7 +91,7 @@ const BloodInventory = ({ onNavigate }) => {
   // Format timestamp for date input
   const formatDateForInput = (date) => {
     if (!date) return '';
-    
+
     try {
       const d = date.toDate ? date.toDate() : new Date(date);
       if (isNaN(d.getTime())) return '';
@@ -115,17 +115,17 @@ const BloodInventory = ({ onNavigate }) => {
       const hospital = hospitals.find(h => h.id === donation.hospitalId);
       if (hospital) return hospital.name;
     }
-    
+
     // 2. Check if donation has hospital_id (alternative field name)
     if (donation.hospital_id) {
       const hospital = hospitals.find(h => h.id === donation.hospital_id);
       if (hospital) return hospital.name;
     }
-    
+
     // 3. Check direct location fields
     if (donation.hospital) return donation.hospital;
     if (donation.location) return donation.location;
-    
+
     // 4. Check if donation has event_id
     if (donation.event_id) {
       const event = bloodDriveEvents.find(e => e.id === donation.event_id);
@@ -133,31 +133,31 @@ const BloodInventory = ({ onNavigate }) => {
         return event.locationHospitalName || event.assignedHospitalName || event.location || 'Unknown Location';
       }
     }
-    
+
     // 5. Check if donation has created_by
     if (donation.created_by) {
       return 'Admin Added';
     }
-    
+
     return 'Unknown Location';
   };
 
   // Get donor profile by user ID
   const getDonorProfile = (userId) => {
     if (!userId) return null;
-    
+
     let profile = donorProfiles.find(profile => profile.user_id === userId);
-    
+
     if (!profile) {
       const user = users.find(u => u.id === userId);
       if (user && user.email) {
-        profile = donorProfiles.find(p => 
-          p.email === user.email || 
+        profile = donorProfiles.find(p =>
+          p.email === user.email ||
           (p.user && p.user.email === user.email)
         );
       }
     }
-    
+
     return profile;
   };
 
@@ -178,7 +178,7 @@ const BloodInventory = ({ onNavigate }) => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
+
         // Fetch hospitals
         const hospitalsSnapshot = await getDocs(collection(db, 'hospitals'));
         const hospitalsData = hospitalsSnapshot.docs.map(doc => ({
@@ -186,7 +186,7 @@ const BloodInventory = ({ onNavigate }) => {
           ...doc.data()
         }));
         setHospitals(hospitalsData);
-        
+
         // Fetch blood drive events
         const eventsSnapshot = await getDocs(collection(db, 'blood_drive_events'));
         const eventsData = eventsSnapshot.docs.map(doc => ({
@@ -194,24 +194,24 @@ const BloodInventory = ({ onNavigate }) => {
           ...doc.data()
         }));
         setBloodDriveEvents(eventsData);
-        
+
         // Fetch donations where used: false
         const donationsQuery = query(
           collection(db, 'donations'),
           where('used', '==', false)
         );
-        
+
         const donationsSnapshot = await getDocs(donationsQuery);
         const donationsData = donationsSnapshot.docs.map(doc => {
           const data = doc.data();
-          
+
           // Store ALL data from Firestore
           return {
             id: doc.id,
             ...data,
           };
         });
-        
+
         console.log('Fetched donations with hospitalIds:', donationsData.map(d => ({
           id: d.id,
           hospitalId: d.hospitalId,
@@ -219,9 +219,9 @@ const BloodInventory = ({ onNavigate }) => {
           location: d.location,
           donor_name: d.donor_name
         }))); // Debug log
-        
+
         setDonations(donationsData);
-        
+
         // Fetch blood stock data from all hospitals
         const bloodStockPromises = hospitalsData.map(async (hospital) => {
           try {
@@ -236,14 +236,14 @@ const BloodInventory = ({ onNavigate }) => {
             return { hospitalId: hospital.id, bloodStock: {} };
           }
         });
-        
+
         const bloodStockResults = await Promise.all(bloodStockPromises);
         const bloodStockMap = {};
         bloodStockResults.forEach(result => {
           bloodStockMap[result.hospitalId] = result.bloodStock;
         });
         setBloodStockData(bloodStockMap);
-        
+
         // Fetch users with role 'blood_donor'
         const usersQuery = query(collection(db, 'users'), where('role', '==', 'blood_donor'));
         const usersSnapshot = await getDocs(usersQuery);
@@ -252,7 +252,7 @@ const BloodInventory = ({ onNavigate }) => {
           ...doc.data()
         }));
         setUsers(usersData);
-        
+
         // Fetch donor profiles
         const profilesSnapshot = await getDocs(collection(db, 'donor_profiles'));
         const profilesData = profilesSnapshot.docs.map(doc => ({
@@ -260,7 +260,7 @@ const BloodInventory = ({ onNavigate }) => {
           ...doc.data()
         }));
         setDonorProfiles(profilesData);
-        
+
         setLoading(false);
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -268,15 +268,15 @@ const BloodInventory = ({ onNavigate }) => {
         setLoading(false);
       }
     };
-    
+
     fetchData();
-    
+
     // Set up real-time listener for donations
     const donationsQuery = query(
       collection(db, 'donations'),
       where('used', '==', false)
     );
-    
+
     const unsubscribe = onSnapshot(donationsQuery, (snapshot) => {
       const donationsData = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -284,7 +284,7 @@ const BloodInventory = ({ onNavigate }) => {
       }));
       setDonations(donationsData);
     });
-    
+
     return () => unsubscribe();
   }, []);
 
@@ -294,12 +294,12 @@ const BloodInventory = ({ onNavigate }) => {
       setFilteredDonors([]);
       return;
     }
-    
+
     const searchTermLower = donorSearchTerm.toLowerCase();
     const filtered = donorProfiles.filter(profile => {
       const user = users.find(u => u.id === profile.user_id);
       if (!user) return false;
-      
+
       return (
         profile.full_name?.toLowerCase().includes(searchTermLower) ||
         profile.id_number?.toLowerCase().includes(searchTermLower) ||
@@ -307,7 +307,7 @@ const BloodInventory = ({ onNavigate }) => {
         user.phone_number?.toLowerCase().includes(searchTermLower)
       );
     }).slice(0, 10);
-    
+
     setFilteredDonors(filtered);
     setShowDonorDropdown(filtered.length > 0);
   }, [donorSearchTerm, donorProfiles, users]);
@@ -347,19 +347,19 @@ const BloodInventory = ({ onNavigate }) => {
       const location = getLocationFromDonation(donation);
       if (location !== locationFilter) return false;
     }
-    
+
     // Blood type filter
     if (bloodTypeFilter !== 'All') {
       const bloodType = getBloodType(donation);
       if (bloodType !== bloodTypeFilter) return false;
     }
-    
+
     // Expiry filter
     if (expiryFilter !== 'All') {
       const status = getExpiryStatus(donation.expiry_date).status;
       if (status !== expiryFilter) return false;
     }
-    
+
     // Search term
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
@@ -370,7 +370,7 @@ const BloodInventory = ({ onNavigate }) => {
       const donorIC = getDonorIC(donation);
       const event = getEvent(donation.event_id);
       const eventTitle = event?.title || '';
-      
+
       return (
         serialNumber.toLowerCase().includes(searchLower) ||
         bloodType.toLowerCase().includes(searchLower) ||
@@ -380,7 +380,7 @@ const BloodInventory = ({ onNavigate }) => {
         eventTitle.toLowerCase().includes(searchLower)
       );
     }
-    
+
     return true;
   });
 
@@ -403,10 +403,10 @@ const BloodInventory = ({ onNavigate }) => {
   // Calculate blood type summary for a specific hospital
   const getBloodTypeSummaryForHospital = (hospitalId) => {
     if (!bloodStockData[hospitalId]) return {};
-    
+
     const summary = {};
     const bloodTypes = ['O-', 'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+'];
-    
+
     bloodTypes.forEach(type => {
       if (bloodStockData[hospitalId][type]) {
         summary[type] = bloodStockData[hospitalId][type].quantity || 0;
@@ -414,7 +414,7 @@ const BloodInventory = ({ onNavigate }) => {
         summary[type] = 0;
       }
     });
-    
+
     return summary;
   };
 
@@ -440,26 +440,26 @@ const BloodInventory = ({ onNavigate }) => {
         setError('Please fill in all required fields');
         return;
       }
-      
+
       const user = users.find(u => u.id === selectedDonor.user_id);
       if (!user) {
         setError('Selected donor not found in users');
         return;
       }
-      
+
       // Find hospital to get its name
       const selectedHospital = hospitals.find(h => h.id === newHospitalId);
       if (!selectedHospital) {
         setError('Selected hospital not found');
         return;
       }
-      
+
       // Get blood type from donor profile
       const bloodType = selectedDonor.blood_group || 'Unknown';
-      
+
       // Create timestamp for now
       const now = Timestamp.now();
-      
+
       const donationData = {
         // Required fields
         amount_ml: parseInt(newAmountML) || 450,
@@ -473,7 +473,7 @@ const BloodInventory = ({ onNavigate }) => {
         hospital: selectedHospital.name,
         serial_number: newSerialNumber,
         user_id: selectedDonor.user_id,
-        
+
         // Default fields as per your structure
         created_at: now,
         created_by: "admin",
@@ -482,15 +482,15 @@ const BloodInventory = ({ onNavigate }) => {
         status: "completed",
         used: false,
       };
-      
+
       console.log('Adding donation with data:', donationData);
-      
+
       const donationRef = await addDoc(collection(db, 'donations'), donationData);
-      
+
       // Update blood stock quantity
       const bloodStockRef = doc(db, 'hospitals', newHospitalId, 'bloodStock', bloodType);
       const bloodStockSnap = await getDoc(bloodStockRef);
-      
+
       if (bloodStockSnap.exists()) {
         const currentData = bloodStockSnap.data();
         await updateDoc(bloodStockRef, {
@@ -511,14 +511,14 @@ const BloodInventory = ({ onNavigate }) => {
           }
         });
       }
-      
+
       // Check if stock is low for notifications
       const hospitalStock = bloodStockData[newHospitalId] || {};
       const stockInfo = hospitalStock[bloodType];
       if (stockInfo && stockInfo.quantity <= stockInfo.thresholds?.low) {
         console.log(`Low stock alert for ${bloodType} at ${selectedHospital.name}`);
       }
-      
+
       // Reset form
       setShowAddModal(false);
       setSelectedDonor(null);
@@ -528,7 +528,7 @@ const BloodInventory = ({ onNavigate }) => {
       setNewAmountML('450');
       setNewSerialNumber('');
       setError('');
-      
+
     } catch (err) {
       console.error('Error adding blood stock:', err);
       setError('Failed to add blood stock: ' + err.message);
@@ -542,10 +542,10 @@ const BloodInventory = ({ onNavigate }) => {
         setError('Please select a blood stock to update');
         return;
       }
-      
+
       const oldBloodType = getBloodType(selectedDonation);
       const newBloodType = selectedDonation.blood_type;
-      
+
       // Find hospital ID from the donation
       let hospitalId = selectedDonation.hospitalId || selectedDonation.hospital_id;
       if (!hospitalId && selectedDonation.hospital) {
@@ -553,19 +553,19 @@ const BloodInventory = ({ onNavigate }) => {
         const hospital = hospitals.find(h => h.name === selectedDonation.hospital);
         if (hospital) hospitalId = hospital.id;
       }
-      
+
       if (!hospitalId) {
         setError('Cannot update: Hospital information missing');
         return;
       }
-      
+
       const donationRef = doc(db, 'donations', selectedDonation.id);
       await updateDoc(donationRef, {
         blood_type: newBloodType,
         expiry_date: Timestamp.fromDate(new Date(selectedDonation.expiry_date)),
         serial_number: selectedDonation.serial_number
       });
-      
+
       if (oldBloodType !== newBloodType) {
         const oldBloodStockRef = doc(db, 'hospitals', hospitalId, 'bloodStock', oldBloodType);
         const oldBloodStockSnap = await getDoc(oldBloodStockRef);
@@ -576,7 +576,7 @@ const BloodInventory = ({ onNavigate }) => {
             lastUpdated: Timestamp.now()
           });
         }
-        
+
         const newBloodStockRef = doc(db, 'hospitals', hospitalId, 'bloodStock', newBloodType);
         const newBloodStockSnap = await getDoc(newBloodStockRef);
         if (newBloodStockSnap.exists()) {
@@ -600,11 +600,11 @@ const BloodInventory = ({ onNavigate }) => {
           });
         }
       }
-      
+
       setShowUpdateModal(false);
       setSelectedDonation(null);
       setError('');
-      
+
     } catch (err) {
       console.error('Error updating blood stock:', err);
       setError('Failed to update blood stock: ' + err.message);
@@ -618,27 +618,27 @@ const BloodInventory = ({ onNavigate }) => {
         setError('Please select a blood stock to mark as used');
         return;
       }
-      
+
       // Get blood type from donation
       const bloodType = getBloodType(selectedDonation);
       const hospitalId = selectedDonation.hospitalId;
-      
+
       if (!hospitalId) {
         setError('Cannot mark as used: Hospital information missing');
         return;
       }
-      
+
       // Update donation document
       const donationRef = doc(db, 'donations', selectedDonation.id);
       await updateDoc(donationRef, {
         used: true,
         status: "used"
       });
-      
+
       // Deduct from blood stock quantity
       const bloodStockRef = doc(db, 'hospitals', hospitalId, 'bloodStock', bloodType);
       const bloodStockSnap = await getDoc(bloodStockRef);
-      
+
       if (bloodStockSnap.exists()) {
         const currentData = bloodStockSnap.data();
         const newQuantity = Math.max(0, (currentData.quantity || 0) - 1);
@@ -647,11 +647,11 @@ const BloodInventory = ({ onNavigate }) => {
           lastUpdated: Timestamp.now()
         });
       }
-      
+
       setShowUpdateModal(false);
       setSelectedDonation(null);
       setError('');
-      
+
     } catch (err) {
       console.error('Error marking as used:', err);
       setError('Failed to mark as used: ' + err.message);
@@ -712,78 +712,31 @@ const BloodInventory = ({ onNavigate }) => {
           </div>
         )}
 
-        {/* FIXED: Debug Info - Shows donation-hospital mapping */}
-        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <h3 className="font-bold mb-2 text-blue-800">Donation-Hospital Mapping</h3>
-          <p className="text-sm text-blue-700 mb-2">
-            Total Donations: {donations.length} | Total Hospitals: {hospitals.length}
-          </p>
-          {donations.slice(0, 3).map((d, i) => {
-            const location = getLocationFromDonation(d);
-            const hospital = hospitals.find(h => h.id === d.hospitalId);
-            return (
-              <div key={i} className="mb-2 p-2 bg-white rounded border border-blue-100">
-                <p className="text-sm"><strong>Donation ID:</strong> {d.id}</p>
-                <p className="text-sm"><strong>Hospital ID in DB:</strong> {d.hospitalId || 'No hospitalId'}</p>
-                <p className="text-sm"><strong>Hospital Found:</strong> {hospital ? 'Yes' : 'No'}</p>
-                <p className="text-sm"><strong>Hospital Name:</strong> {hospital ? hospital.name : 'Not found'}</p>
-                <p className="text-sm"><strong>Location Display:</strong> {location}</p>
-              </div>
-            );
-          })}
-        </div>
 
         {/* Stats Cards */}
-        <div className="stats-cards-grid">
-          {/* Total Blood */}
-          <div className="stat-card stat-card-blue">
-            <div className="stat-card-content">
-              <div className="stat-card-info">
-                <p className="stat-card-label">Total Blood Stock</p>
-                <h2 className="stat-card-number">{stats.total}</h2>
-                <div className="stat-card-trend">
-                  <TrendingUp className="trend-icon" />
-                  <span className="trend-text">{stats.upFromLastWeek}% Up from past week</span>
-                </div>
-              </div>
-              <div className="stat-card-icon stat-card-icon-blue">
-                <Package className="package-icon" />
-              </div>
-            </div>
+        <div className="inventory-stats-grid">
+          {/* Total Blood Stock */}
+          <div className="inventory-stat-card stat-card-total">
+            <h3 className="stat-number-blue">{stats.total}</h3>
+            <p className="stat-label">Total Blood Stock</p>
           </div>
 
           {/* Critical Stock */}
-          <div className="stat-card stat-card-red">
-            <div className="stat-card-content">
-              <div className="stat-card-info">
-                <p className="stat-card-label">Critical (≤3 days)</p>
-                <h2 className="stat-card-number stat-card-number-red">{stats.critical}</h2>
-                <div className="stat-card-trend">
-                  <AlertTriangle className="trend-icon-red" />
-                  <span className="trend-text-red">Immediate action needed</span>
-                </div>
-              </div>
-              <div className="stat-card-icon stat-card-icon-red">
-                <AlertTriangle className="package-icon" />
-              </div>
-            </div>
+          <div className="inventory-stat-card stat-card-critical">
+            <h3 className="stat-number-red">{stats.critical}</h3>
+            <p className="stat-label">Critical (≤3 days)</p>
           </div>
 
           {/* Urgent Stock */}
-          <div className="stat-card stat-card-orange">
-            <div className="stat-card-content">
-              <div className="stat-card-info">
-                <p className="stat-card-label">Urgent (≤7 days)</p>
-                <h2 className="stat-card-number stat-card-number-orange">{stats.urgent}</h2>
-                <div className="stat-card-trend">
-                  <Clock className="trend-icon-orange" />
-                  <span className="trend-text-orange">Priority usage</span>
-                </div>
-              </div>
-              <div className="stat-card-icon stat-card-icon-orange">
-                <Clock className="package-icon" />
-              </div>
-            </div>
+          <div className="inventory-stat-card stat-card-urgent">
+            <h3 className="stat-number-orange">{stats.urgent}</h3>
+            <p className="stat-label">Urgent (≤7 days)</p>
+          </div>
+
+          {/* Warning Stock */}
+          <div className="inventory-stat-card stat-card-warning">
+            <h3 className="stat-number-yellow">{stats.warning || donations.filter(d => getExpiryStatus(d.expiry_date).status === 'Warning').length}</h3>
+            <p className="stat-label">Warning (≤14 days)</p>
           </div>
         </div>
 
@@ -803,13 +756,13 @@ const BloodInventory = ({ onNavigate }) => {
           </div>
 
           {(() => {
-            const selectedLocationName = locationFilter === 'All' 
-              ? (hospitals[0]?.name || 'Select Location') 
+            const selectedLocationName = locationFilter === 'All'
+              ? (hospitals[0]?.name || 'Select Location')
               : locationFilter;
-            
+
             // Find hospital by name
             const selectedHospital = hospitals.find(h => h.name === selectedLocationName);
-            
+
             if (!selectedHospital) {
               return (
                 <div className="location-card">
@@ -825,7 +778,7 @@ const BloodInventory = ({ onNavigate }) => {
                 </div>
               );
             }
-            
+
             const locationSummary = getBloodTypeSummaryForHospital(selectedHospital.id);
             const totalStock = Object.values(locationSummary).reduce((sum, count) => sum + count, 0);
 
@@ -848,7 +801,7 @@ const BloodInventory = ({ onNavigate }) => {
                     const stockInfo = bloodStockData[selectedHospital.id]?.[type];
                     let stockLevel = 'HIGH';
                     let stockLevelClass = 'high';
-                    
+
                     if (stockInfo) {
                       if (count <= stockInfo.thresholds?.low) {
                         stockLevel = 'LOW';
@@ -980,7 +933,7 @@ const BloodInventory = ({ onNavigate }) => {
                   const serialNumber = getSerialNumber(donation);
                   const donorName = getDonorName(donation);
                   const donorIC = getDonorIC(donation);
-                  
+
                   return (
                     <tr key={donation.id} className="inventory-table-row">
                       <td className="inventory-table-cell inventory-id-cell">
@@ -1280,7 +1233,7 @@ const BloodInventory = ({ onNavigate }) => {
                         const bloodType = getBloodType(donation);
                         const serialNumber = getSerialNumber(donation);
                         const donorName = getDonorName(donation);
-                        
+
                         return (
                           <option key={donation.id} value={donation.id}>
                             {serialNumber} - {bloodType} ({location})
@@ -1298,9 +1251,9 @@ const BloodInventory = ({ onNavigate }) => {
                           type="text"
                           className="inventory-form-input"
                           value={getSerialNumber(selectedDonation)}
-                          onChange={(e) => setSelectedDonation({ 
-                            ...selectedDonation, 
-                            serial_number: e.target.value 
+                          onChange={(e) => setSelectedDonation({
+                            ...selectedDonation,
+                            serial_number: e.target.value
                           })}
                         />
                       </div>
@@ -1309,9 +1262,9 @@ const BloodInventory = ({ onNavigate }) => {
                         <select
                           className="inventory-form-select"
                           value={getBloodType(selectedDonation)}
-                          onChange={(e) => setSelectedDonation({ 
-                            ...selectedDonation, 
-                            blood_type: e.target.value 
+                          onChange={(e) => setSelectedDonation({
+                            ...selectedDonation,
+                            blood_type: e.target.value
                           })}
                         >
                           <option value="O-">O- (Universal Donor)</option>
@@ -1330,9 +1283,9 @@ const BloodInventory = ({ onNavigate }) => {
                           type="date"
                           className="inventory-form-input"
                           value={formatDateForInput(selectedDonation.expiry_date)}
-                          onChange={(e) => setSelectedDonation({ 
-                            ...selectedDonation, 
-                            expiry_date: e.target.value 
+                          onChange={(e) => setSelectedDonation({
+                            ...selectedDonation,
+                            expiry_date: e.target.value
                           })}
                         />
                       </div>
@@ -1349,7 +1302,7 @@ const BloodInventory = ({ onNavigate }) => {
                   >
                     Cancel
                   </button>
-                  
+
                   {/* MARK AS USED BUTTON - ADDED HERE */}
                   <button
                     onClick={handleMarkAsUsed}
@@ -1359,7 +1312,7 @@ const BloodInventory = ({ onNavigate }) => {
                     <CheckCircle size={18} className="inline mr-2" />
                     Mark as Used
                   </button>
-                  
+
                   <button
                     onClick={handleUpdateBloodStock}
                     className="inventory-modal-button inventory-save-button ml-2"

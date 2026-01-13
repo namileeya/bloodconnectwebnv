@@ -803,18 +803,22 @@ const UserManagement = ({ onNavigate }) => {
     <Layout onNavigate={onNavigate} currentPage="user-management">
       <div className="space-y-6">
         {/* ---------- Header ---------- */}
-        <div className="user-header-container">
-          <h1 className="user-header-title">User Management</h1>
-          <button className="add-record-button" onClick={handleAddNewMember}>
-            Add New Member
-          </button>
-        </div>
+        {!loading && (
+          <div className="user-header-container">
+            <h1 className="user-header-title">User Management</h1>
+            <button className="add-record-button" onClick={handleAddNewMember}>
+              Add New Member
+            </button>
+          </div>
+        )}
 
         {/* ---------- Loading State ---------- */}
         {loading && (
           <div className="loading-container">
-            <div className="loading-spinner"></div>
-            <p>Loading users...</p>
+            <div className="loading-content">
+              <div className="loading-spinner"></div>
+              <p className="loading-text">Loading users...</p>
+            </div>
           </div>
         )}
 
@@ -1462,7 +1466,8 @@ const UserManagement = ({ onNavigate }) => {
                 Are you sure you want to delete this user? This action cannot be undone.
               </p>
               <div className="delete-actions">
-                <button onClick={() => setShowDeleteConfirm(false)} className="cancel-btn">
+                <button onClick={() => setShowDeleteConfirm(false)} className="cancel-btn
+                ">
                   Cancel
                 </button>
                 <button onClick={handleDeleteConfirm} className="delete-btn">

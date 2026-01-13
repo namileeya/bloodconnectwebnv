@@ -13,7 +13,7 @@
 }
 
 .add-reward-btn {
-    @apply flex items-center gap-2 bg-red-600 text-white px-5 py-3 rounded-lg hover:bg-red-700 transition font-medium;
+    @apply px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-semibold flex items-center gap-2;
 }
 
 /* Stats */
@@ -22,47 +22,45 @@
 }
 
 .stat-card {
-    @apply bg-white p-6 rounded-xl shadow-sm border-l-4;
+    @apply bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow;
 }
 
-.stat-card h3 {
-    @apply text-3xl font-bold mb-2;
+.stat-card-total {
+    @apply border-l-4 border-blue-500;
 }
 
-.stat-card p {
+.stat-card-vouchers {
+    @apply border-l-4 border-purple-500;
+}
+
+.stat-card-products {
+    @apply border-l-4 border-green-500;
+}
+
+.stat-card-active {
+    @apply border-l-4 border-teal-500;
+}
+
+.stat-number-blue {
+    @apply text-3xl font-bold text-blue-600 mb-2;
+}
+
+.stat-number-purple {
+    @apply text-3xl font-bold text-purple-600 mb-2;
+}
+
+.stat-number-green {
+    @apply text-3xl font-bold text-green-600 mb-2;
+}
+
+.stat-number-teal {
+    @apply text-3xl font-bold text-teal-600 mb-2;
+}
+
+.stat-label {
     @apply text-gray-600 text-sm font-medium;
-}
-
-.stat-card.total {
-    @apply border-l-blue-500;
-}
-
-.stat-card.vouchers {
-    @apply border-l-purple-500;
-}
-
-.stat-card.products {
-    @apply border-l-green-500;
-}
-
-.stat-card.active {
-    @apply border-l-teal-500;
-}
-
-.stat-card.total h3 {
-    @apply text-blue-600;
-}
-
-.stat-card.vouchers h3 {
-    @apply text-purple-600;
-}
-
-.stat-card.products h3 {
-    @apply text-green-600;
-}
-
-.stat-card.active h3 {
-    @apply text-teal-600;
+    text-transform: none !important;
+    color: #4b5563 !important;
 }
 
 /* Filters */
@@ -96,7 +94,7 @@
 }
 
 .rewards-table th {
-    @apply bg-gray-50 px-6 py-4 text-left font-bold text-gray-700 uppercase tracking-wider;
+    @apply bg-gray-50 px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider;
 }
 
 .rewards-table td {
@@ -175,7 +173,7 @@
 
 /* Modal */
 .modal-overlay {
-    @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4;
+    @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4;
 }
 
 .modal {
@@ -334,6 +332,7 @@
 
 /* Responsive table adjustments for new column */
 @media (max-width: 1200px) {
+
     .rewards-table th:nth-child(6),
     .rewards-table td:nth-child(6) {
         min-width: 120px;
@@ -345,7 +344,7 @@
     .rewards-table-container {
         @apply overflow-x-auto;
     }
-    
+
     .rewards-table {
         @apply min-w-[1000px];
     }
@@ -356,11 +355,11 @@
     .rewards-pagination {
         @apply flex-col gap-4 items-stretch;
     }
-    
+
     .rewards-pagination-info {
         @apply justify-center;
     }
-    
+
     .rewards-pagination-controls {
         @apply justify-center;
     }

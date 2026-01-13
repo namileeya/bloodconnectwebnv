@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Search, Edit2, XCircle, User, 
+import {
+  Search, Edit2, XCircle, User,
   AlertCircle, X, ChevronLeft, ChevronRight, Award,
   Calendar, MapPin, CheckCircle, Clock, XOctagon,
   Check, Ban, UserX, Loader2, Mail, Phone, FileText,
   Heart
 } from 'lucide-react';
-import { 
-  collection, getDocs, addDoc, updateDoc, deleteDoc, 
+import {
+  collection, getDocs, addDoc, updateDoc, deleteDoc,
   doc, query, where, Timestamp, serverTimestamp,
   orderBy, getDoc, increment, writeBatch, setDoc
 } from 'firebase/firestore';
@@ -32,11 +32,11 @@ const sendNotification = async (userId, notificationData) => {
       read: false,
       createdAt: serverTimestamp()
     };
-    
+
     console.log('Creating notification for user:', userId);
-    
+
     await addDoc(collection(db, 'notifications'), notificationRecord);
-    
+
     try {
       const userTokenDoc = await getDoc(doc(db, 'user_tokens', userId));
       if (userTokenDoc.exists()) {
@@ -48,7 +48,7 @@ const sendNotification = async (userId, notificationData) => {
     } catch (tokenError) {
       console.log('No FCM token found, skipping push notification');
     }
-    
+
     try {
       const userDoc = await getDoc(doc(db, 'users', userId));
       if (userDoc.exists()) {
@@ -60,7 +60,7 @@ const sendNotification = async (userId, notificationData) => {
     } catch (emailError) {
       console.log('User email not found, skipping email notification');
     }
-    
+
     console.log('Notification sent successfully to user:', userId);
   } catch (error) {
     console.error('Error sending notification:', error);
@@ -115,13 +115,13 @@ const DonationRecords = ({ onNavigate }) => {
   const [showNoShowModal, setShowNoShowModal] = useState(false);
   const [noShowRecord, setNoShowRecord] = useState(null);
   const [noShowReason, setNoShowReason] = useState('');
-  
+
   // NEW STATES FOR HOSPITAL FILTERING AND USED FUNCTIONALITY
   const [showUsedModal, setShowUsedModal] = useState(false);
   const [usingRecord, setUsingRecord] = useState(null);
   const [usingHospital, setUsingHospital] = useState(null);
   const [hospitalBloodStock, setHospitalBloodStock] = useState(null);
-  
+
   // User search states
   const [userSearchResults, setUserSearchResults] = useState([]);
   const [searchingUsers, setSearchingUsers] = useState(false);
@@ -135,7 +135,7 @@ const DonationRecords = ({ onNavigate }) => {
     try {
       if (!dateStr) return '';
       if (dateStr.includes('-')) return dateStr;
-      
+
       const parts = dateStr.split('/');
       if (parts.length !== 3) return dateStr;
       return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
@@ -175,22 +175,22 @@ const DonationRecords = ({ onNavigate }) => {
     if (record.status !== 'Completed') {
       return false;
     }
-    
+
     // Must have donation details
     if (!record.donationDetails) {
       return false;
     }
-    
+
     // Must be in stored status (not already used)
     if (record.donationDetails.status !== 'stored') {
       return false;
     }
-    
+
     // Must not already be used
     if (record.donationDetails.used) {
       return false;
     }
-    
+
     // Check if expired
     if (record.donationDetails.expiryDate) {
       const expiryDate = new Date(record.donationDetails.expiryDate);
@@ -199,12 +199,12 @@ const DonationRecords = ({ onNavigate }) => {
         return false;
       }
     }
-    
+
     // Must have blood type
     if (!record.donationDetails.bloodType || record.donationDetails.bloodType === 'Unknown') {
       return false;
     }
-    
+
     return true;
   };
 
@@ -213,13 +213,13 @@ const DonationRecords = ({ onNavigate }) => {
     if (!booking.eventId && hasDonation) {
       return 'Completed';
     }
-    
+
     if (booking.entryType === 'walk_in' || booking.createdBy === 'Admin') {
       if (booking.bookingStatus) {
         const status = booking.bookingStatus.toLowerCase();
         switch (status) {
           case 'pending': return 'Pending';
-          case 'registered': 
+          case 'registered':
           case 'scheduled': return 'Registered';
           case 'confirmed': return 'Confirmed';
           case 'rejected': return 'Rejected';
@@ -231,16 +231,16 @@ const DonationRecords = ({ onNavigate }) => {
       }
       return 'Pending';
     }
-    
+
     if (booking.bookingStatus) {
       const status = booking.bookingStatus.toLowerCase();
       if (status === 'completed') {
         return 'Completed';
       }
-      
+
       switch (status) {
         case 'pending': return 'Pending';
-        case 'registered': 
+        case 'registered':
         case 'scheduled': return 'Registered';
         case 'confirmed': return 'Confirmed';
         case 'rejected': return 'Rejected';
@@ -249,7 +249,7 @@ const DonationRecords = ({ onNavigate }) => {
         default: return 'Pending';
       }
     }
-    
+
     return 'Pending';
   };
 
@@ -258,10 +258,10 @@ const DonationRecords = ({ onNavigate }) => {
       if (donation.donor_id !== booking.userId) {
         return false;
       }
-      
+
       const donationDate = formatDateFromFirestore(donation.donation_date);
       if (!donationDate) return false;
-      
+
       let bookingDate;
       if (booking.bookingDate) {
         bookingDate = convertToISOString(booking.bookingDate);
@@ -270,12 +270,12 @@ const DonationRecords = ({ onNavigate }) => {
       } else {
         return false;
       }
-      
+
       if (!bookingDate) return false;
-      
+
       const donationDateObj = new Date(donationDate);
       const bookingDateObj = new Date(bookingDate);
-      
+
       return donationDateObj.toDateString() === bookingDateObj.toDateString();
     } catch (err) {
       console.error('Error checking donation for booking:', err);
@@ -287,7 +287,7 @@ const DonationRecords = ({ onNavigate }) => {
   const getHospitalForRecord = async (record) => {
     try {
       console.log('Getting hospital for record:', record.id, 'Source:', record.source);
-      
+
       // If record has hospital info directly
       if (record.hospitalId) {
         try {
@@ -304,25 +304,25 @@ const DonationRecords = ({ onNavigate }) => {
           console.error('Error fetching hospital from record:', hospitalErr);
         }
       }
-      
+
       // Try to get from event (for slot_bookings)
       if (record.source === 'event_booking' && record.bookingData?.eventId) {
         const eventDoc = await getDoc(doc(db, 'blood_drive_events', record.bookingData.eventId));
         if (eventDoc.exists()) {
           const eventData = eventDoc.data();
-          
-          let hospitalId = eventData.assignedHospitalId || 
-                          eventData.hospitalId || 
-                          eventData.hospital_id || 
-                          eventData.assigned_hospital_id;
-                          
-          let hospitalName = eventData.assignedHospitalName || 
-                            eventData.hospitalName || 
-                            eventData.hospital_name || 
-                            eventData.assigned_hospital_name;
-          
+
+          let hospitalId = eventData.assignedHospitalId ||
+            eventData.hospitalId ||
+            eventData.hospital_id ||
+            eventData.assigned_hospital_id;
+
+          let hospitalName = eventData.assignedHospitalName ||
+            eventData.hospitalName ||
+            eventData.hospital_name ||
+            eventData.assigned_hospital_name;
+
           console.log('Event data:', { hospitalId, hospitalName });
-          
+
           if (hospitalId) {
             try {
               const hospitalDoc = await getDoc(doc(db, 'hospitals', hospitalId));
@@ -340,15 +340,15 @@ const DonationRecords = ({ onNavigate }) => {
           }
         }
       }
-      
+
       // Try to find hospital by name
       if (record.hospitalName) {
-        const hospital = hospitals.find(h => 
+        const hospital = hospitals.find(h =>
           h.name.toLowerCase() === record.hospitalName.toLowerCase() ||
           h.name.toLowerCase().includes(record.hospitalName.toLowerCase()) ||
           record.hospitalName.toLowerCase().includes(h.name.toLowerCase())
         );
-        
+
         if (hospital) {
           return {
             id: hospital.id,
@@ -357,13 +357,13 @@ const DonationRecords = ({ onNavigate }) => {
           };
         }
       }
-      
+
       // Fallback to first hospital
       if (hospitals.length > 0) {
         console.log('Using fallback hospital:', hospitals[0].name);
         return hospitals[0];
       }
-      
+
       return null;
     } catch (err) {
       console.error('Error getting hospital for record:', err);
@@ -377,35 +377,35 @@ const DonationRecords = ({ onNavigate }) => {
         console.error('Missing hospitalId or bloodType');
         return null;
       }
-      
+
       console.log(`Looking for blood stock: Hospital=${hospitalId}, BloodType=${bloodType}`);
-      
+
       // Try direct document first
       try {
         const bloodStockDoc = await getDoc(doc(db, 'hospitals', hospitalId, 'bloodStock', bloodType));
         if (bloodStockDoc.exists()) {
           console.log(`Found blood stock document: ${bloodType}`);
-          return { 
+          return {
             id: bloodType,
             bloodType: bloodType,
-            ...bloodStockDoc.data() 
+            ...bloodStockDoc.data()
           };
         }
       } catch (docErr) {
         console.log(`No direct document for ${bloodType}`);
       }
-      
+
       // Search through all blood stock documents
       const bloodStockSnapshot = await getDocs(collection(db, 'hospitals', hospitalId, 'bloodStock'));
       console.log(`Found ${bloodStockSnapshot.docs.length} blood stock documents`);
-      
+
       for (const stockDoc of bloodStockSnapshot.docs) {
         const stockData = stockDoc.data();
         const docBloodType = stockData.bloodType || stockDoc.id;
-        
+
         const normalizedDocType = docBloodType.toLowerCase().replace(/[^a-z0-9+]/g, '');
         const normalizedSearchType = bloodType.toLowerCase().replace(/[^a-z0-9+]/g, '');
-        
+
         if (normalizedDocType === normalizedSearchType) {
           console.log(`Found matching blood type: ${docBloodType}`);
           return {
@@ -415,7 +415,7 @@ const DonationRecords = ({ onNavigate }) => {
           };
         }
       }
-      
+
       // Return default structure if not found
       console.log(`No existing blood stock for ${bloodType}, will create on submit`);
       return {
@@ -425,7 +425,7 @@ const DonationRecords = ({ onNavigate }) => {
         minimumLevel: 10,
         criticalLevel: 5
       };
-      
+
     } catch (err) {
       console.error('Error getting blood stock:', err);
       return null;
@@ -436,7 +436,7 @@ const DonationRecords = ({ onNavigate }) => {
     try {
       const bloodStockRef = doc(db, 'hospitals', hospitalId, 'bloodStock', bloodType);
       const bloodStockDoc = await getDoc(bloodStockRef);
-      
+
       if (!bloodStockDoc.exists()) {
         await setDoc(bloodStockRef, {
           bloodType: bloodType,
@@ -448,7 +448,7 @@ const DonationRecords = ({ onNavigate }) => {
         });
         console.log(`Created blood stock document for ${bloodType} in hospital ${hospitalId}`);
       }
-      
+
       return bloodStockRef;
     } catch (err) {
       console.error('Error ensuring blood stock exists:', err);
@@ -460,18 +460,18 @@ const DonationRecords = ({ onNavigate }) => {
     try {
       console.log('Mark as used clicked for record:', record.id);
       setUsingRecord(record);
-      
+
       const hospital = await getHospitalForRecord(record);
       if (!hospital) {
         setError('Cannot find hospital information for this donation. Please assign a hospital to the event first.');
         return;
       }
-      
+
       console.log('Found hospital:', hospital);
-      
+
       // Get blood type from multiple sources
       let bloodType = 'Unknown';
-      
+
       if (record.donationDetails?.bloodType && record.donationDetails.bloodType !== 'Unknown') {
         bloodType = record.donationDetails.bloodType;
       } else if (record.bookingData?.donorBloodType && record.bookingData.donorBloodType !== 'Unknown') {
@@ -479,11 +479,11 @@ const DonationRecords = ({ onNavigate }) => {
       } else if (record.userId && record.userId !== 'walk_in') {
         try {
           const donorQuery = query(
-            collection(db, 'donor_profiles'), 
+            collection(db, 'donor_profiles'),
             where('user_id', '==', record.userId)
           );
           const donorSnapshot = await getDocs(donorQuery);
-          
+
           if (!donorSnapshot.empty) {
             const donorData = donorSnapshot.docs[0].data();
             bloodType = donorData.blood_group || 'Unknown';
@@ -492,25 +492,25 @@ const DonationRecords = ({ onNavigate }) => {
           console.warn('Could not fetch donor profile:', profileErr);
         }
       }
-      
+
       console.log('Determined blood type:', bloodType);
-      
+
       if (!bloodType || bloodType === 'Unknown') {
         setError('Blood type is unknown. Cannot mark as used without valid blood type.');
         return;
       }
-      
+
       const bloodStock = await getBloodStockForHospital(hospital.id, bloodType);
       if (!bloodStock) {
         setError(`Blood type ${bloodType} not found in ${hospital.name} inventory. Please add this blood type to the hospital inventory first.`);
         return;
       }
-      
+
       setUsingHospital(hospital);
       setHospitalBloodStock(bloodStock);
       setShowUsedModal(true);
       setError('');
-      
+
     } catch (err) {
       console.error('Error preparing to mark as used:', err);
       setError('Error preparing to mark donation as used: ' + err.message);
@@ -526,22 +526,22 @@ const DonationRecords = ({ onNavigate }) => {
       });
       return;
     }
-    
+
     try {
       setError('');
       setSuccess('');
-      
+
       console.log('Marking blood as used:', {
         donationId: usingRecord.firestoreDonationId,
         hospitalId: usingHospital.id,
         bloodType: hospitalBloodStock.bloodType
       });
-      
+
       // IMPORTANT: Ensure blood stock document exists first
       await ensureBloodStockExists(usingHospital.id, hospitalBloodStock.bloodType);
-      
+
       const batch = writeBatch(db);
-      
+
       // 1. Update donation record
       if (usingRecord.firestoreDonationId) {
         const donationRef = doc(db, 'donations', usingRecord.firestoreDonationId);
@@ -553,31 +553,31 @@ const DonationRecords = ({ onNavigate }) => {
           used_hospital_name: usingHospital.name
         });
       }
-      
+
       // 2. Update blood stock - CRITICAL: Use bloodType as document ID
       const bloodStockRef = doc(db, 'hospitals', usingHospital.id, 'bloodStock', hospitalBloodStock.bloodType);
-      
+
       // Get current quantity
       const currentStockDoc = await getDoc(bloodStockRef);
       let currentQuantity = 0;
-      
+
       if (currentStockDoc.exists()) {
         const currentData = currentStockDoc.data();
         currentQuantity = parseInt(currentData.quantity) || 0;
       }
-      
+
       const newQuantity = currentQuantity - 1;
-      
+
       if (newQuantity < 0) {
         setError(`Cannot mark as used: Blood stock for ${hospitalBloodStock.bloodType} would go negative. Current stock: ${currentQuantity}`);
         return;
       }
-      
+
       batch.update(bloodStockRef, {
         quantity: newQuantity,
         lastUpdated: serverTimestamp()
       });
-      
+
       // 3. Update booking if exists
       if (usingRecord.firestoreBookingId) {
         const bookingRef = doc(db, 'slot_bookings', usingRecord.firestoreBookingId);
@@ -587,12 +587,12 @@ const DonationRecords = ({ onNavigate }) => {
           updatedAt: serverTimestamp()
         });
       }
-      
+
       // Execute batch
       await batch.commit();
-      
+
       console.log('Blood marked as used successfully');
-      
+
       // CRITICAL: Update local state IMMEDIATELY for instant UI feedback
       const updatedRecords = records.map(rec => {
         if (rec.id === usingRecord.id) {
@@ -610,10 +610,10 @@ const DonationRecords = ({ onNavigate }) => {
         }
         return rec;
       });
-      
+
       // Update both records and filteredRecords
       setRecords(updatedRecords);
-      
+
       // IMPORTANT: Also update filteredRecords based on current filters
       const updatedFiltered = filteredRecords.map(rec => {
         if (rec.id === usingRecord.id) {
@@ -631,9 +631,9 @@ const DonationRecords = ({ onNavigate }) => {
         }
         return rec;
       });
-      
+
       setFilteredRecords(updatedFiltered);
-      
+
       // Send notification
       if (usingRecord.userId && usingRecord.userId !== 'walk_in') {
         await sendNotification(usingRecord.userId, {
@@ -655,15 +655,15 @@ const DonationRecords = ({ onNavigate }) => {
           }
         });
       }
-      
+
       setSuccess(`Blood marked as used successfully! Inventory updated for ${usingHospital.name}. New stock: ${newQuantity} units of ${hospitalBloodStock.bloodType}`);
-      
+
       // Close modal and reset states
       setShowUsedModal(false);
       setUsingRecord(null);
       setUsingHospital(null);
       setHospitalBloodStock(null);
-      
+
     } catch (err) {
       console.error('Error marking blood as used:', err);
       console.error('Error details:', {
@@ -673,7 +673,7 @@ const DonationRecords = ({ onNavigate }) => {
         errorMessage: err.message,
         errorStack: err.stack
       });
-      
+
       if (err.code === 'not-found') {
         setError(`Hospital or blood stock document not found. Hospital: ${usingHospital?.name}, Blood Type: ${hospitalBloodStock?.bloodType}`);
       } else if (err.code === 'permission-denied') {
@@ -717,21 +717,21 @@ const DonationRecords = ({ onNavigate }) => {
       allUsersSnapshot.forEach(doc => {
         const userData = doc.data();
         const donorProfile = donorProfilesMap[doc.id] || {};
-        
+
         const userName = donorProfile.full_name || userData.displayName || userData.email?.split('@')[0] || 'User';
         const userEmail = userData.email || 'No email';
         const userPhone = userData.phone || donorProfile.phone || 'No phone';
         const userAddress = userData.address || donorProfile.address || 'No address';
         const bloodType = donorProfile.blood_group || 'Unknown';
-        
-        const matchesSearch = 
+
+        const matchesSearch =
           userName.toLowerCase().includes(searchLower) ||
           userEmail.toLowerCase().includes(searchLower) ||
           userPhone.toLowerCase().includes(searchLower) ||
           (userData.ic && userData.ic.toLowerCase().includes(searchLower)) ||
           (donorProfile.ic_number && donorProfile.ic_number.toLowerCase().includes(searchLower)) ||
           userAddress.toLowerCase().includes(searchLower);
-        
+
         if (matchesSearch) {
           results.push({
             id: doc.id,
@@ -752,22 +752,22 @@ const DonationRecords = ({ onNavigate }) => {
       allDonorProfilesSnapshot.forEach(doc => {
         const donorData = doc.data();
         const userId = donorData.user_id;
-        
+
         if (results.some(r => r.id === userId)) return;
-        
+
         const donorName = donorData.full_name;
         const donorEmail = donorData.email || 'No email';
         const donorPhone = donorData.phone || 'No phone';
         const donorAddress = donorData.address || 'No address';
         const bloodType = donorData.blood_group || 'Unknown';
-        
-        const matchesSearch = 
+
+        const matchesSearch =
           donorName?.toLowerCase().includes(searchLower) ||
           donorEmail.toLowerCase().includes(searchLower) ||
           donorPhone.toLowerCase().includes(searchLower) ||
           (donorData.ic_number && donorData.ic_number.toLowerCase().includes(searchLower)) ||
           donorAddress.toLowerCase().includes(searchLower);
-        
+
         if (matchesSearch && userId) {
           results.push({
             id: userId,
@@ -830,11 +830,11 @@ const DonationRecords = ({ onNavigate }) => {
 
       let userData = {};
       let donorProfile = {};
-      
+
       if (userDoc.exists()) {
         userData = userDoc.data();
       }
-      
+
       if (!donorProfileQuery.empty) {
         donorProfile = donorProfileQuery.docs[0].data();
       }
@@ -854,7 +854,7 @@ const DonationRecords = ({ onNavigate }) => {
         userEmail: selectedEmail,
         userPhone: selectedPhone
       });
-      
+
       setUserSearchResults([]);
       setShowUserDropdown(false);
     } catch (err) {
@@ -890,7 +890,7 @@ const DonationRecords = ({ onNavigate }) => {
         ...doc.data()
       }));
       setHospitals(hospitalsList);
-      
+
       const hospitalIds = hospitalsList.map(h => h.id);
       console.log(`Loaded ${hospitalsList.length} hospitals:`, hospitalIds);
 
@@ -930,13 +930,13 @@ const DonationRecords = ({ onNavigate }) => {
       donationsSnapshot.forEach(doc => {
         const donation = { id: doc.id, ...doc.data() };
         const donorId = donation.donor_id;
-        
+
         // Map by donor
         if (!donationsByDonor[donorId]) {
           donationsByDonor[donorId] = [];
         }
         donationsByDonor[donorId].push(donation);
-        
+
         // Map by ID
         donationsById[doc.id] = donation;
       });
@@ -948,18 +948,18 @@ const DonationRecords = ({ onNavigate }) => {
         const userId = booking.userId;
         const userData = usersMap[userId] || {};
         const donorProfile = donorProfilesMap[userId] || {};
-        
+
         // CHANGED: Check if this is from an event or from appointment
         let event = null;
         let hospitalId = null;
         let hospitalName = null;
-        
+
         if (booking.eventId && eventsMap[booking.eventId]) {
           // This is from an event
           event = eventsMap[booking.eventId];
           hospitalId = event.assignedHospitalId;
           hospitalName = event.assignedHospitalName;
-          
+
           // Skip if hospital is not in our list
           if (!hospitalIds.includes(hospitalId)) {
             console.log(`Skipping event booking from untracked hospital: ${hospitalId}`);
@@ -968,14 +968,14 @@ const DonationRecords = ({ onNavigate }) => {
         } else {
           // This is from an appointment (has eventTitle = 'From appointment')
           hospitalName = booking.eventLocation || 'Hospital Appointment';
-          
+
           // Try to find hospital by name
-          const matchingHospital = hospitalsList.find(h => 
+          const matchingHospital = hospitalsList.find(h =>
             h.name.toLowerCase() === hospitalName.toLowerCase() ||
             h.name.toLowerCase().includes(hospitalName.toLowerCase()) ||
             hospitalName.toLowerCase().includes(h.name.toLowerCase())
           );
-          
+
           if (matchingHospital) {
             hospitalId = matchingHospital.id;
             hospitalName = matchingHospital.name;
@@ -986,7 +986,7 @@ const DonationRecords = ({ onNavigate }) => {
             hospitalName = hospitalsList[0]?.name || hospitalName;
           }
         }
-        
+
         if (!hospitalId) {
           console.log(`Skipping booking ${booking.id} - no hospital found`);
           continue;
@@ -994,7 +994,7 @@ const DonationRecords = ({ onNavigate }) => {
 
         // IMPROVED DONATION MATCHING
         let matchingDonation = null;
-        
+
         // First, check if booking has a donationId field (direct link)
         if (booking.donationId && donationsById[booking.donationId]) {
           matchingDonation = donationsById[booking.donationId];
@@ -1002,7 +1002,7 @@ const DonationRecords = ({ onNavigate }) => {
         } else {
           // If no direct link, try to match by user and date
           const userDonations = donationsByDonor[userId] || [];
-          
+
           for (const donation of userDonations) {
             if (isDonationForBooking(donation, booking)) {
               matchingDonation = donation;
@@ -1019,7 +1019,7 @@ const DonationRecords = ({ onNavigate }) => {
 
         let displayDate = '';
         let rawDate = '';
-        
+
         if (booking.bookingDate) {
           displayDate = convertToISOString(booking.bookingDate);
           rawDate = displayDate;
@@ -1071,7 +1071,7 @@ const DonationRecords = ({ onNavigate }) => {
         };
 
         combinedRecords.push(record);
-        
+
         console.log(`Added record from ${record.source}:`, {
           id: record.id,
           name: record.name,
@@ -1086,7 +1086,7 @@ const DonationRecords = ({ onNavigate }) => {
         const alreadyLinked = combinedRecords.some(
           record => record.firestoreDonationId === donation.id
         );
-        
+
         if (!alreadyLinked) {
           console.log('Skipping standalone donation (no booking link):', donation.id);
         }
@@ -1108,7 +1108,7 @@ const DonationRecords = ({ onNavigate }) => {
       console.log(`Loaded ${combinedRecords.length} records. Status distribution:`, statusCounts);
       console.log(`Source distribution:`, sourceCounts);
       console.log('Hospitals included:', [...new Set(combinedRecords.map(r => r.hospitalName))]);
-      console.log('Sample appointments:', 
+      console.log('Sample appointments:',
         combinedRecords
           .filter(r => r.source === 'appointment_booking')
           .map(r => ({ id: r.id, name: r.name, status: r.status, hospital: r.hospitalName }))
@@ -1141,7 +1141,7 @@ const DonationRecords = ({ onNavigate }) => {
       console.log(`Total records: ${filteredRecords.length}`);
       console.log(`Completed records: ${completedRecords.length}`);
       console.log(`Appointment bookings: ${filteredRecords.filter(r => r.source === 'appointment_booking').length}`);
-      
+
       completedRecords.forEach((record, index) => {
         console.log(`Completed Record ${index}:`, {
           id: record.id,
@@ -1169,24 +1169,24 @@ const DonationRecords = ({ onNavigate }) => {
         try {
           const dateToUse = record.rawDate || record.date;
           if (!dateToUse) return false;
-          
+
           const recordDate = new Date(dateToUse);
           if (isNaN(recordDate.getTime())) return false;
-          
+
           const recordMonth = recordDate.getMonth() + 1;
           const recordYear = recordDate.getFullYear();
-          
+
           let monthMatch = true;
           let yearMatch = true;
-          
+
           if (monthFilter) {
             monthMatch = recordMonth === parseInt(monthFilter);
           }
-          
+
           if (yearFilter) {
             yearMatch = recordYear === parseInt(yearFilter);
           }
-          
+
           return monthMatch && yearMatch;
         } catch {
           return false;
@@ -1221,18 +1221,18 @@ const DonationRecords = ({ onNavigate }) => {
 
   const getStatusClasses = (record) => {
     const status = record.status.toLowerCase();
-    
+
     if (record.donationDetails?.used) {
       return 'status-used';
     }
-    
+
     if (record.donationDetails?.status === 'stored') {
       const isExpired = isDonationExpired({ expiry_date: record.donationDetails.expiryDate });
       if (isExpired) {
         return 'status-expired';
       }
     }
-    
+
     switch (status) {
       case 'completed': return 'status-completed';
       case 'registered': return 'status-scheduled';
@@ -1249,14 +1249,14 @@ const DonationRecords = ({ onNavigate }) => {
     if (record.donationDetails?.used) {
       return <Heart size={14} />;
     }
-    
+
     if (record.donationDetails?.status === 'stored') {
       const isExpired = isDonationExpired({ expiry_date: record.donationDetails.expiryDate });
       if (isExpired) {
         return <XCircle size={14} />;
       }
     }
-    
+
     const status = record.status.toLowerCase();
     switch (status) {
       case 'completed': return <CheckCircle size={14} />;
@@ -1274,14 +1274,14 @@ const DonationRecords = ({ onNavigate }) => {
     if (record.donationDetails?.used) {
       return 'Used';
     }
-    
+
     if (record.donationDetails?.status === 'stored') {
       const isExpired = isDonationExpired({ expiry_date: record.donationDetails.expiryDate });
       if (isExpired) {
         return 'Expired';
       }
     }
-    
+
     return record.status;
   };
 
@@ -1314,7 +1314,7 @@ const DonationRecords = ({ onNavigate }) => {
   // FIXED: Calculate stats based on displayed records
   const calculateStats = () => {
     const recordsToCount = filteredRecords;
-    
+
     const stats = {
       total: recordsToCount.length,
       completed: 0,
@@ -1328,8 +1328,8 @@ const DonationRecords = ({ onNavigate }) => {
 
     recordsToCount.forEach(record => {
       const statusText = getStatusText(record);
-      
-      switch(statusText.toLowerCase()) {
+
+      switch (statusText.toLowerCase()) {
         case 'completed':
         case 'used':
         case 'expired':
@@ -1375,11 +1375,11 @@ const DonationRecords = ({ onNavigate }) => {
 
       if (record.userId && record.userId !== 'walk_in') {
         const donorQuery = query(
-          collection(db, 'donor_profiles'), 
+          collection(db, 'donor_profiles'),
           where('user_id', '==', record.userId)
         );
         const donorSnapshot = await getDocs(donorQuery);
-        
+
         if (!donorSnapshot.empty) {
           const donorData = donorSnapshot.docs[0].data();
           bloodType = donorData.blood_group || 'Unknown';
@@ -1432,7 +1432,7 @@ const DonationRecords = ({ onNavigate }) => {
 
   const handleRegisterClick = async (record) => {
     if (!record.firestoreBookingId) return;
-    
+
     try {
       setError('');
       setSuccess('');
@@ -1441,7 +1441,7 @@ const DonationRecords = ({ onNavigate }) => {
         bookingStatus: 'registered',
         updatedAt: serverTimestamp()
       });
-      
+
       if (record.userId && record.userId !== 'walk_in') {
         await sendNotification(record.userId, {
           title: 'Donation Registered',
@@ -1455,7 +1455,7 @@ const DonationRecords = ({ onNavigate }) => {
           }
         });
       }
-      
+
       await loadRecords();
       setSuccess('Donation registered successfully!');
     } catch (err) {
@@ -1466,7 +1466,7 @@ const DonationRecords = ({ onNavigate }) => {
 
   const handleConfirmClick = async (record) => {
     if (!record.firestoreBookingId) return;
-    
+
     try {
       setError('');
       setSuccess('');
@@ -1475,7 +1475,7 @@ const DonationRecords = ({ onNavigate }) => {
         bookingStatus: 'confirmed',
         updatedAt: serverTimestamp()
       });
-      
+
       if (record.userId && record.userId !== 'walk_in') {
         await sendNotification(record.userId, {
           title: 'Donation Confirmed',
@@ -1489,7 +1489,7 @@ const DonationRecords = ({ onNavigate }) => {
           }
         });
       }
-      
+
       await loadRecords();
       setSuccess('Donation confirmed successfully!');
     } catch (err) {
@@ -1536,7 +1536,7 @@ const DonationRecords = ({ onNavigate }) => {
     try {
       setError('');
       setSuccess('');
-      
+
       const donationData = {
         serial_number: completionData.serialNumber.trim(),
         amount_ml: Number(completionData.amountDonated),
@@ -1611,7 +1611,7 @@ const DonationRecords = ({ onNavigate }) => {
         rejectReason: rejectReason || 'No reason provided',
         updatedAt: serverTimestamp()
       });
-      
+
       if (rejectingRecord.userId && rejectingRecord.userId !== 'walk_in') {
         await sendNotification(rejectingRecord.userId, {
           title: 'Donation Request Rejected',
@@ -1624,7 +1624,7 @@ const DonationRecords = ({ onNavigate }) => {
           }
         });
       }
-      
+
       await loadRecords();
       setShowRejectModal(false);
       setRejectingRecord(null);
@@ -1648,7 +1648,7 @@ const DonationRecords = ({ onNavigate }) => {
         cancelReason: cancelReason || 'No reason provided',
         updatedAt: serverTimestamp()
       });
-      
+
       if (cancellingRecord.userId && cancellingRecord.userId !== 'walk_in') {
         await sendNotification(cancellingRecord.userId, {
           title: 'Donation Cancelled',
@@ -1661,7 +1661,7 @@ const DonationRecords = ({ onNavigate }) => {
           }
         });
       }
-      
+
       await loadRecords();
       setShowCancelModal(false);
       setCancellingRecord(null);
@@ -1685,7 +1685,7 @@ const DonationRecords = ({ onNavigate }) => {
         noShowReason: noShowReason || 'No reason provided',
         updatedAt: serverTimestamp()
       });
-      
+
       if (noShowRecord.userId && noShowRecord.userId !== 'walk_in') {
         await sendNotification(noShowRecord.userId, {
           title: 'Missed Donation Appointment',
@@ -1698,7 +1698,7 @@ const DonationRecords = ({ onNavigate }) => {
           }
         });
       }
-      
+
       await loadRecords();
       setShowNoShowModal(false);
       setNoShowRecord(null);
@@ -1735,22 +1735,22 @@ const DonationRecords = ({ onNavigate }) => {
     try {
       setError('');
       setSuccess('');
-      
+
       const isRealUser = newRecord.userId && newRecord.userId !== 'walk_in';
       let userData = {};
       let donorProfile = {};
-      
+
       if (isRealUser) {
         try {
           const [userDoc, donorProfileQuery] = await Promise.all([
             getDoc(doc(db, 'users', newRecord.userId)),
             getDocs(query(collection(db, 'donor_profiles'), where('user_id', '==', newRecord.userId)))
           ]);
-          
+
           if (userDoc.exists()) {
             userData = userDoc.data();
           }
-          
+
           if (!donorProfileQuery.empty) {
             donorProfile = donorProfileQuery.docs[0].data();
           }
@@ -1764,7 +1764,7 @@ const DonationRecords = ({ onNavigate }) => {
         month: 'short',
         year: 'numeric'
       });
-      
+
       const confirmationCode = `WALK-IN-${Date.now().toString().substr(8, 6).toUpperCase()}`;
 
       if (newRecord.status === 'Completed') {
@@ -1787,7 +1787,7 @@ const DonationRecords = ({ onNavigate }) => {
         };
 
         const donationRef = await addDoc(collection(db, 'donations'), donationData);
-        
+
         const bookingData = {
           userId: newRecord.userId || 'walk_in',
           bookedAt: serverTimestamp(),
@@ -1805,9 +1805,9 @@ const DonationRecords = ({ onNavigate }) => {
           donorBloodType: donorProfile.blood_group || newRecord.bloodType || 'Unknown',
           entryType: 'walk_in'
         };
-        
+
         const bookingRef = await addDoc(collection(db, 'slot_bookings'), bookingData);
-        
+
         if (isRealUser) {
           await sendNotification(newRecord.userId, {
             title: 'Walk-in Donation Completed',
@@ -1821,7 +1821,7 @@ const DonationRecords = ({ onNavigate }) => {
             }
           });
         }
-      } 
+      }
       else {
         let bookingStatus = '';
         switch (newRecord.status.toLowerCase()) {
@@ -1833,7 +1833,7 @@ const DonationRecords = ({ onNavigate }) => {
           case 'no-show': bookingStatus = 'no-show'; break;
           default: bookingStatus = 'pending';
         }
-        
+
         const bookingData = {
           userId: isRealUser ? newRecord.userId : 'walk_in',
           bookedAt: serverTimestamp(),
@@ -1853,7 +1853,7 @@ const DonationRecords = ({ onNavigate }) => {
         };
 
         const bookingRef = await addDoc(collection(db, 'slot_bookings'), bookingData);
-        
+
         if (isRealUser) {
           await sendNotification(newRecord.userId, {
             title: `Walk-in Donation: ${newRecord.status}`,
@@ -1883,7 +1883,7 @@ const DonationRecords = ({ onNavigate }) => {
       });
       setUserSearchResults([]);
       setShowUserDropdown(false);
-      
+
       setSuccess(`Walk-in record added successfully with status: ${newRecord.status}`);
 
     } catch (err) {
@@ -1909,7 +1909,7 @@ const DonationRecords = ({ onNavigate }) => {
       setError('');
       setSuccess('');
       const recordToDelete = records.find(r => r.id === deletingId);
-      
+
       if (!recordToDelete) {
         throw new Error('Record not found');
       }
@@ -1927,7 +1927,7 @@ const DonationRecords = ({ onNavigate }) => {
 
       if (recordToDelete.firestoreBookingId) {
         await deleteDoc(doc(db, 'slot_bookings', recordToDelete.firestoreBookingId));
-        
+
         if (recordToDelete.userId && recordToDelete.userId !== 'walk_in') {
           await sendNotification(recordToDelete.userId, {
             title: 'Donation Record Deleted',
@@ -2023,7 +2023,7 @@ const DonationRecords = ({ onNavigate }) => {
             </button>
           </div>
         )}
-        
+
         {success && (
           <div className="error-container success-alert">
             <CheckCircle className="error-icon" />
@@ -2086,7 +2086,7 @@ const DonationRecords = ({ onNavigate }) => {
                 />
               </div>
             </div>
-            
+
             <div className="records-filter-select-container">
               <label className="records-filter-label">Status</label>
               <select
@@ -2099,7 +2099,7 @@ const DonationRecords = ({ onNavigate }) => {
                 ))}
               </select>
             </div>
-            
+
             <div className="records-filter-select-container">
               <label className="records-filter-label">Month</label>
               <select
@@ -2112,7 +2112,7 @@ const DonationRecords = ({ onNavigate }) => {
                 ))}
               </select>
             </div>
-            
+
             <div className="records-filter-select-container">
               <label className="records-filter-label">Year</label>
               <select
@@ -2146,7 +2146,7 @@ const DonationRecords = ({ onNavigate }) => {
                 {paginatedRecords.map((record) => {
                   const isCompleted = record.status === 'Completed';
                   const canBeUsed = canMarkAsUsed(record);
-                  
+
                   return (
                     <tr key={`${record.id}-${record.firestoreBookingId}`} className="records-table-row">
                       <td className="records-table-cell records-id-cell">
@@ -2191,15 +2191,14 @@ const DonationRecords = ({ onNavigate }) => {
                           {record.status === 'Completed' && (
                             <button
                               onClick={() => handleMarkAsUsedClick(record)}
-                              className={`records-action-button ${
-                                record.donationDetails?.used ? 'used-completed' : 'used-button'
-                              }`}
+                              className={`records-action-button ${record.donationDetails?.used ? 'used-completed' : 'used-button'
+                                }`}
                               title={
-                                record.donationDetails?.used 
-                                  ? "Already Used" 
+                                record.donationDetails?.used
+                                  ? "Already Used"
                                   : canMarkAsUsed(record)
-                                  ? "Mark as Used"
-                                  : "Cannot be used"
+                                    ? "Mark as Used"
+                                    : "Cannot be used"
                               }
                               disabled={record.donationDetails?.used || !canMarkAsUsed(record)}
                             >
@@ -2216,15 +2215,15 @@ const DonationRecords = ({ onNavigate }) => {
                             <button
                               className="records-action-button disabled-button"
                               title={
-                                record.donationDetails.used 
-                                  ? 'Already Used' 
+                                record.donationDetails.used
+                                  ? 'Already Used'
                                   : record.donationDetails.status !== 'stored'
-                                  ? 'Not in stored status'
-                                  : !record.donationDetails.bloodType || record.donationDetails.bloodType === 'Unknown'
-                                  ? 'No valid blood type'
-                                  : record.donationDetails.expiryDate && new Date(record.donationDetails.expiryDate) < new Date()
-                                  ? 'Expired'
-                                  : 'Cannot be used'
+                                    ? 'Not in stored status'
+                                    : !record.donationDetails.bloodType || record.donationDetails.bloodType === 'Unknown'
+                                      ? 'No valid blood type'
+                                      : record.donationDetails.expiryDate && new Date(record.donationDetails.expiryDate) < new Date()
+                                        ? 'Expired'
+                                        : 'Cannot be used'
                               }
                               disabled
                             >
@@ -2357,7 +2356,7 @@ const DonationRecords = ({ onNavigate }) => {
                 {records.length === 0 ? 'No donation records found' : 'No matching records'}
               </h3>
               <p className="records-empty-state-description">
-                {records.length === 0 
+                {records.length === 0
                   ? 'Start by adding a donation record or wait for bookings'
                   : 'Try adjusting your search filters'}
               </p>
@@ -2545,15 +2544,15 @@ const DonationRecords = ({ onNavigate }) => {
                       try {
                         setError('');
                         setSuccess('');
-                        
+
                         if (selectedRecord.firestoreDonationId) {
                           const donationRef = doc(db, 'donations', selectedRecord.firestoreDonationId);
                           await updateDoc(donationRef, {
                             donor_name: selectedRecord.name,
-                            status: selectedRecord.status.toLowerCase() === 'completed' ? 'stored' : 
-                                    selectedRecord.status.toLowerCase() === 'rejected' ? 'rejected' : 
-                                    selectedRecord.status.toLowerCase() === 'cancelled' ? 'cancelled' :
-                                    selectedRecord.status.toLowerCase() === 'no-show' ? 'no-show' :
+                            status: selectedRecord.status.toLowerCase() === 'completed' ? 'stored' :
+                              selectedRecord.status.toLowerCase() === 'rejected' ? 'rejected' :
+                                selectedRecord.status.toLowerCase() === 'cancelled' ? 'cancelled' :
+                                  selectedRecord.status.toLowerCase() === 'no-show' ? 'no-show' :
                                     'pending',
                             donation_date: Timestamp.fromDate(new Date(selectedRecord.date))
                           });
@@ -2565,7 +2564,7 @@ const DonationRecords = ({ onNavigate }) => {
                             bookingStatus: selectedRecord.status.toLowerCase(),
                             updatedAt: serverTimestamp()
                           });
-                          
+
                           if (selectedRecord.userId && selectedRecord.userId !== 'walk_in' && selectedRecord.status !== 'Pending') {
                             await sendNotification(selectedRecord.userId, {
                               title: `Donation Status Updated to ${selectedRecord.status}`,
@@ -2638,7 +2637,7 @@ const DonationRecords = ({ onNavigate }) => {
                           <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
                         </div>
                       )}
-                      
+
                       {showUserDropdown && userSearchResults.length > 0 && (
                         <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                           {userSearchResults.map((user) => (
@@ -2662,18 +2661,17 @@ const DonationRecords = ({ onNavigate }) => {
                                   )}
                                 </div>
                                 <div className="flex flex-col items-end">
-                                  <span className={`text-xs px-2 py-1 rounded-full mb-1 ${
-                                    user.source === 'donor_profile' 
-                                      ? 'bg-green-100 text-green-800' 
+                                  <span className={`text-xs px-2 py-1 rounded-full mb-1 ${user.source === 'donor_profile'
+                                      ? 'bg-green-100 text-green-800'
                                       : user.source === 'donor_profile_only'
-                                      ? 'bg-blue-100 text-blue-800'
-                                      : 'bg-gray-100 text-gray-800'
-                                  }`}>
-                                    {user.source === 'donor_profile' 
-                                      ? 'Donor' 
+                                        ? 'bg-blue-100 text-blue-800'
+                                        : 'bg-gray-100 text-gray-800'
+                                    }`}>
+                                    {user.source === 'donor_profile'
+                                      ? 'Donor'
                                       : user.source === 'donor_profile_only'
-                                      ? 'Donor (No User)'
-                                      : 'User'}
+                                        ? 'Donor (No User)'
+                                        : 'User'}
                                   </span>
                                   {user.hasDonorProfile && (
                                     <span className="text-xs px-2 py-0.5 bg-red-100 text-red-800 rounded-full">
@@ -2698,7 +2696,7 @@ const DonationRecords = ({ onNavigate }) => {
                           ))}
                         </div>
                       )}
-                      
+
                       {showUserDropdown && userSearchResults.length === 0 && newRecord.name.length >= 2 && !searchingUsers && (
                         <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
                           <div className="px-4 py-3 text-gray-500 text-center">
@@ -2808,7 +2806,7 @@ const DonationRecords = ({ onNavigate }) => {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="records-modal-actions">
                   <button
                     onClick={() => {
@@ -2904,7 +2902,7 @@ const DonationRecords = ({ onNavigate }) => {
                     <label className="records-detail-label">Date</label>
                     <p className="records-detail-value">{formatDate(selectedRecord.date)}</p>
                   </div>
-                  
+
                   {selectedRecord.eventInfo && (
                     <div className="records-detail-item records-detail-full-width">
                       <label className="records-detail-label">Event Information</label>

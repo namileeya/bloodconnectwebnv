@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Calendar, Clock, MapPin, User, Phone, CheckCircle, XCircle, Edit2, AlertCircle, X, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
-import { 
-  collection, 
-  query, 
-  onSnapshot, 
-  doc, 
-  updateDoc, 
+import {
+  collection,
+  query,
+  onSnapshot,
+  doc,
+  updateDoc,
   addDoc,
   getDoc,
   getDocs,
@@ -47,10 +47,10 @@ const DonationAppointment = ({ onNavigate }) => {
   const formatFirebaseDate = (timestamp) => {
     if (!timestamp) return 'N/A';
     const date = timestamp.toDate();
-    return date.toLocaleDateString('en-GB', { 
-      day: '2-digit', 
-      month: 'short', 
-      year: 'numeric' 
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
     });
   };
 
@@ -89,7 +89,7 @@ const DonationAppointment = ({ onNavigate }) => {
   // Fetch user data by userId from users collection
   const fetchUserData = async (userId) => {
     if (!userId) return null;
-    
+
     // Check if user data is already cached
     if (usersData[userId]) {
       return usersData[userId];
@@ -117,7 +117,7 @@ const DonationAppointment = ({ onNavigate }) => {
   // Fetch donor profile data by userId from donor_profiles collection
   const fetchDonorProfileData = async (userId) => {
     if (!userId) return null;
-    
+
     // Check if donor profile data is already cached
     if (donorProfilesData[userId]) {
       return donorProfilesData[userId];
@@ -129,16 +129,16 @@ const DonationAppointment = ({ onNavigate }) => {
         collection(db, 'donor_profiles'),
         where('user_id', '==', userId)
       );
-      
+
       const querySnapshot = await getDocs(donorProfilesQuery);
       if (!querySnapshot.empty) {
         // Get the first matching document (should only be one per user)
         const doc = querySnapshot.docs[0];
         const donorProfileData = doc.data();
-        
+
         // Debug log to see what data we're getting
         console.log(`Fetched donor profile for userId ${userId}:`, donorProfileData);
-        
+
         // Cache the donor profile data
         setDonorProfilesData(prev => ({
           ...prev,
@@ -157,13 +157,13 @@ const DonationAppointment = ({ onNavigate }) => {
   // Fetch all user-related data for an appointment
   const fetchAllUserData = async (userId) => {
     if (!userId) return { userData: null, donorProfileData: null };
-    
+
     try {
       const [userData, donorProfileData] = await Promise.all([
         fetchUserData(userId),
         fetchDonorProfileData(userId)
       ]);
-      
+
       return { userData, donorProfileData };
     } catch (error) {
       console.error(`Error fetching data for userId ${userId}:`, error);
@@ -174,23 +174,23 @@ const DonationAppointment = ({ onNavigate }) => {
   // Load appointments with real-time updates
   useEffect(() => {
     setLoading(true);
-    
+
     const q = query(
       collection(db, 'appointments'),
       orderBy('appointmentDate', 'asc')
     );
 
-    const unsubscribe = onSnapshot(q, 
+    const unsubscribe = onSnapshot(q,
       async (querySnapshot) => {
         const appointmentsData = [];
         const locationSet = new Set();
         const userIds = new Set();
-        
+
         // First, collect all appointments and userIds
         querySnapshot.forEach((doc) => {
           const data = doc.data();
           const userId = data.userId;
-          
+
           appointmentsData.push({
             id: doc.id,
             firebaseId: doc.id,
@@ -206,30 +206,30 @@ const DonationAppointment = ({ onNavigate }) => {
             notes: data.notes || '',
             hospitalId: data.hospitalId
           });
-          
+
           if (data.hospitalName) {
             locationSet.add(data.hospitalName);
           }
-          
+
           if (userId) {
             userIds.add(userId);
           }
         });
-        
+
         console.log(`Found ${userIds.size} unique users in appointments`);
-        
+
         // Fetch user data for all unique userIds
         const fetchPromises = Array.from(userIds).map(userId => fetchAllUserData(userId));
         await Promise.all(fetchPromises);
-        
+
         setAppointments(appointmentsData);
         setLocations(Array.from(locationSet));
         setLoading(false);
-        
+
         // Debug: Log data we have
         console.log('Users data cache size:', Object.keys(usersData).length);
         console.log('Donor profiles cache size:', Object.keys(donorProfilesData).length);
-        
+
         // Log first few appointments with their data
         appointmentsData.slice(0, 3).forEach((apt, index) => {
           const userData = usersData[apt.userId];
@@ -260,7 +260,7 @@ const DonationAppointment = ({ onNavigate }) => {
   // Get user data for an appointment
   const getUserDataForAppointment = (appointment) => {
     if (!appointment || !appointment.userId) return { userData: null, donorProfileData: null };
-    
+
     return {
       userData: usersData[appointment.userId] || null,
       donorProfileData: donorProfilesData[appointment.userId] || null
@@ -270,7 +270,7 @@ const DonationAppointment = ({ onNavigate }) => {
   // Get appointment with combined user data
   const getAppointmentWithUserData = (appointment) => {
     const { userData, donorProfileData } = getUserDataForAppointment(appointment);
-    
+
     // Determine donor name with fallbacks
     let donorName = 'Unknown Donor';
     if (donorProfileData?.full_name) {
@@ -280,13 +280,13 @@ const DonationAppointment = ({ onNavigate }) => {
     } else if (userData?.email) {
       donorName = userData.email.split('@')[0]; // Use email username as fallback
     }
-    
+
     // Determine phone number
     let phone = 'No phone number';
     if (userData?.phone_number) {
       phone = userData.phone_number;
     }
-    
+
     // Determine blood type with priority: appointment > donor profile > unknown
     let bloodType = 'Unknown';
     if (appointment.bloodType) {
@@ -294,7 +294,7 @@ const DonationAppointment = ({ onNavigate }) => {
     } else if (donorProfileData?.blood_group) {
       bloodType = donorProfileData.blood_group;
     }
-    
+
     return {
       ...appointment,
       donorName,
@@ -311,18 +311,18 @@ const DonationAppointment = ({ onNavigate }) => {
   // Calculate age from birth date string (DD/MM/YYYY)
   const calculateAge = (birthDateString) => {
     if (!birthDateString) return null;
-    
+
     try {
       const [day, month, year] = birthDateString.split('/').map(Number);
       const birthDate = new Date(year, month - 1, day);
       const today = new Date();
       let age = today.getFullYear() - birthDate.getFullYear();
       const monthDiff = today.getMonth() - birthDate.getMonth();
-      
+
       if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
         age--;
       }
-      
+
       return age;
     } catch (error) {
       console.error('Error calculating age:', error);
@@ -345,10 +345,10 @@ const DonationAppointment = ({ onNavigate }) => {
     if (dateFilter !== 'All') {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      
+
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
-      
+
       const nextWeek = new Date(today);
       nextWeek.setDate(nextWeek.getDate() + 7);
 
@@ -356,7 +356,7 @@ const DonationAppointment = ({ onNavigate }) => {
         if (!apt.date) return false;
         const aptDate = apt.date.toDate();
         aptDate.setHours(0, 0, 0, 0);
-        
+
         if (dateFilter === 'Today') {
           return aptDate.getTime() === today.getTime();
         } else if (dateFilter === 'Tomorrow') {
@@ -374,7 +374,7 @@ const DonationAppointment = ({ onNavigate }) => {
         const appointmentWithUser = getAppointmentWithUserData(apt);
         const donorName = appointmentWithUser.donorName.toLowerCase();
         const phone = appointmentWithUser.phone || '';
-        
+
         return (
           donorName.includes(searchLower) ||
           apt.displayId.toLowerCase().includes(searchLower) ||
@@ -471,13 +471,13 @@ const DonationAppointment = ({ onNavigate }) => {
           status: 'cancelled',
           updatedAt: serverTimestamp()
         });
-        
+
         setError(''); // Clear any previous errors
       }
-      
+
       setShowConfirmModal(false);
       setSelectedAppointment(null);
-      
+
     } catch (error) {
       console.error('Error updating appointment:', error);
       setError('Failed to update appointment. Please try again.');
@@ -490,7 +490,7 @@ const DonationAppointment = ({ onNavigate }) => {
 
       // Convert date string to Firestore timestamp
       const newDate = new Date(rescheduleData.date);
-      
+
       // Update appointment in Firestore
       const appointmentRef = doc(db, 'appointments', selectedAppointment.firebaseId);
       await updateDoc(appointmentRef, {
@@ -503,7 +503,7 @@ const DonationAppointment = ({ onNavigate }) => {
       setShowRescheduleModal(false);
       setSelectedAppointment(null);
       setError(''); // Clear any previous errors
-      
+
     } catch (error) {
       console.error('Error rescheduling appointment:', error);
       setError('Failed to reschedule appointment. Please try again.');
@@ -755,8 +755,8 @@ const DonationAppointment = ({ onNavigate }) => {
           <div className="appointment-pagination">
             <div className="appointment-pagination-info">
               <span>Items per page:</span>
-              <select 
-                value={itemsPerPage} 
+              <select
+                value={itemsPerPage}
                 onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
                 className="appointment-items-per-page-select"
               >
@@ -769,7 +769,7 @@ const DonationAppointment = ({ onNavigate }) => {
                 {startIndex + 1}-{Math.min(endIndex, filteredAppointments.length)} of {filteredAppointments.length}
               </span>
             </div>
-            
+
             <div className="appointment-pagination-controls">
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
@@ -814,7 +814,7 @@ const DonationAppointment = ({ onNavigate }) => {
                       {capitalizeStatus(selectedAppointment.status)}
                     </span>
                   </div>
-                  
+
                   {/* Donor Information */}
                   <div className="detail-item">
                     <label className="detail-label">Donor Name</label>
@@ -828,7 +828,7 @@ const DonationAppointment = ({ onNavigate }) => {
                       {getAppointmentWithUserData(selectedAppointment).phone}
                     </p>
                   </div>
-                  
+
                   {/* Blood Information */}
                   <div className="detail-item">
                     <label className="detail-label">Blood Type</label>
@@ -838,7 +838,7 @@ const DonationAppointment = ({ onNavigate }) => {
                       </span>
                     </p>
                   </div>
-                  
+
                   {/* Appointment Information */}
                   <div className="detail-item">
                     <label className="detail-label">Booking Date</label>
@@ -861,7 +861,7 @@ const DonationAppointment = ({ onNavigate }) => {
                     <label className="detail-label">Appointment Time</label>
                     <p className="detail-value">{formatTimeForDisplay(selectedAppointment.time)}</p>
                   </div>
-                  
+
                   {selectedAppointment.notes && (
                     <div className="detail-item full-width">
                       <label className="detail-label">Notes</label>
@@ -911,7 +911,7 @@ const DonationAppointment = ({ onNavigate }) => {
                       type="date"
                       className="appointment-form-input"
                       value={rescheduleData.date}
-                      onChange={(e) => setRescheduleData({...rescheduleData, date: e.target.value})}
+                      onChange={(e) => setRescheduleData({ ...rescheduleData, date: e.target.value })}
                       min={new Date().toISOString().split('T')[0]}
                     />
                   </div>
@@ -920,7 +920,7 @@ const DonationAppointment = ({ onNavigate }) => {
                     <select
                       className="appointment-form-select"
                       value={rescheduleData.time}
-                      onChange={(e) => setRescheduleData({...rescheduleData, time: e.target.value})}
+                      onChange={(e) => setRescheduleData({ ...rescheduleData, time: e.target.value })}
                     >
                       <option value="">Select time</option>
                       {timeSlots.map(slot => (
@@ -964,7 +964,7 @@ const DonationAppointment = ({ onNavigate }) => {
                 {actionType === 'confirm' ? 'Confirm Appointment' : 'Cancel Appointment'}
               </h3>
               <p className="appointment-confirm-message">
-                {actionType === 'confirm' 
+                {actionType === 'confirm'
                   ? `Are you sure you want to confirm this appointment for ${getAppointmentWithUserData(selectedAppointment).donorName}?`
                   : `Are you sure you want to cancel this appointment for ${getAppointmentWithUserData(selectedAppointment).donorName}?`
                 }

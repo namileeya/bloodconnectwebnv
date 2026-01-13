@@ -1,35 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Search, Calendar, Clock, MapPin, User, CheckCircle, XCircle, AlertCircle, X, 
-  Users, Award, Heart
+import {
+    Search, Calendar, Clock, MapPin, User, CheckCircle, XCircle, AlertCircle, X,
+    Users, Award, Heart, ChevronLeft, ChevronRight
 } from 'lucide-react';
-import { 
-  collection, getDocs, addDoc, updateDoc, 
-  doc, query, where, Timestamp, serverTimestamp,
-  orderBy, getDoc, increment, writeBatch, setDoc
+import {
+    collection, getDocs, addDoc, updateDoc,
+    doc, query, where, Timestamp, serverTimestamp,
+    orderBy, getDoc, increment, writeBatch, setDoc
 } from 'firebase/firestore';
 import { db } from '../../firebase';
 import Layout from '../../components/Layout';
 import './EventRegistrations.css';
 
 const sendNotification = async (userId, notificationData) => {
-  try {
-    if (!userId || ['manual_entry', 'walk_in', 'unknown'].includes(userId)) return;
+    try {
+        if (!userId || ['manual_entry', 'walk_in', 'unknown'].includes(userId)) return;
 
-    const notificationRecord = {
-      userId: userId,
-      type: 'donation_status_update',
-      title: notificationData.title,
-      message: notificationData.message,
-      data: notificationData.data || {},
-      read: false,
-      createdAt: serverTimestamp()
-    };
-    
-    await addDoc(collection(db, 'notifications'), notificationRecord);
-  } catch (error) {
-    console.error('Error sending notification:', error);
-  }
+        const notificationRecord = {
+            userId: userId,
+            type: 'donation_status_update',
+            title: notificationData.title,
+            message: notificationData.message,
+            data: notificationData.data || {},
+            read: false,
+            createdAt: serverTimestamp()
+        };
+
+        await addDoc(collection(db, 'notifications'), notificationRecord);
+    } catch (error) {
+        console.error('Error sending notification:', error);
+    }
 };
 
 const EventRegistrations = ({ onNavigate }) => {
@@ -67,6 +67,10 @@ const EventRegistrations = ({ onNavigate }) => {
     const [usingHospital, setUsingHospital] = useState(null);
     const [hospitalBloodStock, setHospitalBloodStock] = useState(null);
 
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+
     const formatDateFromFirestore = (timestamp) => {
         try {
             if (!timestamp) return new Date();
@@ -87,7 +91,7 @@ const EventRegistrations = ({ onNavigate }) => {
             try {
                 setLoading(true);
                 setError('');
-                
+
                 // Load hospitals
                 const hospitalsSnapshot = await getDocs(collection(db, 'hospitals'));
                 const hospitalsList = hospitalsSnapshot.docs.map(doc => ({
@@ -95,9 +99,9 @@ const EventRegistrations = ({ onNavigate }) => {
                     ...doc.data()
                 }));
                 setHospitals(hospitalsList);
-                
+
                 const hospitalNames = hospitalsList.map(h => h.name);
-                
+
                 // Load venues
                 const venuesSnapshot = await getDocs(collection(db, 'venues'));
                 const venuesList = venuesSnapshot.docs.map(doc => ({
@@ -105,12 +109,12 @@ const EventRegistrations = ({ onNavigate }) => {
                     ...doc.data()
                 }));
                 setVenues(venuesList);
-                
+
                 // Load events
                 const eventsSnapshot = await getDocs(collection(db, 'blood_drive_events'));
                 const allEvents = [];
                 const eventMap = {};
-                
+
                 eventsSnapshot.forEach(doc => {
                     const event = { id: doc.id, ...doc.data() };
                     if (event.date) {
@@ -121,24 +125,24 @@ const EventRegistrations = ({ onNavigate }) => {
                     allEvents.push(event);
                     eventMap[doc.id] = event;
                 });
-                
+
                 // Filter out hospital events
                 const includedEvents = allEvents.filter(event => {
                     const eventLocation = (event.location || '').toLowerCase();
-                    return !hospitalNames.some(hospitalName => 
+                    return !hospitalNames.some(hospitalName =>
                         eventLocation.includes(hospitalName.toLowerCase())
                     );
                 });
-                
+
                 setEvents(includedEvents);
                 const includedEventIds = new Set(includedEvents.map(e => e.id));
-                
+
                 // Load users and donor profiles
                 const [usersSnapshot, donorProfilesSnapshot] = await Promise.all([
                     getDocs(collection(db, 'users')),
                     getDocs(collection(db, 'donor_profiles'))
                 ]);
-                
+
                 const usersMap = {};
                 usersSnapshot.forEach(doc => {
                     const userData = doc.data();
@@ -151,7 +155,7 @@ const EventRegistrations = ({ onNavigate }) => {
                         ic: userData.ic || userData.nric || userData.id_number || ''
                     };
                 });
-                
+
                 const donorProfilesMap = {};
                 donorProfilesSnapshot.forEach(doc => {
                     const donorData = doc.data();
@@ -167,34 +171,34 @@ const EventRegistrations = ({ onNavigate }) => {
                         };
                     }
                 });
-                
+
                 // Load bookings
                 const bookingsSnapshot = await getDocs(query(collection(db, 'slot_bookings'), orderBy('bookedAt', 'desc')));
                 const bookingsArray = [];
                 bookingsSnapshot.forEach(doc => {
                     bookingsArray.push({ id: doc.id, ...doc.data() });
                 });
-                
+
                 // Process bookings
                 const registrationsList = [];
-                
+
                 for (const booking of bookingsArray) {
                     const bookingId = booking.id;
-                    
+
                     if (!booking.eventId || !includedEventIds.has(booking.eventId)) continue;
-                    
+
                     const eventData = eventMap[booking.eventId];
                     if (!eventData) continue;
-                    
+
                     // Get user information
                     let userName = 'Unknown Donor';
                     let userEmail = '';
                     let userPhone = '';
                     let userIC = '';
                     let bloodType = 'Unknown';
-                    
+
                     const userId = booking.userId;
-                    
+
                     if (userId && userId !== 'walk_in') {
                         if (usersMap[userId]) {
                             const user = usersMap[userId];
@@ -202,7 +206,7 @@ const EventRegistrations = ({ onNavigate }) => {
                             userEmail = user.email || booking.donorEmail || '';
                             userPhone = user.phone || booking.donorPhone || '';
                             userIC = user.ic || booking.donorIC || '';
-                            
+
                             if (donorProfilesMap[userId]) {
                                 const donor = donorProfilesMap[userId];
                                 bloodType = donor.blood_group || booking.donorBloodType || 'Unknown';
@@ -229,7 +233,7 @@ const EventRegistrations = ({ onNavigate }) => {
                         userIC = booking.donorIC || '';
                         bloodType = booking.donorBloodType || 'Unknown';
                     }
-                    
+
                     // Try to find by email
                     const userEmailToFind = userEmail || booking.donorEmail;
                     if (userEmailToFind && (!userEmail || !userPhone || !userIC)) {
@@ -242,7 +246,7 @@ const EventRegistrations = ({ onNavigate }) => {
                                 break;
                             }
                         }
-                        
+
                         for (const donor of Object.values(donorProfilesMap)) {
                             if (donor.email === userEmailToFind) {
                                 userName = donor.full_name || userName;
@@ -254,7 +258,7 @@ const EventRegistrations = ({ onNavigate }) => {
                             }
                         }
                     }
-                    
+
                     // Get donation details
                     let donationDetails = null;
                     if (booking.donationId) {
@@ -265,13 +269,13 @@ const EventRegistrations = ({ onNavigate }) => {
                                 donationDetails = {
                                     serialNumber: donationData.serial_number || '',
                                     amountDonated: donationData.amount_ml?.toString() || '',
-                                    expiryDate: donationData.expiry_date ? 
+                                    expiryDate: donationData.expiry_date ?
                                         formatDateFromFirestore(donationData.expiry_date).toISOString().split('T')[0] : '',
-                                    completedDate: donationData.donation_date ? 
+                                    completedDate: donationData.donation_date ?
                                         formatDateFromFirestore(donationData.donation_date).toISOString().split('T')[0] : '',
                                     bloodType: donationData.blood_type || bloodType,
                                     used: donationData.used || false,
-                                    usedAt: donationData.used_at ? 
+                                    usedAt: donationData.used_at ?
                                         formatDateFromFirestore(donationData.used_at).toISOString().split('T')[0] : '',
                                     status: donationData.status || 'stored'
                                 };
@@ -280,7 +284,7 @@ const EventRegistrations = ({ onNavigate }) => {
                             console.warn(`Error fetching donation:`, err);
                         }
                     }
-                    
+
                     // Determine status
                     let status = 'Pending';
                     if (booking.bookingStatus) {
@@ -296,7 +300,7 @@ const EventRegistrations = ({ onNavigate }) => {
                             default: status = 'Pending';
                         }
                     }
-                    
+
                     // Create registration object
                     const registration = {
                         id: bookingId,
@@ -310,7 +314,7 @@ const EventRegistrations = ({ onNavigate }) => {
                         userIC: userIC,
                         bloodType: bloodType,
                         selectedTime: booking.selectedTime || '10:00',
-                        registrationDate: booking.bookedAt ? 
+                        registrationDate: booking.bookedAt ?
                             formatDateFromFirestore(booking.bookedAt).toISOString() : new Date().toISOString(),
                         status: status,
                         specialNotes: booking.specialNotes || '',
@@ -326,13 +330,13 @@ const EventRegistrations = ({ onNavigate }) => {
                         hospitalId: eventData.assignedHospitalId,
                         hospitalName: eventData.assignedHospitalName || 'Unknown Hospital'
                     };
-                    
+
                     registrationsList.push(registration);
                 }
-                
+
                 setRegistrations(registrationsList);
                 setLoading(false);
-                
+
             } catch (err) {
                 console.error('Failed to load registrations:', err);
                 setError(`Failed to load registrations: ${err.message}`);
@@ -458,21 +462,21 @@ const EventRegistrations = ({ onNavigate }) => {
         try {
             setError('');
             setSuccess('');
-            
+
             const bookingRef = doc(db, 'slot_bookings', registration.firestoreBookingId);
             await updateDoc(bookingRef, {
                 bookingStatus: 'confirmed',
                 updatedAt: serverTimestamp()
             });
-            
-            const updatedRegistrations = registrations.map(reg => 
+
+            const updatedRegistrations = registrations.map(reg =>
                 reg.id === registration.id ? { ...reg, status: 'Approved' } : reg
             );
-            
+
             setRegistrations(updatedRegistrations);
             setSuccess('Registration approved successfully');
             setShowConfirmModal(false);
-            
+
             // Send notification
             if (registration.userId && registration.userId !== 'walk_in') {
                 await sendNotification(registration.userId, {
@@ -487,7 +491,7 @@ const EventRegistrations = ({ onNavigate }) => {
                     }
                 });
             }
-            
+
         } catch (err) {
             console.error('Error approving registration:', err);
             setError(`Failed to approve registration: ${err.message}`);
@@ -498,28 +502,28 @@ const EventRegistrations = ({ onNavigate }) => {
         try {
             setError('');
             setSuccess('');
-            
+
             const bookingRef = doc(db, 'slot_bookings', registration.firestoreBookingId);
             await updateDoc(bookingRef, {
                 bookingStatus: 'rejected',
                 rejectionReason: reason,
                 updatedAt: serverTimestamp()
             });
-            
-            const updatedRegistrations = registrations.map(reg => 
+
+            const updatedRegistrations = registrations.map(reg =>
                 reg.id === registration.id ? { ...reg, status: 'Rejected' } : reg
             );
-            
+
             setRegistrations(updatedRegistrations);
             setSuccess('Registration rejected successfully');
             setShowConfirmModal(false);
             setRejectionReason('');
-            
+
             // Send notification
             if (registration.userId && registration.userId !== 'walk_in') {
                 await sendNotification(registration.userId, {
                     title: 'Registration Update',
-                    message: reason 
+                    message: reason
                         ? `Your registration for ${getEventById(registration.eventId)?.title} was rejected. Reason: ${reason}`
                         : `Your registration for ${getEventById(registration.eventId)?.title} has been rejected.`,
                     data: {
@@ -531,7 +535,7 @@ const EventRegistrations = ({ onNavigate }) => {
                     }
                 });
             }
-            
+
         } catch (err) {
             console.error('Error rejecting registration:', err);
             setError(`Failed to reject registration: ${err.message}`);
@@ -542,22 +546,22 @@ const EventRegistrations = ({ onNavigate }) => {
         try {
             setError('');
             setSuccess('');
-            
+
             const bookingRef = doc(db, 'slot_bookings', registration.firestoreBookingId);
             await updateDoc(bookingRef, {
                 bookingStatus: 'checked_in',
                 checkedInAt: serverTimestamp(),
                 updatedAt: serverTimestamp()
             });
-            
-            const updatedRegistrations = registrations.map(reg => 
+
+            const updatedRegistrations = registrations.map(reg =>
                 reg.id === registration.id ? { ...reg, status: 'Checked-In' } : reg
             );
-            
+
             setRegistrations(updatedRegistrations);
             setSuccess('Donor checked in successfully');
             setShowConfirmModal(false);
-            
+
             // Send notification
             if (registration.userId && registration.userId !== 'walk_in') {
                 await sendNotification(registration.userId, {
@@ -571,7 +575,7 @@ const EventRegistrations = ({ onNavigate }) => {
                     }
                 });
             }
-            
+
         } catch (err) {
             console.error('Error checking in:', err);
             setError(`Failed to check in: ${err.message}`);
@@ -582,22 +586,22 @@ const EventRegistrations = ({ onNavigate }) => {
         try {
             setError('');
             setSuccess('');
-            
+
             const bookingRef = doc(db, 'slot_bookings', registration.firestoreBookingId);
             await updateDoc(bookingRef, {
                 bookingStatus: 'cancelled',
                 cancelledAt: serverTimestamp(),
                 updatedAt: serverTimestamp()
             });
-            
-            const updatedRegistrations = registrations.map(reg => 
+
+            const updatedRegistrations = registrations.map(reg =>
                 reg.id === registration.id ? { ...reg, status: 'Cancelled' } : reg
             );
-            
+
             setRegistrations(updatedRegistrations);
             setSuccess('Registration cancelled successfully');
             setShowConfirmModal(false);
-            
+
             // Send notification
             if (registration.userId && registration.userId !== 'walk_in') {
                 await sendNotification(registration.userId, {
@@ -611,7 +615,7 @@ const EventRegistrations = ({ onNavigate }) => {
                     }
                 });
             }
-            
+
         } catch (err) {
             console.error('Error cancelling registration:', err);
             setError(`Failed to cancel registration: ${err.message}`);
@@ -622,7 +626,7 @@ const EventRegistrations = ({ onNavigate }) => {
         try {
             setError('');
             setSuccess('');
-            
+
             // Create donation record
             const donationData = {
                 user_id: registration.userId,
@@ -641,9 +645,9 @@ const EventRegistrations = ({ onNavigate }) => {
                 used: false,
                 created_at: serverTimestamp()
             };
-            
+
             const donationRef = await addDoc(collection(db, 'donations'), donationData);
-            
+
             // Update booking
             const bookingRef = doc(db, 'slot_bookings', registration.firestoreBookingId);
             await updateDoc(bookingRef, {
@@ -652,11 +656,11 @@ const EventRegistrations = ({ onNavigate }) => {
                 completedAt: serverTimestamp(),
                 updatedAt: serverTimestamp()
             });
-            
+
             // Get event details for notification
             const eventDoc = await getDoc(doc(db, 'blood_drive_events', registration.eventId));
             const eventData = eventDoc.exists() ? eventDoc.data() : { title: 'Unknown Event' };
-            
+
             // Update local state
             const updatedRegistrations = registrations.map(reg => {
                 if (reg.id === registration.id) {
@@ -677,12 +681,12 @@ const EventRegistrations = ({ onNavigate }) => {
                 }
                 return reg;
             });
-            
+
             setRegistrations(updatedRegistrations);
             setSuccess('Donation completed successfully');
             setShowCompletionModal(false);
             setCompletionData({ serialNumber: '', amountDonated: '', expiryDate: '' });
-            
+
             // Send notification - FIXED: Include donationData structure
             if (registration.userId && registration.userId !== 'walk_in') {
                 await sendNotification(registration.userId, {
@@ -704,7 +708,7 @@ const EventRegistrations = ({ onNavigate }) => {
                     }
                 });
             }
-            
+
         } catch (err) {
             console.error('Error completing donation:', err);
             setError(`Failed to complete donation: ${err.message}`);
@@ -716,7 +720,7 @@ const EventRegistrations = ({ onNavigate }) => {
         try {
             const bloodStockRef = doc(db, 'hospitals', hospitalId, 'bloodStock', bloodType);
             const bloodStockDoc = await getDoc(bloodStockRef);
-            
+
             if (!bloodStockDoc.exists()) {
                 // Create the blood stock document if it doesn't exist
                 await setDoc(bloodStockRef, {
@@ -729,7 +733,7 @@ const EventRegistrations = ({ onNavigate }) => {
                 });
                 console.log(`Created blood stock document for ${bloodType} in hospital ${hospitalId}`);
             }
-            
+
             return bloodStockRef;
         } catch (err) {
             console.error('Error ensuring blood stock exists:', err);
@@ -741,17 +745,17 @@ const EventRegistrations = ({ onNavigate }) => {
     const getHospitalForRegistration = async (registration) => {
         try {
             if (!registration.eventId) return null;
-            
+
             // First try to get event details
             const eventDoc = await getDoc(doc(db, 'blood_drive_events', registration.eventId));
             if (!eventDoc.exists()) return null;
-            
+
             const eventData = eventDoc.data();
-            
+
             // Look for hospital in different possible fields
             let hospitalId = null;
             let hospitalName = null;
-            
+
             // Check multiple possible field names for hospital ID
             if (eventData.assignedHospitalId) {
                 hospitalId = eventData.assignedHospitalId;
@@ -762,7 +766,7 @@ const EventRegistrations = ({ onNavigate }) => {
             } else if (eventData.assigned_hospital_id) {
                 hospitalId = eventData.assigned_hospital_id;
             }
-            
+
             // Check multiple possible field names for hospital name
             if (eventData.assignedHospitalName) {
                 hospitalName = eventData.assignedHospitalName;
@@ -773,11 +777,11 @@ const EventRegistrations = ({ onNavigate }) => {
             } else if (eventData.assigned_hospital_name) {
                 hospitalName = eventData.assigned_hospital_name;
             }
-            
+
             console.log('Event Data:', eventData);
             console.log('Found hospitalId:', hospitalId);
             console.log('Found hospitalName:', hospitalName);
-            
+
             // If we have a hospital ID, try to get the hospital details
             if (hospitalId) {
                 try {
@@ -794,15 +798,15 @@ const EventRegistrations = ({ onNavigate }) => {
                     console.error('Error fetching hospital:', hospitalErr);
                 }
             }
-            
+
             // If we have hospital name but no ID, check if it exists in hospitals list
             if (hospitalName) {
-                const hospital = hospitals.find(h => 
+                const hospital = hospitals.find(h =>
                     h.name.toLowerCase() === hospitalName.toLowerCase() ||
                     (h.name && hospitalName && h.name.toLowerCase().includes(hospitalName.toLowerCase())) ||
                     (hospitalName && h.name && hospitalName.toLowerCase().includes(h.name.toLowerCase()))
                 );
-                
+
                 if (hospital) {
                     return {
                         id: hospital.id,
@@ -811,7 +815,7 @@ const EventRegistrations = ({ onNavigate }) => {
                     };
                 }
             }
-            
+
             // Try to get hospital from registration data
             if (registration.hospitalId) {
                 try {
@@ -828,7 +832,7 @@ const EventRegistrations = ({ onNavigate }) => {
                     console.error('Error fetching hospital from registration:', hospitalErr);
                 }
             }
-            
+
             // If still no hospital, try the first hospital from the list as fallback
             if (hospitals.length > 0) {
                 console.log('Using fallback hospital:', hospitals[0]);
@@ -838,9 +842,9 @@ const EventRegistrations = ({ onNavigate }) => {
                     ...hospitals[0]
                 };
             }
-            
+
             return null;
-            
+
         } catch (err) {
             console.error('Error getting hospital:', err);
             return null;
@@ -850,39 +854,39 @@ const EventRegistrations = ({ onNavigate }) => {
     const getBloodStockForHospital = async (hospitalId, bloodType) => {
         try {
             if (!hospitalId || !bloodType) return null;
-            
+
             console.log(`Looking for blood stock: Hospital=${hospitalId}, BloodType=${bloodType}`);
-            
+
             // First try to get the specific blood type document
             try {
                 const bloodStockDoc = await getDoc(doc(db, 'hospitals', hospitalId, 'bloodStock', bloodType));
                 if (bloodStockDoc.exists()) {
                     console.log(`Found blood stock document with ID: ${bloodType}`);
-                    return { 
-                        id: bloodType, 
+                    return {
+                        id: bloodType,
                         bloodType: bloodType,
-                        ...bloodStockDoc.data() 
+                        ...bloodStockDoc.data()
                     };
                 }
             } catch (docErr) {
                 console.log(`No direct document found for ${bloodType}, searching...`);
             }
-            
+
             // If not found, search through all blood stock documents
             const bloodStockSnapshot = await getDocs(collection(db, 'hospitals', hospitalId, 'bloodStock'));
-            
+
             console.log(`Found ${bloodStockSnapshot.docs.length} blood stock documents`);
-            
+
             // Try to find matching blood type (case insensitive, with various formats)
             for (const doc of bloodStockSnapshot.docs) {
                 const stockData = doc.data();
                 const docBloodType = stockData.bloodType || doc.id;
                 console.log(`Checking document: ID=${doc.id}, bloodType=${docBloodType}`);
-                
+
                 // Try different matching strategies
                 const normalizedDocType = docBloodType.toLowerCase().replace(/[^a-z0-9+]/g, '');
                 const normalizedSearchType = bloodType.toLowerCase().replace(/[^a-z0-9+]/g, '');
-                
+
                 if (normalizedDocType === normalizedSearchType) {
                     console.log(`Found matching blood type: ${docBloodType}`);
                     return {
@@ -892,7 +896,7 @@ const EventRegistrations = ({ onNavigate }) => {
                     };
                 }
             }
-            
+
             // If still not found, check if we should create one
             console.log(`No existing blood stock found for ${bloodType}, creating default entry`);
             return {
@@ -903,7 +907,7 @@ const EventRegistrations = ({ onNavigate }) => {
                 criticalLevel: 5,
                 lastUpdated: new Date()
             };
-            
+
         } catch (err) {
             console.error('Error getting blood stock:', err);
             return null;
@@ -926,7 +930,7 @@ const EventRegistrations = ({ onNavigate }) => {
     const handleMarkAsUsedClick = async (registration) => {
         try {
             setUsingRegistration(registration);
-            
+
             // Debug: Log registration details
             console.log('Registration details:', {
                 id: registration.id,
@@ -935,40 +939,40 @@ const EventRegistrations = ({ onNavigate }) => {
                 hospitalName: registration.hospitalName,
                 donationDetails: registration.donationDetails
             });
-            
+
             const hospital = await getHospitalForRegistration(registration);
-            
+
             if (!hospital) {
                 console.error('No hospital found for registration:', registration);
                 setError('Cannot find hospital information for this event. Please assign a hospital to the event first.');
                 return;
             }
-            
+
             console.log('Found hospital:', hospital);
-            
+
             let bloodType = 'Unknown';
             if (registration.donationDetails?.bloodType && registration.donationDetails.bloodType !== 'Unknown') {
                 bloodType = registration.donationDetails.bloodType;
             } else if (registration.bloodType && registration.bloodType !== 'Unknown') {
                 bloodType = registration.bloodType;
             }
-            
+
             if (!bloodType || bloodType === 'Unknown') {
                 setError('Blood type is unknown');
                 return;
             }
-            
+
             const bloodStock = await getBloodStockForHospital(hospital.id, bloodType);
             if (!bloodStock) {
                 setError(`Blood type ${bloodType} not found in ${hospital.name} inventory. Please add this blood type to the hospital inventory first.`);
                 return;
             }
-            
+
             setUsingHospital(hospital);
             setHospitalBloodStock(bloodStock);
             setShowUsedModal(true);
             setError('');
-            
+
         } catch (err) {
             console.error('Error preparing to mark as used:', err);
             setError('Error preparing to mark donation as used: ' + err.message);
@@ -977,20 +981,20 @@ const EventRegistrations = ({ onNavigate }) => {
 
     const handleSubmitUsed = async () => {
         if (!usingRegistration || !usingHospital || !hospitalBloodStock) return;
-        
+
         try {
             setError('');
             setSuccess('');
-            
+
             // Ensure blood stock document exists
             await ensureBloodStockExists(usingHospital.id, hospitalBloodStock.bloodType);
-            
+
             const batch = writeBatch(db);
-            
+
             // Get event and donation details
             const eventDoc = await getDoc(doc(db, 'blood_drive_events', usingRegistration.eventId));
             const eventData = eventDoc.exists() ? eventDoc.data() : { title: 'Unknown Event' };
-            
+
             // Update donation record
             if (usingRegistration.firestoreDonationId) {
                 const donationRef = doc(db, 'donations', usingRegistration.firestoreDonationId);
@@ -1002,14 +1006,14 @@ const EventRegistrations = ({ onNavigate }) => {
                     used_hospital_name: usingHospital.name
                 });
             }
-            
+
             // Update blood stock - use the correct document ID
             const bloodStockRef = doc(db, 'hospitals', usingHospital.id, 'bloodStock', hospitalBloodStock.bloodType);
-            
+
             // Get current document to ensure we have the latest data
             const currentStockDoc = await getDoc(bloodStockRef);
             let currentQuantity = 0;
-            
+
             if (currentStockDoc.exists()) {
                 const currentData = currentStockDoc.data();
                 currentQuantity = parseInt(currentData.quantity) || 0;
@@ -1024,19 +1028,19 @@ const EventRegistrations = ({ onNavigate }) => {
                     createdAt: serverTimestamp()
                 });
             }
-            
+
             const newQuantity = currentQuantity - 1;
-            
+
             if (newQuantity < 0) {
                 setError(`Cannot mark as used: Blood stock for ${hospitalBloodStock.bloodType} would go negative. Current stock: ${currentQuantity}`);
                 return;
             }
-            
+
             batch.update(bloodStockRef, {
                 quantity: newQuantity,
                 lastUpdated: serverTimestamp()
             });
-            
+
             // Also update the booking status if it exists
             if (usingRegistration.firestoreBookingId) {
                 const bookingRef = doc(db, 'slot_bookings', usingRegistration.firestoreBookingId);
@@ -1046,9 +1050,9 @@ const EventRegistrations = ({ onNavigate }) => {
                     updatedAt: serverTimestamp()
                 });
             }
-            
+
             await batch.commit();
-            
+
             // Update local state
             const updatedRegistrations = registrations.map(reg => {
                 if (reg.id === usingRegistration.id) {
@@ -1066,9 +1070,9 @@ const EventRegistrations = ({ onNavigate }) => {
                 }
                 return reg;
             });
-            
+
             setRegistrations(updatedRegistrations);
-            
+
             // Send notification
             if (usingRegistration.userId && usingRegistration.userId !== 'walk_in') {
                 await sendNotification(usingRegistration.userId, {
@@ -1094,13 +1098,13 @@ const EventRegistrations = ({ onNavigate }) => {
                     }
                 });
             }
-            
+
             setSuccess(`Blood marked as used successfully! Inventory updated for ${usingHospital.name}. New stock: ${newQuantity} units of ${hospitalBloodStock.bloodType}`);
             setShowUsedModal(false);
             setUsingRegistration(null);
             setUsingHospital(null);
             setHospitalBloodStock(null);
-            
+
         } catch (err) {
             console.error('Error marking blood as used:', err);
             console.error('Error details:', {
@@ -1109,7 +1113,7 @@ const EventRegistrations = ({ onNavigate }) => {
                 errorCode: err.code,
                 errorMessage: err.message
             });
-            
+
             if (err.code === 'not-found') {
                 setError(`Hospital or blood stock document not found. Hospital ID: ${usingHospital?.id}, Blood Type: ${hospitalBloodStock?.bloodType}. Please check if the hospital has blood inventory setup.`);
             } else if (err.code === 'permission-denied') {
@@ -1123,7 +1127,7 @@ const EventRegistrations = ({ onNavigate }) => {
     // Handle confirm modal actions
     const handleConfirmAction = () => {
         if (!selectedRegistration) return;
-        
+
         switch (actionType) {
             case 'approve':
                 handleApprove(selectedRegistration);
@@ -1143,18 +1147,18 @@ const EventRegistrations = ({ onNavigate }) => {
     // Handle completion form submit
     const handleCompletionSubmit = () => {
         if (!selectedRegistration) return;
-        
+
         // Validate
         const errors = {};
         if (!completionData.serialNumber.trim()) errors.serialNumber = 'Serial number is required';
         if (!completionData.amountDonated.trim()) errors.amountDonated = 'Amount donated is required';
         if (!completionData.expiryDate.trim()) errors.expiryDate = 'Expiry date is required';
-        
+
         if (Object.keys(errors).length > 0) {
             setCompletionErrors(errors);
             return;
         }
-        
+
         handleCompleteDonation(selectedRegistration, completionData);
     };
 
@@ -1172,6 +1176,21 @@ const EventRegistrations = ({ onNavigate }) => {
     }
 
     const filteredRegs = getFilteredRegistrations();
+
+    // Pagination logic
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedRegs = filteredRegs.slice(startIndex, endIndex);
+    const totalPages = Math.ceil(filteredRegs.length / itemsPerPage);
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
+
+    const handleItemsPerPageChange = (newItemsPerPage) => {
+        setItemsPerPage(newItemsPerPage);
+        setCurrentPage(1);
+    };
 
     return (
         <Layout onNavigate={onNavigate} currentPage="event-registrations">
@@ -1194,7 +1213,7 @@ const EventRegistrations = ({ onNavigate }) => {
                         </button>
                     </div>
                 )}
-                
+
                 {success && (
                     <div className="error-container success-alert">
                         <CheckCircle className="error-icon" />
@@ -1310,7 +1329,7 @@ const EventRegistrations = ({ onNavigate }) => {
                                 </tr>
                             </thead>
                             <tbody className="registration-table-body">
-                                {filteredRegs.map(reg => {
+                                {paginatedRegs.map(reg => {
                                     const event = getEventById(reg.eventId);
                                     const venue = getVenueById(reg.venueId);
                                     const canBeUsed = canMarkAsUsed(reg);
@@ -1360,7 +1379,7 @@ const EventRegistrations = ({ onNavigate }) => {
                                                     >
                                                         <User className="registration-action-icon" />
                                                     </button>
-                                                    
+
                                                     {isCompleted && (
                                                         <button
                                                             onClick={() => handleMarkAsUsedClick(reg)}
@@ -1375,7 +1394,7 @@ const EventRegistrations = ({ onNavigate }) => {
                                                             )}
                                                         </button>
                                                     )}
-                                                    
+
                                                     {reg.status === 'Pending' && (
                                                         <>
                                                             <button
@@ -1439,6 +1458,45 @@ const EventRegistrations = ({ onNavigate }) => {
                             </p>
                         </div>
                     )}
+
+                    {/* Pagination */}
+                    {filteredRegs.length > 0 && (
+                        <div className="registration-pagination">
+                            <div className="registration-pagination-info">
+                                <span>Items per page:</span>
+                                <select
+                                    value={itemsPerPage}
+                                    onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                                    className="registration-items-per-page-select"
+                                >
+                                    <option value={10}>10</option>
+                                    <option value={20}>20</option>
+                                    <option value={50}>50</option>
+                                    <option value={100}>100</option>
+                                </select>
+                                <span className="registration-pagination-range">
+                                    {startIndex + 1}-{Math.min(endIndex, filteredRegs.length)} of {filteredRegs.length}
+                                </span>
+                            </div>
+
+                            <div className="registration-pagination-controls">
+                                <button
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                    className="registration-pagination-btn prev-btn"
+                                >
+                                    <ChevronLeft size={16} />
+                                </button>
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                    className="registration-pagination-btn next-btn"
+                                >
+                                    <ChevronRight size={16} />
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Detail Modal */}
@@ -1454,7 +1512,7 @@ const EventRegistrations = ({ onNavigate }) => {
                                     <X className="registration-modal-close-icon" />
                                 </button>
                             </div>
-                            
+
                             <div className="registration-modal-body">
                                 <div className="mb-8">
                                     <h3 className="text-lg font-semibold text-gray-800 mb-4">Donor Information</h3>
@@ -1508,9 +1566,9 @@ const EventRegistrations = ({ onNavigate }) => {
                                         <div className="detail-item">
                                             <span className="detail-label">Venue:</span>
                                             <span className="detail-value">
-                                                {getVenueById(selectedRegistration.venueId)?.name || 
-                                                 getEventById(selectedRegistration.eventId)?.location || 
-                                                 'Unknown Venue'}
+                                                {getVenueById(selectedRegistration.venueId)?.name ||
+                                                    getEventById(selectedRegistration.eventId)?.location ||
+                                                    'Unknown Venue'}
                                             </span>
                                         </div>
                                         <div className="detail-item">
@@ -1674,7 +1732,7 @@ const EventRegistrations = ({ onNavigate }) => {
                                 <p><strong>Event:</strong> {getEventById(selectedRegistration.eventId)?.title}</p>
                                 <p><strong>Time Slot:</strong> {selectedRegistration.selectedTime}</p>
                             </div>
-                            
+
                             {actionType === 'reject' && (
                                 <div className="rejection-reason-container">
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1689,7 +1747,7 @@ const EventRegistrations = ({ onNavigate }) => {
                                     />
                                 </div>
                             )}
-                            
+
                             <p className="registration-confirm-message">
                                 {actionType === 'approve' && 'Are you sure you want to approve this registration?'}
                                 {actionType === 'reject' && 'Are you sure you want to reject this registration?'}
@@ -1708,12 +1766,11 @@ const EventRegistrations = ({ onNavigate }) => {
                                 </button>
                                 <button
                                     onClick={handleConfirmAction}
-                                    className={`registration-confirm-button ${
-                                        actionType === 'approve' ? 'registration-confirm-approve' :
+                                    className={`registration-confirm-button ${actionType === 'approve' ? 'registration-confirm-approve' :
                                         actionType === 'reject' ? 'registration-confirm-reject' :
-                                        actionType === 'checkin' ? 'registration-confirm-checkin' :
-                                        'registration-confirm-delete'
-                                    }`}
+                                            actionType === 'checkin' ? 'registration-confirm-checkin' :
+                                                'registration-confirm-delete'
+                                        }`}
                                 >
                                     {actionType === 'approve' && 'Approve'}
                                     {actionType === 'reject' && 'Reject'}
@@ -1738,7 +1795,7 @@ const EventRegistrations = ({ onNavigate }) => {
                                     <X className="registration-modal-close-icon" />
                                 </button>
                             </div>
-                            
+
                             <div className="registration-modal-body">
                                 <div className="completion-donor-info">
                                     <div className="completion-donor-header">
@@ -1754,7 +1811,7 @@ const EventRegistrations = ({ onNavigate }) => {
                                         <p><strong>Time Slot:</strong> {selectedRegistration.selectedTime}</p>
                                     </div>
                                 </div>
-                                
+
                                 <div className="completion-form">
                                     <div className="completion-form-group">
                                         <label className="completion-form-label">Serial Number *</label>
@@ -1763,13 +1820,13 @@ const EventRegistrations = ({ onNavigate }) => {
                                             className={`completion-form-input ${completionErrors.serialNumber ? 'input-error' : ''}`}
                                             placeholder="Enter blood bag serial number"
                                             value={completionData.serialNumber}
-                                            onChange={(e) => setCompletionData({...completionData, serialNumber: e.target.value})}
+                                            onChange={(e) => setCompletionData({ ...completionData, serialNumber: e.target.value })}
                                         />
                                         {completionErrors.serialNumber && (
                                             <span className="completion-form-error">{completionErrors.serialNumber}</span>
                                         )}
                                     </div>
-                                    
+
                                     <div className="completion-form-group">
                                         <label className="completion-form-label">Amount Donated (ml) *</label>
                                         <input
@@ -1777,20 +1834,20 @@ const EventRegistrations = ({ onNavigate }) => {
                                             className={`completion-form-input ${completionErrors.amountDonated ? 'input-error' : ''}`}
                                             placeholder="Enter amount in ml"
                                             value={completionData.amountDonated}
-                                            onChange={(e) => setCompletionData({...completionData, amountDonated: e.target.value})}
+                                            onChange={(e) => setCompletionData({ ...completionData, amountDonated: e.target.value })}
                                         />
                                         {completionErrors.amountDonated && (
                                             <span className="completion-form-error">{completionErrors.amountDonated}</span>
                                         )}
                                     </div>
-                                    
+
                                     <div className="completion-form-group">
                                         <label className="completion-form-label">Expiry Date *</label>
                                         <input
                                             type="date"
                                             className={`completion-form-input ${completionErrors.expiryDate ? 'input-error' : ''}`}
                                             value={completionData.expiryDate}
-                                            onChange={(e) => setCompletionData({...completionData, expiryDate: e.target.value})}
+                                            onChange={(e) => setCompletionData({ ...completionData, expiryDate: e.target.value })}
                                         />
                                         {completionErrors.expiryDate && (
                                             <span className="completion-form-error">{completionErrors.expiryDate}</span>
@@ -1798,7 +1855,7 @@ const EventRegistrations = ({ onNavigate }) => {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div className="completion-modal-actions">
                                 <button
                                     onClick={() => setShowCompletionModal(false)}

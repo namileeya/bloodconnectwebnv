@@ -5,16 +5,16 @@ import './RewardsManagement.css';
 
 // Import Firebase - UPDATE THIS PATH TO MATCH YOUR STRUCTURE
 import { db } from '../../firebase'; // Adjust this path!
-import { 
-  collection, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  doc, 
-  onSnapshot, 
-  Timestamp, 
-  query, 
-  orderBy 
+import {
+    collection,
+    addDoc,
+    updateDoc,
+    deleteDoc,
+    doc,
+    onSnapshot,
+    Timestamp,
+    query,
+    orderBy
 } from 'firebase/firestore';
 
 const RewardsManagement = ({ onNavigate }) => {
@@ -52,12 +52,12 @@ const RewardsManagement = ({ onNavigate }) => {
     // Calculate days remaining
     const calculateDaysRemaining = (expiryTimestamp) => {
         if (!expiryTimestamp) return null;
-        
+
         const now = new Date();
         const expiryDate = expiryTimestamp.toDate();
         const diffTime = expiryDate - now;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
+
         return diffDays;
     };
 
@@ -70,17 +70,17 @@ const RewardsManagement = ({ onNavigate }) => {
     // Fetch rewards with real-time updates
     useEffect(() => {
         setLoading(true);
-        
+
         try {
             console.log("🔍 Connecting to Firestore...");
             console.log("Database object:", db);
             console.log("Collection ref:", rewardsCollectionRef);
-            
+
             // Create query with ordering
             const rewardsQuery = query(rewardsCollectionRef, orderBy('createdAt', 'desc'));
-            
+
             // Set up real-time listener
-            const unsubscribe = onSnapshot(rewardsQuery, 
+            const unsubscribe = onSnapshot(rewardsQuery,
                 (snapshot) => {
                     console.log("✅ Firestore data received!");
                     const rewardsList = snapshot.docs.map(doc => ({
@@ -90,7 +90,7 @@ const RewardsManagement = ({ onNavigate }) => {
                         updatedAt: doc.data().updatedAt,
                         expiryDate: doc.data().expiryDate
                     }));
-                    
+
                     console.log("Rewards loaded:", rewardsList.length);
                     setRewards(rewardsList);
                     setFilteredRewards(rewardsList);
@@ -177,7 +177,7 @@ const RewardsManagement = ({ onNavigate }) => {
     const handleSave = async () => {
         try {
             console.log("💾 Saving reward to Firestore...");
-            
+
             const rewardData = {
                 name: formData.name,
                 description: formData.description,
@@ -279,9 +279,9 @@ const RewardsManagement = ({ onNavigate }) => {
 
     const getDaysRemainingDisplay = (expiryDate) => {
         if (!expiryDate) return '-';
-        
+
         const daysRemaining = calculateDaysRemaining(expiryDate);
-        
+
         if (daysRemaining < 0) {
             return <span className="expired-badge">Expired</span>;
         } else if (daysRemaining === 0) {
@@ -319,9 +319,9 @@ const RewardsManagement = ({ onNavigate }) => {
                                 <p className="text-red-700">{firebaseError}</p>
                                 <p className="text-red-600 text-sm mt-2">
                                     Please enable Firestore in Firebase Console:
-                                    <a 
-                                        href="https://console.firebase.google.com/project/bloodconnectnv/firestore" 
-                                        target="_blank" 
+                                    <a
+                                        href="https://console.firebase.google.com/project/bloodconnectnv/firestore"
+                                        target="_blank"
                                         rel="noopener noreferrer"
                                         className="ml-2 text-red-800 underline"
                                     >
@@ -331,7 +331,7 @@ const RewardsManagement = ({ onNavigate }) => {
                             </div>
                         </div>
                     </div>
-                    <button 
+                    <button
                         onClick={() => window.location.reload()}
                         className="bg-red-600 text-white px-4 py-2 rounded"
                     >
@@ -360,39 +360,29 @@ const RewardsManagement = ({ onNavigate }) => {
                 <div className="rewards-header">
                     <h1 className="rewards-title">Rewards Management</h1>
                     <button onClick={handleAddNew} className="add-reward-btn">
-                        <Plus size={20} />
+                        <Plus size={16} />
                         Add Reward
                     </button>
                 </div>
 
-                {/* Firebase Status */}
-                <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded">
-                    <div className="flex items-center">
-                        <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-                        <div>
-                            <p className="text-green-800 font-medium">Connected to Firebase</p>
-                            <p className="text-green-700 text-sm">Data is being saved to Firestore database</p>
-                        </div>
-                    </div>
-                </div>
 
-                {/* Stats */}
+                {/* Stat Cards */}
                 <div className="rewards-stats-grid">
-                    <div className="stat-card total">
-                        <h3>{rewards.length}</h3>
-                        <p>Total Rewards</p>
+                    <div className="stat-card stat-card-total">
+                        <h3 className="stat-number-blue">{rewards.length}</h3>
+                        <p className="stat-label">Total Rewards</p>
                     </div>
-                    <div className="stat-card vouchers">
-                        <h3>{rewards.filter(r => r.type === 'voucher').length}</h3>
-                        <p>Vouchers</p>
+                    <div className="stat-card stat-card-vouchers">
+                        <h3 className="stat-number-purple">{rewards.filter(r => r.type === 'voucher').length}</h3>
+                        <p className="stat-label">Vouchers</p>
                     </div>
-                    <div className="stat-card products">
-                        <h3>{rewards.filter(r => r.type === 'product').length}</h3>
-                        <p>Physical Products</p>
+                    <div className="stat-card stat-card-products">
+                        <h3 className="stat-number-green">{rewards.filter(r => r.type === 'product').length}</h3>
+                        <p className="stat-label">Physical Products</p>
                     </div>
-                    <div className="stat-card active">
-                        <h3>{rewards.filter(r => r.isActive).length}</h3>
-                        <p>Active Rewards</p>
+                    <div className="stat-card stat-card-active">
+                        <h3 className="stat-number-teal">{rewards.filter(r => r.isActive).length}</h3>
+                        <p className="stat-label">Active Rewards</p>
                     </div>
                 </div>
 
@@ -496,8 +486,8 @@ const RewardsManagement = ({ onNavigate }) => {
                     <div className="rewards-pagination">
                         <div className="rewards-pagination-info">
                             <span>Items per page:</span>
-                            <select 
-                                value={itemsPerPage} 
+                            <select
+                                value={itemsPerPage}
                                 onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
                                 className="rewards-items-per-page-select"
                             >
@@ -510,7 +500,7 @@ const RewardsManagement = ({ onNavigate }) => {
                                 {startIndex + 1}-{Math.min(endIndex, filteredRewards.length)} of {filteredRewards.length}
                             </span>
                         </div>
-                        
+
                         <div className="rewards-pagination-controls">
                             <button
                                 onClick={() => handlePageChange(currentPage - 1)}
@@ -542,20 +532,20 @@ const RewardsManagement = ({ onNavigate }) => {
                                 <div className="form-grid">
                                     <div className="form-group">
                                         <label>Reward Name *</label>
-                                        <input 
-                                            value={formData.name} 
-                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
+                                        <input
+                                            value={formData.name}
+                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                         />
                                     </div>
                                     <div className="form-group">
                                         <label>Type *</label>
-                                        <select 
-                                            value={formData.type} 
-                                            onChange={(e) => setFormData({ 
-                                                ...formData, 
-                                                type: e.target.value, 
-                                                discountValue: '', 
-                                                stock: '' 
+                                        <select
+                                            value={formData.type}
+                                            onChange={(e) => setFormData({
+                                                ...formData,
+                                                type: e.target.value,
+                                                discountValue: '',
+                                                stock: ''
                                             })}
                                         >
                                             <option value="voucher">Voucher (Discount)</option>
@@ -564,29 +554,29 @@ const RewardsManagement = ({ onNavigate }) => {
                                     </div>
                                     <div className="form-group">
                                         <label>Category *</label>
-                                        <input 
-                                            value={formData.category} 
-                                            onChange={(e) => setFormData({ ...formData, category: e.target.value })} 
-                                            placeholder="e.g. Food & Beverages, Merchandise" 
+                                        <input
+                                            value={formData.category}
+                                            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                            placeholder="e.g. Food & Beverages, Merchandise"
                                         />
                                     </div>
                                     <div className="form-group">
                                         <label>Points Required *</label>
-                                        <input 
-                                            type="number" 
-                                            value={formData.pointsRequired} 
-                                            onChange={(e) => setFormData({ ...formData, pointsRequired: e.target.value })} 
+                                        <input
+                                            type="number"
+                                            value={formData.pointsRequired}
+                                            onChange={(e) => setFormData({ ...formData, pointsRequired: e.target.value })}
                                         />
                                     </div>
 
                                     {formData.type === 'voucher' && (
                                         <div className="form-group">
                                             <label>Discount Percentage *</label>
-                                            <input 
-                                                type="number" 
-                                                value={formData.discountValue} 
-                                                onChange={(e) => setFormData({ ...formData, discountValue: e.target.value })} 
-                                                placeholder="e.g. 20" 
+                                            <input
+                                                type="number"
+                                                value={formData.discountValue}
+                                                onChange={(e) => setFormData({ ...formData, discountValue: e.target.value })}
+                                                placeholder="e.g. 20"
                                             />
                                         </div>
                                     )}
@@ -594,21 +584,21 @@ const RewardsManagement = ({ onNavigate }) => {
                                     {formData.type === 'product' && (
                                         <div className="form-group">
                                             <label>Stock Quantity</label>
-                                            <input 
-                                                type="number" 
-                                                value={formData.stock} 
-                                                onChange={(e) => setFormData({ ...formData, stock: e.target.value })} 
-                                                placeholder="e.g. 20" 
+                                            <input
+                                                type="number"
+                                                value={formData.stock}
+                                                onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                                                placeholder="e.g. 20"
                                             />
                                         </div>
                                     )}
 
                                     <div className="form-group">
                                         <label>Expiry Date (Optional)</label>
-                                        <input 
-                                            type="date" 
-                                            value={formData.expiryDate} 
-                                            onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })} 
+                                        <input
+                                            type="date"
+                                            value={formData.expiryDate}
+                                            onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
                                             min={new Date().toISOString().split('T')[0]}
                                         />
                                         <small>Reward will expire on this date</small>
@@ -616,10 +606,10 @@ const RewardsManagement = ({ onNavigate }) => {
 
                                     <div className="form-group">
                                         <label>Max Claims Per User</label>
-                                        <input 
-                                            type="number" 
-                                            value={formData.maxClaimsPerUser} 
-                                            onChange={(e) => setFormData({ ...formData, maxClaimsPerUser: e.target.value })} 
+                                        <input
+                                            type="number"
+                                            value={formData.maxClaimsPerUser}
+                                            onChange={(e) => setFormData({ ...formData, maxClaimsPerUser: e.target.value })}
                                             min="1"
                                         />
                                         <small>How many times a user can claim this reward</small>
@@ -627,10 +617,10 @@ const RewardsManagement = ({ onNavigate }) => {
 
                                     <div className="form-group full-width">
                                         <label>Description (Optional)</label>
-                                        <textarea 
-                                            rows={3} 
-                                            value={formData.description} 
-                                            onChange={(e) => setFormData({ ...formData, description: e.target.value })} 
+                                        <textarea
+                                            rows={3}
+                                            value={formData.description}
+                                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                         />
                                     </div>
                                 </div>

@@ -26,6 +26,15 @@
 }
 
 /* Header */
+.header-container {
+  @apply flex justify-between items-center -mt-4;
+}
+
+.header-title {
+  @apply text-3xl font-bold text-gray-800;
+}
+
+/* Header */
 .event-header {
   @apply flex justify-between items-center;
 }
@@ -144,11 +153,11 @@
 }
 
 .view-button {
-  @apply px-4 py-2 rounded-lg font-medium text-sm transition-colors;
+  @apply px-4 py-2 rounded-lg font-medium text-sm transition-colors text-gray-700;
 }
 
 .view-button-active {
-  @apply bg-red-600 text-white;
+  @apply bg-red-600 text-white !important;
 }
 
 .view-button:not(.view-button-active) {
@@ -238,7 +247,8 @@
 
 /* Modal */
 .event-modal-overlay {
-  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4;
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4;
+  z-index: 9999;
 }
 
 .event-modal-container {
@@ -1293,11 +1303,11 @@
   .calendar-controls {
     @apply flex-col items-stretch;
   }
-  
+
   .calendar-button-group {
     @apply w-full;
   }
-  
+
   .add-event-button,
   .today-button {
     @apply flex-1;
@@ -1414,15 +1424,15 @@
   .slots-grid {
     @apply grid-cols-1;
   }
-  
+
   .slots-summary .grid {
     @apply grid-cols-2;
   }
-  
+
   .form-group-inline {
     @apply flex-col;
   }
-  
+
   .form-group-small {
     @apply w-full;
   }
@@ -1701,11 +1711,11 @@
   .hospital-search-input {
     font-size: 0.875rem;
   }
-  
+
   .hospital-dropdown {
     max-height: 12rem;
   }
-  
+
   .hospital-dropdown-item {
     padding: 0.5rem 1rem;
   }
@@ -1809,6 +1819,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }

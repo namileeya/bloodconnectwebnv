@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Search, Eye, Check, X, Calendar, MapPin, AlertCircle, 
-  ChevronLeft, ChevronRight, Loader2, RefreshCw, Edit2 
+import {
+  Search, Eye, Check, X, Calendar, MapPin, AlertCircle,
+  ChevronLeft, ChevronRight, Loader2, RefreshCw, Edit2
 } from 'lucide-react';
 import Layout from '../../components/Layout';
-import { 
-  collection, 
-  query, 
-  orderBy, 
+import {
+  collection,
+  query,
+  orderBy,
   onSnapshot,
-  doc, 
-  updateDoc, 
+  doc,
+  updateDoc,
   serverTimestamp,
   getDocs,
   where,
@@ -57,7 +57,7 @@ const BloodRequest = ({ onNavigate }) => {
   // Format Firebase timestamp
   const formatFirebaseTimestamp = (timestamp) => {
     if (!timestamp) return 'N/A';
-    
+
     try {
       if (timestamp.toDate) {
         const date = timestamp.toDate();
@@ -70,11 +70,11 @@ const BloodRequest = ({ onNavigate }) => {
           hour12: true
         }).replace(',', '');
       }
-      
+
       if (typeof timestamp === 'string') {
         return timestamp;
       }
-      
+
       return 'Invalid date';
     } catch (err) {
       console.error('Error formatting timestamp:', err);
@@ -86,10 +86,10 @@ const BloodRequest = ({ onNavigate }) => {
   const getUserContactInfo = async (userId) => {
     try {
       if (!userId) return { email: 'N/A', phone: 'N/A' };
-      
+
       const userRef = doc(db, 'users', userId);
       const userDoc = await getDoc(userRef);
-      
+
       if (userDoc.exists()) {
         const userData = userDoc.data();
         return {
@@ -97,11 +97,11 @@ const BloodRequest = ({ onNavigate }) => {
           phone: userData.phone_number || userData.contact_number || 'N/A'
         };
       }
-      
+
       // Try donor_profiles as fallback
       const donorRef = doc(db, 'donor_profiles', userId);
       const donorDoc = await getDoc(donorRef);
-      
+
       if (donorDoc.exists()) {
         const donorData = donorDoc.data();
         return {
@@ -109,7 +109,7 @@ const BloodRequest = ({ onNavigate }) => {
           phone: donorData.emergency_contact_phone || 'N/A'
         };
       }
-      
+
       return { email: 'N/A', phone: 'N/A' };
     } catch (err) {
       console.error('Error fetching user info:', err);
@@ -121,29 +121,29 @@ const BloodRequest = ({ onNavigate }) => {
   useEffect(() => {
     console.log('Setting up Firebase listener for blood_requests...');
     setLoading(true);
-    
+
     try {
       const q = query(
         collection(db, 'blood_requests'),
         orderBy('created_at', 'desc')
       );
 
-      const unsubscribe = onSnapshot(q, 
+      const unsubscribe = onSnapshot(q,
         async (snapshot) => {
           console.log('Firebase snapshot received for blood_requests:', {
             size: snapshot.size,
             empty: snapshot.empty
           });
-          
+
           const requestsData = [];
-          
+
           // Process all documents and fetch contact info
           for (const docSnap of snapshot.docs) {
             const data = docSnap.data();
-            
+
             // Get user contact info
             const contactInfo = await getUserContactInfo(data.user_id);
-            
+
             requestsData.push({
               id: docSnap.id,
               requestId: `BR-${docSnap.id.slice(0, 4).toUpperCase()}-${new Date(data.created_at?.toDate?.() || Date.now()).getFullYear()}`,
@@ -164,10 +164,10 @@ const BloodRequest = ({ onNavigate }) => {
           }
 
           console.log('Processed requests:', requestsData);
-          
+
           setRequests(requestsData);
           setLoading(false);
-          
+
           if (requestsData.length > 0) {
             displayToast(`Loaded ${requestsData.length} blood request(s)`, 'success');
           } else {
@@ -206,7 +206,7 @@ const BloodRequest = ({ onNavigate }) => {
     let filtered = [...requests];
 
     if (filters.status !== 'All') {
-      filtered = filtered.filter(req => 
+      filtered = filtered.filter(req =>
         req.status.toLowerCase() === filters.status.toLowerCase()
       );
     }
@@ -216,7 +216,7 @@ const BloodRequest = ({ onNavigate }) => {
     }
 
     if (filters.urgency !== 'All') {
-      filtered = filtered.filter(req => 
+      filtered = filtered.filter(req =>
         req.urgency.toLowerCase() === filters.urgency.toLowerCase()
       );
     }
@@ -242,7 +242,7 @@ const BloodRequest = ({ onNavigate }) => {
         collection(db, 'donor_profiles'),
         where('blood_group', '==', bloodType)
       );
-      
+
       const snapshot = await getDocs(donorsQuery);
       const donors = [];
       snapshot.forEach(doc => {
@@ -265,14 +265,14 @@ const BloodRequest = ({ onNavigate }) => {
   const createNotification = async (notificationData) => {
     try {
       console.log('Creating notification in Firebase:', notificationData);
-      
+
       // Add the notification to Firebase
       const notificationRef = await addDoc(collection(db, 'notifications'), {
         ...notificationData,
         created_at: serverTimestamp(),
         read: false
       });
-      
+
       console.log('Notification created successfully with ID:', notificationRef.id);
       return true;
     } catch (error) {
@@ -289,16 +289,16 @@ const BloodRequest = ({ onNavigate }) => {
       setError('');
 
       const requestRef = doc(db, 'blood_requests', requestId);
-      
+
       await updateDoc(requestRef, {
         urgency: newUrgency,
         updated_at: serverTimestamp()
       });
 
       // Update local state immediately
-      setRequests(prevRequests => 
-        prevRequests.map(req => 
-          req.id === requestId 
+      setRequests(prevRequests =>
+        prevRequests.map(req =>
+          req.id === requestId
             ? { ...req, urgency: newUrgency }
             : req
         )
@@ -347,7 +347,7 @@ const BloodRequest = ({ onNavigate }) => {
       }
 
       console.log('Updating request:', { requestId, newStatus, reason });
-      
+
       // 1. First update the request status
       await updateDoc(requestRef, updateData);
       console.log('Request status updated successfully');
@@ -390,9 +390,9 @@ const BloodRequest = ({ onNavigate }) => {
       if (newStatus.toLowerCase() === 'approved') {
         console.log('Looking for matching donors for blood type:', request.bloodType);
         const matchingDonors = await getMatchingDonors(request.bloodType);
-        
+
         let donorNotificationsCount = 0;
-        
+
         for (const donor of matchingDonors) {
           // Don't notify the requester again
           if (donor.userId !== request.userId) {
@@ -417,19 +417,19 @@ const BloodRequest = ({ onNavigate }) => {
               },
               created_by: 'system'
             };
-            
+
             await createNotification(donorNotification);
             donorNotificationsCount++;
           }
         }
-        
+
         console.log(`Created ${donorNotificationsCount} donor notifications`);
       }
 
       // 5. Update local state immediately for UI responsiveness
-      setRequests(prevRequests => 
-        prevRequests.map(req => 
-          req.id === requestId 
+      setRequests(prevRequests =>
+        prevRequests.map(req =>
+          req.id === requestId
             ? { ...req, status: newStatus.toLowerCase(), rejectionReason: reason || req.rejectionReason }
             : req
         )
@@ -564,13 +564,12 @@ const BloodRequest = ({ onNavigate }) => {
     <Layout onNavigate={onNavigate} currentPage="blood-request">
       {/* Toast Notification */}
       {showToast.show && (
-        <div className={`fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 ${
-          showToast.type === 'success' 
-            ? 'bg-green-500 text-white' 
-            : showToast.type === 'error'
+        <div className={`fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 ${showToast.type === 'success'
+          ? 'bg-green-500 text-white'
+          : showToast.type === 'error'
             ? 'bg-red-500 text-white'
             : 'bg-blue-500 text-white'
-        }`}>
+          }`}>
           <div className="flex items-center gap-2">
             {showToast.type === 'success' ? (
               <Check className="w-5 h-5" />
@@ -589,9 +588,6 @@ const BloodRequest = ({ onNavigate }) => {
         <div className="header-container">
           <div>
             <h1 className="header-title">Blood Request Management</h1>
-            <p className="text-sm text-gray-600 mt-1">
-              Collection: <span className="font-mono bg-gray-100 px-2 py-1 rounded">blood_requests</span>
-            </p>
           </div>
           <button
             onClick={handleRefresh}
@@ -622,20 +618,20 @@ const BloodRequest = ({ onNavigate }) => {
         )}
 
         {/* Stats Cards */}
-        <div className="stats-grid">
-          <div className="stat-card stat-card-total">
+        <div className="request-stats-grid">
+          <div className="request-stat-card stat-card-total">
             <h3 className="stat-number-blue">{stats.total}</h3>
             <p className="stat-label">Total Requests</p>
           </div>
-          <div className="stat-card stat-card-pending">
-            <h3 className="stat-number-yellow">{stats.pending}</h3>
+          <div className="request-stat-card stat-card-pending">
+            <h3 className="stat-number-purple">{stats.pending}</h3>
             <p className="stat-label">Pending Approval</p>
           </div>
-          <div className="stat-card stat-card-approved">
+          <div className="request-stat-card stat-card-approved">
             <h3 className="stat-number-green">{stats.approved}</h3>
             <p className="stat-label">Approved Requests</p>
           </div>
-          <div className="stat-card stat-card-critical">
+          <div className="request-stat-card stat-card-critical">
             <h3 className="stat-number-red">{stats.critical}</h3>
             <p className="stat-label">Critical Cases</p>
           </div>
@@ -703,16 +699,10 @@ const BloodRequest = ({ onNavigate }) => {
               </select>
             </div>
           </div>
-          <div className="mt-4 flex justify-between items-center">
+          <div className="mt-4">
             <span className="text-sm text-gray-600">
               Showing {filteredRequests.length} of {requests.length} request(s)
             </span>
-            <button
-              onClick={clearFilters}
-              className="text-sm text-red-600 hover:text-red-800 font-medium"
-            >
-              Clear all filters
-            </button>
           </div>
         </div>
 
@@ -725,7 +715,7 @@ const BloodRequest = ({ onNavigate }) => {
                 <span className="ml-3 text-gray-600">Loading data...</span>
               </div>
             )}
-            
+
             <table className="table">
               <thead className="table-header">
                 <tr>
@@ -755,7 +745,6 @@ const BloodRequest = ({ onNavigate }) => {
                         <div className="table-cell-content">
                           <div className="patient-name">{request.patientName}</div>
                           <div className="patient-location">
-                            <MapPin className="location-icon" />
                             {request.location}
                           </div>
                         </div>
@@ -791,7 +780,7 @@ const BloodRequest = ({ onNavigate }) => {
                       </td>
                       <td className="table-cell">
                         <span className={`status-badge ${getStatusClasses(request.status)}`}>
-                          {request.status.toUpperCase()}
+                          {request.status.charAt(0).toUpperCase() + request.status.slice(1).toLowerCase()}
                         </span>
                       </td>
                       <td className="table-cell">
@@ -843,12 +832,12 @@ const BloodRequest = ({ onNavigate }) => {
                           <Search />
                         </div>
                         <h3 className="empty-state-title">
-                          {requests.length === 0 
-                            ? "No blood requests found" 
+                          {requests.length === 0
+                            ? "No blood requests found"
                             : "No matching requests"}
                         </h3>
                         <p className="empty-state-description">
-                          {requests.length === 0 
+                          {requests.length === 0
                             ? "There are no blood requests in the database yet."
                             : "Try adjusting your search or filter criteria."}
                         </p>
@@ -957,7 +946,7 @@ const BloodRequest = ({ onNavigate }) => {
                     <div className="modal-field">
                       <label className="modal-field-label">Current Status</label>
                       <span className={`status-badge ${getStatusClasses(selectedRequest.status)}`} style={{ padding: '6px 14px' }}>
-                        {selectedRequest.status.toUpperCase()}
+                        {selectedRequest.status.charAt(0).toUpperCase() + selectedRequest.status.slice(1).toLowerCase()}
                       </span>
                     </div>
                   </div>
@@ -1154,11 +1143,10 @@ const BloodRequest = ({ onNavigate }) => {
                     {['Critical', 'High', 'Medium', 'Low'].map((level) => (
                       <label
                         key={level}
-                        className={`flex items-center p-3 rounded-lg border cursor-pointer transition-all ${
-                          selectedUrgency === level
-                            ? `border-2 ${level === 'Critical' ? 'border-red-500 bg-red-50' : level === 'High' ? 'border-orange-500 bg-orange-50' : level === 'Medium' ? 'border-yellow-500 bg-yellow-50' : 'border-green-500 bg-green-50'}`
-                            : 'border-gray-300 hover:bg-gray-50'
-                        }`}
+                        className={`flex items-center p-3 rounded-lg border cursor-pointer transition-all ${selectedUrgency === level
+                          ? `border-2 ${level === 'Critical' ? 'border-red-500 bg-red-50' : level === 'High' ? 'border-orange-500 bg-orange-50' : level === 'Medium' ? 'border-yellow-500 bg-yellow-50' : 'border-green-500 bg-green-50'}`
+                          : 'border-gray-300 hover:bg-gray-50'
+                          }`}
                       >
                         <input
                           type="radio"
