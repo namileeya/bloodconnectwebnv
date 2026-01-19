@@ -278,19 +278,41 @@ const Dashboard = ({ onNavigate }) => {
     return lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  // Helper function to format dd/mm/yyyy to readable format
-  const formatEventDate = (dateStr) => {
-    if (!dateStr) return 'Date TBD';
+  // Robust helper function to format dates
+  const formatEventDate = (dateInput) => {
+    if (!dateInput) return 'Date TBD';
+
     try {
-      const [day, month, year] = dateStr.split('/').map(Number);
-      const date = new Date(year, month - 1, day);
+      let date;
+
+      // 1. Handle Firestore Timestamp (has toDate method)
+      if (dateInput && typeof dateInput.toDate === 'function') {
+        date = dateInput.toDate();
+      }
+      // 2. Handle "dd/mm/yyyy" format specifically (common in this app)
+      else if (typeof dateInput === 'string' && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateInput)) {
+        const [day, month, year] = dateInput.split('/').map(Number);
+        date = new Date(year, month - 1, day);
+      }
+      // 3. Handle standard string formats or Date objects
+      else {
+        date = new Date(dateInput);
+      }
+
+      // Check validity
+      if (isNaN(date.getTime())) {
+        // If parsing failed, return the original string if it's displayable, otherwise fallback
+        return typeof dateInput === 'string' ? dateInput : 'Invalid Date';
+      }
+
       return date.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric'
       });
     } catch (error) {
-      return dateStr;
+      console.warn('Date formatting error:', error);
+      return typeof dateInput === 'string' ? dateInput : 'Date Error';
     }
   };
 
