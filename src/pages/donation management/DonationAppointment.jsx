@@ -177,7 +177,7 @@ const DonationAppointment = ({ onNavigate }) => {
 
     const q = query(
       collection(db, 'appointments'),
-      orderBy('appointmentDate', 'asc')
+      orderBy('appointmentDate', 'desc')
     );
 
     const unsubscribe = onSnapshot(q,
