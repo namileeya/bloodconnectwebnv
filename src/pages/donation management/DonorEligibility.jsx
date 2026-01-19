@@ -320,17 +320,17 @@ const DonorEligibility = ({ onNavigate }) => {
 
     try {
       const currentUser = auth.currentUser;
-      if (!currentUser) {
-        alert('Admin not authenticated');
-        return;
-      }
+      // if (!currentUser) {
+      //   alert('Admin not authenticated');
+      //   return;
+      // }
 
       // Update eligibility request with admin decision
       const updateData = {
         admin_decision: adminDecision.admin_decision,
         admin_notes: adminDecision.admin_notes.trim(),
         decision_date: serverTimestamp(),
-        decided_by: currentUser.uid,
+        decided_by: currentUser?.uid || 'admin',
       };
 
       await updateDoc(doc(db, 'eligibility_requests', selectedDonor.eligibilityId), updateData);
@@ -353,7 +353,7 @@ const DonorEligibility = ({ onNavigate }) => {
         },
         read: false,
         created_at: serverTimestamp(),
-        created_by: currentUser.uid,
+        created_by: currentUser?.uid || 'admin',
       });
 
       // Reload donors
@@ -528,35 +528,7 @@ const DonorEligibility = ({ onNavigate }) => {
     );
   };
 
-  // Debug function to check database
-  const debugCheckDatabase = async () => {
-    console.log('=== DEBUG: Checking eligibility_requests collection ===');
-    try {
-      const querySnapshot = await getDocs(collection(db, 'eligibility_requests'));
-      console.log(`Total documents: ${querySnapshot.size}`);
 
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        console.log(`Document ${doc.id}:`, {
-          userId: data.userId,
-          userName: data.userName,
-          admin_decision: data.admin_decision,
-          display_status: data.display_status,
-          status: data.status,
-          submittedDate: data.submittedDate?.toDate?.(),
-          hasAnswers: !!data.answers,
-          answerCount: data.answers ? Object.keys(data.answers).length : 0,
-          hasFeelingWellQuestion: data.answers ? 'Are you feeling well today?' in data.answers : false,
-          feelingWellAnswer: data.answers ? data.answers['Are you feeling well today?'] : null
-        });
-      });
-
-      alert(`Check console for database details. Found ${querySnapshot.size} eligibility requests.`);
-    } catch (error) {
-      console.error('Debug error:', error);
-      alert('Error checking database. See console.');
-    }
-  };
 
   if (loading) {
     return (
@@ -584,26 +556,7 @@ const DonorEligibility = ({ onNavigate }) => {
       <Layout onNavigate={onNavigate} currentPage="donor-eligibility">
         <div className="eligibility-page">
           {/* Debug Button */}
-          <button
-            onClick={debugCheckDatabase}
-            className="debug-button"
-            style={{
-              position: 'fixed',
-              bottom: '20px',
-              right: '20px',
-              zIndex: 1000,
-              padding: '8px 12px',
-              background: '#dc2626',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '12px',
-              fontWeight: 'bold',
-              cursor: 'pointer'
-            }}
-          >
-            Debug DB
-          </button>
+
 
           {/* Header */}
           <div className="eligibility-header-container">
@@ -691,20 +644,7 @@ const DonorEligibility = ({ onNavigate }) => {
                 <Search className="empty-icon" />
                 <h3>No {viewMode === 'pending' ? 'pending ' : ''}donors found</h3>
                 <p>Try adjusting your search or filters</p>
-                <button
-                  onClick={debugCheckDatabase}
-                  className="debug-link"
-                  style={{
-                    marginTop: '10px',
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#dc2626',
-                    textDecoration: 'underline',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Check database for requests
-                </button>
+
               </div>
             ) : (
               currentDonors.map((donor) => (

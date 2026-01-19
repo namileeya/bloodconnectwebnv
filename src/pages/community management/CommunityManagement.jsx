@@ -57,6 +57,7 @@ const CommunityManagement = ({ onNavigate }) => {
 
   // Firebase auth
   const auth = getAuth(app);
+  // Using auth.currentUser directly might be null on refresh, but we handle nulls in the code below
   const currentUser = auth.currentUser;
 
   // Format timestamp to display date
