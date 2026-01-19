@@ -65,65 +65,10 @@ const Dashboard = ({ onNavigate }) => {
   const [urgentRequests, setUrgentRequests] = useState([]);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [lastUpdated, setLastUpdated] = useState(null);
-  const [debugInfo, setDebugInfo] = useState('');
+
   const [refreshing, setRefreshing] = useState(false);
 
-  // Debug: Test each service method individually
-  const testAllServices = async () => {
-    console.log('=== TESTING ALL SERVICES ===');
-    let debugText = 'Dashboard Service Test Results:\n\n';
 
-    try {
-      // Test 1: Check if service file is loaded
-      debugText += '✅ Service loaded: ' + (dashboardService ? 'YES' : 'NO') + '\n\n';
-
-      // Test 2: Check each method
-      const methods = [
-        'getDashboardStats',
-        'getBloodTypeDistribution',
-        'getUrgentRequests',
-        'getRecentActivities',
-        'getDonationTrends',
-        'getMonthlyComparison',
-        'getTopDonors',
-        'getUpcomingEvents'
-      ];
-
-      for (const method of methods) {
-        if (dashboardService[method]) {
-          try {
-            debugText += `✅ ${method}: EXISTS\n`;
-            const startTime = Date.now();
-            const result = await dashboardService[method]();
-            const endTime = Date.now();
-
-            if (Array.isArray(result)) {
-              debugText += `   📊 Result: ${result.length} items returned (${endTime - startTime}ms)\n`;
-              if (result.length > 0) {
-                debugText += `   📝 First item: ${JSON.stringify(result[0]).substring(0, 80)}...\n`;
-              }
-            } else if (typeof result === 'object') {
-              debugText += `   📊 Result: Object with ${Object.keys(result).length} properties\n`;
-              debugText += `   📝 Sample: ${JSON.stringify(result).substring(0, 100)}...\n`;
-            } else {
-              debugText += `   📊 Result: ${result}\n`;
-            }
-            debugText += '\n';
-          } catch (err) {
-            debugText += `❌ ${method} ERROR: ${err.message}\n\n`;
-          }
-        } else {
-          debugText += `❌ ${method}: MISSING from service!\n\n`;
-        }
-      }
-
-    } catch (err) {
-      debugText += '❌ Test failed: ' + err.message + '\n';
-    }
-
-    setDebugInfo(debugText);
-    console.log('Debug info:', debugText);
-  };
 
   // Load all dashboard data
   const loadDashboardData = useCallback(async (showLoading = true) => {
@@ -350,50 +295,11 @@ const Dashboard = ({ onNavigate }) => {
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
               {refreshing ? 'Refreshing...' : 'Refresh'}
             </button>
-            <button
-              onClick={testAllServices}
-              className="px-4 py-2.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-semibold text-sm shadow-sm"
-            >
-              Debug Services
-            </button>
+
           </div>
         </div>
 
-        {/* Debug Panel */}
-        {debugInfo && (
-          <div className="bg-gray-900 text-white p-4 rounded-lg">
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="font-bold text-lg">Debug Information</h3>
-              <button onClick={() => setDebugInfo('')} className="text-gray-400 hover:text-white">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <pre className="text-xs whitespace-pre-wrap font-mono bg-gray-800 p-3 rounded overflow-auto max-h-64">
-              {debugInfo}
-            </pre>
-            <div className="mt-3 pt-3 border-t border-gray-700">
-              <h4 className="font-bold mb-2">Current State Summary:</h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                <div>
-                  <span className="text-gray-400">Blood Types: </span>
-                  <span className="font-bold">{bloodTypeData.length}</span>
-                </div>
-                <div>
-                  <span className="text-gray-400">Urgent Requests: </span>
-                  <span className="font-bold">{urgentRequests.length}</span>
-                </div>
-                <div>
-                  <span className="text-gray-400">Total Stock: </span>
-                  <span className="font-bold">{stats.totalBloodStock}</span>
-                </div>
-                <div>
-                  <span className="text-gray-400">Activities: </span>
-                  <span className="font-bold">{recentActivities.length}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+
 
         {/* Error Message */}
         {error && (

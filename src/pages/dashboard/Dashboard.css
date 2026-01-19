@@ -670,11 +670,11 @@
 }
 
 .quick-actions-grid {
-  @apply grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4;
+  @apply flex flex-wrap justify-center gap-4;
 }
 
 .dashboard-quick-action-btn {
-  @apply flex flex-col items-center justify-center gap-3 p-4 rounded-xl transition-all font-semibold text-sm border-2 hover:shadow-lg hover:-translate-y-1 duration-300;
+  @apply flex flex-col items-center justify-center gap-3 p-4 rounded-xl transition-all font-semibold text-sm border-2 hover:shadow-lg hover:-translate-y-1 duration-300 w-40;
 }
 
 .action-btn-primary {
