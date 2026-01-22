@@ -898,7 +898,7 @@ const Dashboard = ({ onNavigate }) => {
                 <FileText className="quick-action-icon" />
                 <span>Records</span>
               </button>
-              <button className="dashboard-quick-action-btn action-btn-primary" onClick={() => onNavigate && onNavigate('donation-appointments')}>
+              <button className="dashboard-quick-action-btn action-btn-primary" onClick={() => onNavigate && onNavigate('donation-appointment')}>
                 <Calendar className="quick-action-icon" />
                 <span>Appointments</span>
               </button>

@@ -197,7 +197,6 @@ const ReportsContent = () => {
     return acc;
   }, []);
 
-  // Most frequent donors
   const donorVolumes = donations.reduce((acc, donation) => {
     const donorId = donation.donor_id;
     if (!donorId) return acc;
